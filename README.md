@@ -28,6 +28,7 @@ El objetivo es representar el flujo completo de una aplicación de pedidos, sin 
 
 ---
 
+
 ## 🧱 Estructura de la base de datos
 
 El sistema utiliza las siguientes tablas:

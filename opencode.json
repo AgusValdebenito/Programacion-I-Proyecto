@@ -1,0 +1,18 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "um-ia": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Gemma Facultad (UM)",
+      "options": {
+        "baseURL": "https://ai.cloud.um.edu.ar/api/v1"
+      },
+      "models": {
+        "gpt-oss-20b": {
+          "name": "Gemma Facultad (UM)"
+        }
+      }
+    }
+  },
+  "model": "um-ia/gpt-oss-20b"
+}
