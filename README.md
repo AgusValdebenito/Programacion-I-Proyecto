@@ -345,6 +345,11 @@ GET    /api/docs/
 Nota:
 `POST /api/carts/` reutiliza el carrito existente del usuario si ya tiene uno creado.
 
+La API actual ya aplica restricciones basicas:
+* los recursos personales (`users`, `carts`, `cart-items`, `orders`, `order-items`) requieren autenticacion para modificar datos
+* solo el propietario puede modificar sus propios recursos
+* solo usuarios con rol `store` pueden crear tiendas
+
 Ejemplo de registro:
 
 ```json

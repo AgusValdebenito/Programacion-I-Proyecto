@@ -23,6 +23,8 @@ La base del TP1 ya fue puesta en marcha y el TP2 quedo implementado en su estruc
 * Rutas `/api/` registradas para usuarios, tiendas, productos, carritos y pedidos
 * Swagger disponible en `/api/docs/`
 * El endpoint de carritos reutiliza el carrito existente de un usuario para respetar la relacion `OneToOne`
+* Se agregaron permisos basicos para evitar modificaciones globales y restringir recursos por propietario
+* La creacion de tiendas ya esta restringida a usuarios con rol `store`
 * README del proyecto actualizado con la estructura y endpoints actuales
 * Servidor local, panel admin y superusuario ya fueron probados por el equipo
 
@@ -93,7 +95,7 @@ Puntos cubiertos del TP2:
 
 ## Observaciones
 
-* La API actual es CRUD basico y todavia no tiene autenticacion ni restricciones por permisos.
+* La API ya tiene permisos basicos por autenticacion y propietario, pero todavia falta JWT para un flujo completo desde frontend.
 * Ya no quedan credenciales de base de datos hardcodeadas en `settings.py`.
-* El proximo paso natural del proyecto es JWT, permisos por rol y proteccion de endpoints.
+* El proximo paso natural del proyecto es JWT, permisos por rol mas finos y proteccion completa de endpoints.
 * Si la clave eliminada de `umllmkey` fue usada fuera del entorno local, conviene regenerarla o revocarla por seguridad.
