@@ -6,3 +6,4 @@ __pycache__/
 umllmkey
 .env
 .env.*
+!.env.example

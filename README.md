@@ -159,7 +159,7 @@ Restricciones recomendadas:
 
 * Una tienda tiene muchos productos
 * Un producto pertenece a una tienda
-* Un usuario puede registrarse como `customer` o `store`
+* Un usuario puede registrarse como `client` o `store`
 * Una tienda pertenece a un unico usuario propietario
 * Un usuario tiene un carrito activo
 * Un carrito tiene muchos items
@@ -220,7 +220,18 @@ pip install -r requirements.txt
 
 ### 4. Configurar la base de datos
 
-La base esta gestionada por Django mediante migraciones. Una vez creada la base de datos en PostgreSQL y configurado `settings.py`, ejecutar:
+La configuracion de la base y la `SECRET_KEY` se leen desde variables de entorno. Se puede usar `.env.example` como referencia para definir:
+
+```plaintext
+DJANGO_SECRET_KEY
+DB_NAME
+DB_USER
+DB_PASSWORD
+DB_HOST
+DB_PORT
+```
+
+La base esta gestionada por Django mediante migraciones. Una vez creada la base de datos en PostgreSQL y configuradas las variables, ejecutar:
 
 ```bash
 python manage.py makemigrations
@@ -330,6 +341,9 @@ POST   /api/order-items/
 GET    /api/schema/
 GET    /api/docs/
 ```
+
+Nota:
+`POST /api/carts/` reutiliza el carrito existente del usuario si ya tiene uno creado.
 
 Ejemplo de registro:
 
