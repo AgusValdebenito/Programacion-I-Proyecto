@@ -50,8 +50,8 @@ Almacena los datos de los usuarios.
 Restricciones recomendadas:
 
 * `email` debe ser unico
-* `role` puede ser `client` o `store`
-* `client` debe ser el valor por defecto
+* `role` puede ser `cliente`, `vendedor` o `admin`
+* `cliente` debe ser el valor por defecto
 
 ---
 
@@ -159,7 +159,7 @@ Restricciones recomendadas:
 
 * Una tienda tiene muchos productos
 * Un producto pertenece a una tienda
-* Un usuario puede registrarse como `client` o `store`
+* Un usuario puede registrarse como `cliente`, `vendedor` o `admin`
 * Una tienda pertenece a un unico usuario propietario
 * Un usuario tiene un carrito activo
 * Un carrito tiene muchos items
@@ -176,6 +176,8 @@ Restricciones recomendadas:
 
 * Python
 * Django
+* Django REST Framework
+* Django REST Framework SimpleJWT (autenticación JWT)
 
 ### Frontend
 
@@ -220,7 +222,7 @@ pip install -r requirements.txt
 
 ### 4. Configurar la base de datos
 
-La configuracion de la base y la `SECRET_KEY` se leen desde variables de entorno. Se puede usar `.env.example` como referencia para definir:
+La configuracion de la base y la `SECRET_KEY` se leen automaticamente desde un archivo `.env`. Se puede copiar `.env.example` como base y completar:
 
 ```plaintext
 DJANGO_SECRET_KEY
@@ -229,6 +231,12 @@ DB_USER
 DB_PASSWORD
 DB_HOST
 DB_PORT
+```
+
+Ejemplo rapido:
+
+```bash
+copy .env.example .env
 ```
 
 La base esta gestionada por Django mediante migraciones. Una vez creada la base de datos en PostgreSQL y configuradas las variables, ejecutar:
@@ -247,7 +255,7 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE,
     password VARCHAR(255),
     phone VARCHAR(20),
-    role VARCHAR(20) DEFAULT 'client',
+    role VARCHAR(20) DEFAULT 'cliente',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -320,23 +328,42 @@ python manage.py runserver
 ## 📡 Endpoints principales
 
 ```plaintext
+### Autenticación
+
+POST   /api/token/                     # Login (obtener JWT)
+POST   /api/token/refresh/             # Renovar token
+POST   /api/register/                  # Registro de usuario (default: cliente)
+POST   /api/logout/                    # Cerrar sesión (blacklist token)
+
+### Usuarios
+
+GET    /api/profile/                   # Ver mi perfil
+PATCH  /api/profile/                   # Editar mi perfil
 GET    /api/users/
 POST   /api/users/
+
+### Tiendas y Productos
 
 GET    /api/stores/
 POST   /api/stores/
 GET    /api/products/
-POST   /api/products/
+POST   /api/products/                  # Solo ADMIN o VENDEDOR
+
+### Carrito
 
 GET    /api/carts/
 POST   /api/carts/
 GET    /api/cart-items/
 POST   /api/cart-items/
 
+### Pedidos
+
 GET    /api/orders/
 POST   /api/orders/
 GET    /api/order-items/
 POST   /api/order-items/
+
+### Documentación
 
 GET    /api/schema/
 GET    /api/docs/
@@ -345,10 +372,13 @@ GET    /api/docs/
 Nota:
 `POST /api/carts/` reutiliza el carrito existente del usuario si ya tiene uno creado.
 
-La API actual ya aplica restricciones basicas:
+La API actual aplica las siguientes restricciones:
+* autenticacion via JWT (token Bearer) requerida para la mayoria de endpoints
 * los recursos personales (`users`, `carts`, `cart-items`, `orders`, `order-items`) requieren autenticacion para modificar datos
 * solo el propietario puede modificar sus propios recursos
-* solo usuarios con rol `store` pueden crear tiendas
+* la creacion de productos esta restringida a ADMIN o VENDEDOR
+* la lectura de productos es publica
+* cualquier usuario autenticado puede crear una tienda (se promueve automaticamente a `vendedor`)
 
 Ejemplo de registro:
 
@@ -358,24 +388,50 @@ Ejemplo de registro:
   "email": "juan@email.com",
   "password": "123456",
   "phone": "1122334455",
-  "role": "client"
+  "role": "cliente"
 }
 ```
 
-Si el usuario elige `role = "store"`, luego podra crear su tienda y publicar productos.
+Si el usuario elige `role = "vendedor"`, luego podra crear su tienda y publicar productos.
+
+Ejemplo de login (obtener JWT):
+
+```json
+POST /api/token/
+{
+  "username": "juanperez",
+  "password": "123456"
+}
+// Respuesta:
+{
+  "access": "eyJhbGciOiJIUzI1NiIs...",
+  "refresh": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
+
+Usar el token en las peticiones siguientes:
+
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+```
+
+### 🔍 ¿Por qué JWT en lugar de sesiones tradicionales?
+
+En una aplicacion con sesiones tradicionales, el servidor almacena el estado de cada usuario (memoria o base de datos) y lo consulta en cada peticion. JWT elimina esa necesidad: el servidor firma un token y se lo entrega al cliente, quien lo reenvia en cada request. El servidor solo valida la firma sin consultar ningun almacenamiento central.
+
+Principales ventajas que llevaron a elegir JWT en este proyecto:
+
+* **Escalabilidad:** cualquier servidor del cluster puede validar un token sin compartir sesiones. Esto facilita agregar mas instancias si la aplicacion crece.
+* **Rendimiento:** se evita una consulta a base de datos o Redis por cada peticion para verificar la sesion.
+* **Desacoplamiento:** como no se usan cookies, el frontend (React, mobile, etc.) puede estar en un dominio distinto al backend sin problemas de CORS entre dominios.
+* **Flexibilidad:** el token puede incluir informacion como el `role` del usuario, reduciendo consultas extras a la base de datos.
+* **Estandar moderno:** JWT es el mecanismo de autenticacion mas adoptado en APIs REST y aplicaciones SPA, con herramientas maduras en Django (`djangorestframework-simplejwt`).
 
 ---
 
 ## 📌 Estado del proyecto
 
-🟡 En desarrollo
-
-Funcionalidades futuras:
-
-* Historial de compras
-* Autenticación con JWT
-* Permisos por rol (`client` y `store`)
-* Panel para tiendas
+> 📄 El detalle completo del estado del proyecto y cada TP está en [`ESTADO_ACTUAL.md`](ESTADO_ACTUAL.md).
 
 ---
 

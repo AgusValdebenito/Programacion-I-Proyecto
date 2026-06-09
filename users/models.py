@@ -4,8 +4,9 @@ from django.db import models
 
 class Usuario(AbstractUser):
     class RoleChoices(models.TextChoices):
-        CLIENT = "client", "Cliente"
-        STORE = "store", "Tienda"
+        ADMIN = "admin", "Admin"
+        CLIENTE = "cliente", "Cliente"
+        VENDEDOR = "vendedor", "Vendedor"
 
     name = models.CharField(max_length=100, verbose_name="nombre")
     email = models.EmailField(unique=True, verbose_name="correo electronico")
@@ -16,9 +17,9 @@ class Usuario(AbstractUser):
         verbose_name="telefono",
     )
     role = models.CharField(
-        max_length=10,
+        max_length=12,
         choices=RoleChoices.choices,
-        default=RoleChoices.CLIENT,
+        default=RoleChoices.CLIENTE,
         verbose_name="rol",
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="fecha de creacion")
