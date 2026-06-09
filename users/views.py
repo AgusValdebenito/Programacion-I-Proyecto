@@ -1,6 +1,7 @@
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 
 from .models import Usuario
 from .serializers import UsuarioSerializer
@@ -49,8 +50,6 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     def logout(self, request):
         try:
             refresh_token = request.data["refresh"]
-            from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
-
             token = OutstandingToken.objects.get(token=refresh_token)
             BlacklistedToken.objects.get_or_create(token=token)
         except (KeyError, OutstandingToken.DoesNotExist):
