@@ -387,12 +387,11 @@ Ejemplo de registro:
   "name": "Juan Perez",
   "email": "juan@email.com",
   "password": "123456",
-  "phone": "1122334455",
-  "role": "cliente"
+  "phone": "1122334455"
 }
 ```
 
-Si el usuario elige `role = "vendedor"`, luego podra crear su tienda y publicar productos.
+El registro siempre crea el usuario con rol `cliente`. Para ser `vendedor`, el usuario crea su tienda y el sistema lo promueve automaticamente. Solo los usuarios `vendedor` o `admin` pueden publicar productos.
 
 Ejemplo de login (obtener JWT):
 

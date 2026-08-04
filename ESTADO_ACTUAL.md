@@ -25,7 +25,8 @@ El TP3 fue implementado completamente: autenticacion JWT, permisos por rol, regi
 * Swagger disponible en `/api/docs/`
 * El endpoint de carritos reutiliza el carrito existente de un usuario para respetar la relacion `OneToOne`
 * Se agregaron permisos basicos para evitar modificaciones globales y restringir recursos por propietario
-* La creacion de tiendas ya esta restringida a usuarios con rol `vendedor`
+* La creacion de productos esta restringida a usuarios con rol `vendedor` o `admin`
+* Cualquier usuario autenticado puede crear una tienda (se promueve automaticamente a `vendedor` via signals)
 * README del proyecto actualizado con la estructura y endpoints actuales
 * Servidor local, panel admin y superusuario ya fueron probados por el equipo
 
