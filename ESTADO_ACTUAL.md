@@ -1,10 +1,15 @@
 # Estado Actual Del Proyecto
 
+> ⚠️ **IMPORTANTE (leer primero):** este proyecto existe en DOS carpetas del disco.
+> Ver seccion "CRITICO: dos copias del repositorio" mas abajo antes de seguir trabajando.
+
 ## Resumen
 
 El proyecto backend esta iniciado con Django y Django REST Framework.
 La base del TP1 ya fue puesta en marcha y el TP2 quedo implementado en su estructura principal: modelos, migraciones, admin, serializers, vistas CRUD, rutas de API y Swagger.
 El TP3 fue implementado completamente: autenticacion JWT, permisos por rol, registro, perfil y logout.
+El TP4 esta pendiente (se hace en otro momento).
+El TP5 (frontend React con Vite) esta EN PROGRESO.
 
 ## Estado actual
 
@@ -29,6 +34,8 @@ El TP3 fue implementado completamente: autenticacion JWT, permisos por rol, regi
 * Cualquier usuario autenticado puede crear una tienda (se promueve automaticamente a `vendedor` via signals)
 * README del proyecto actualizado con la estructura y endpoints actuales
 * Servidor local, panel admin y superusuario ya fueron probados por el equipo
+* Node.js instalado en el sistema: `v24.19.0` (npm `11.17.0`) en `C:\Program Files\nodejs`
+* Chocolatey instalado (v2.7.3) y Python 3.14.6 instalados por el bootstrapper de VS Build Tools (no bloquean nada)
 
 ## Modelos implementados
 
@@ -60,12 +67,13 @@ Estas partes ya estan pensadas o documentadas, pero todavia no estan completas e
 
 * filtros y consultas mas especificas en la API
 * historial de compras y flujo real de confirmacion de pedidos
+* TP4 completo (matriz de pruebas, stock en productos, validaciones de compra, coleccion Postman, reporte, capturas)
 
 ## Limpieza realizada
 
 Para dejar el repositorio mas prolijo:
 
-* se agrego `.gitignore` en la raiz
+* se agrego `.gitignore` en la raiz (incluye `node_modules/` y `dist/` para el frontend)
 * se agrego `.env.example` como referencia para la configuracion local
 * se elimino el archivo `umllmkey` del repositorio
 * se eliminaron archivos `__pycache__` versionados
@@ -77,7 +85,9 @@ Para dejar el repositorio mas prolijo:
 
 * TP1: base del proyecto completada y validada por el equipo
 * TP2: implementado en su parte principal
-* TP3: implementado completamente
+* TP3: implementado completamente y aprobado por el compañero (PR #3 y PR #5 mergeados en `main`)
+* TP4: pendiente (se va a hacer en otro momento)
+* TP5: en progreso (solo se creo el proyecto Vite en la copia equivocada del repo)
 
 Puntos cubiertos del TP2:
 
@@ -107,9 +117,44 @@ Puntos cubiertos del TP3:
 * Endpoint `POST /api/logout/` con blacklist de tokens
 * Tests actualizados y pasando
 
+## CRITICO: dos copias del repositorio
+
+Actualmente existen DOS carpetas con el mismo proyecto en el disco. Esto causo confusion
+y hay que resolverlo antes de seguir:
+
+| Copia | Ruta | Estado |
+| :--- | :--- | :--- |
+| **A** | `C:\Users\mvaldebenito\Documents\Programacion-I-Proyecto` | AL DIA: TP1+TP2+TP3, rama `TP5` saneada y pusheada, working tree limpio |
+| **B** | `C:\Users\mvaldebenito\Documents\GitHub\Programacion-I-Proyecto` | VIEJA: sin TP3, rama `TP5` en commit `99ac11f`. ACÁ se creo el `frontend/` de Vite por error |
+
+Detalle de la copia B: el proyecto Vite se creo en `C:\Users\mvaldebenito\Documents\GitHub\Programacion-I-Proyecto\Frontend`
+(con `npm create vite@latest frontend -- --template react`). Incluye `node_modules/`, `src/`, `public/`,
+`index.html`, `vite.config.js`, `package.json`, etc. Ya instalo dependencias (135 paquetes, 0 vulnerabilidades)
+y levanto el dev server en `http://localhost:5173/` (aun NO configurado para puerto 3000).
+
+**PENDIENTE (decisión del usuario):** elegir cual carpeta sera la definitiva (A o B), mover/crear el
+`frontend/` en la definitiva, configurar `vite.config.js` con `server.port = 3000`, y borrar o ignorar la otra copia.
+
+## Estado del TP5 (progreso)
+
+* [x] Node.js instalado y verificado (`node -v` = v24.19.0, `npm -v` = 11.17.0)
+* [x] `.gitignore` actualizado con `node_modules/` y `dist/`
+* [x] Rama `TP5` creada sobre `main` actualizado (commit `20d8150`) y pusheada a `origin/TP5`
+      (se elimino y recreo la rama remota porque estaba en un commit viejo)
+* [x] Proyecto Vite creado en `Frontend/` pero en la COPIA B (equivocada)
+* [ ] Mover el frontend a la copia definitiva del repo
+* [ ] Configurar `vite.config.js` con `server: { port: 3000 }`
+* [ ] Verificar `npm run dev` en `http://localhost:3000`
+* [ ] Crear `docs/diagrama.md` con el bosquejo de la Home (componentes + flujo)
+* [ ] Commits claros en `TP5` y push
+* [ ] PR a `main` (necesita approval del compañero por las reglas del repo)
+
 ## Observaciones
 
 * La API ya tiene autenticacion JWT completamente funcional.
 * La creacion de una tienda promueve automaticamente al usuario a `vendedor` via signals.
 * Al eliminar una tienda, el usuario vuelve a `cliente` automaticamente.
 * Ya no quedan credenciales de base de datos hardcodeadas en `settings.py`.
+* El instalador de VS Build Tools quedo a medias/cancelado pero NO es necesario para React/Vite.
+* Las reglas de GitHub del repo exigen 1 approval por PR para mergear (no hay bypass ni como admin).
+* El backend NO esta en una carpeta `backend/`: vive en la raiz (`FoodRush/`, `core/`, `users/`). El TP5 pide crear `frontend/` al mismo nivel sin mover el backend.
