@@ -32,6 +32,18 @@ body {
   color: var(--white);
 }
 
+.fr-logo-img {
+  height: 36px;
+  width: auto;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .fr-logo-img {
+    height: 44px;
+  }
+}
+
 .fr-logo .text-rush {
   color: var(--yellow);
 }
@@ -170,9 +182,10 @@ body {
 }
 
 .fr-card-img-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 82%;
+  max-height: 82%;
+  object-fit: contain;
+  display: block;
 }
 
 .fr-card-title {

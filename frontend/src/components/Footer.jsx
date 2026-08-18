@@ -1,15 +1,14 @@
+import Logo from './Logo'
+
 export default function Footer() {
   return (
     <footer className="fr-footer d-none d-md-block mt-5">
       <div className="container py-5">
         <div className="row g-4">
           <div className="col-12 col-md-4">
-            <a className="fr-logo text-decoration-none d-flex align-items-center gap-2 mb-2" href="#">
-              <i className="bi bi-bag-fill" />
-              <span>
-                Food<span className="text-rush">Rush</span>
-              </span>
-            </a>
+            <div className="mb-2">
+              <Logo />
+            </div>
             <p className="small mb-0">
               Pedidos online de restaurantes, supermercados, cafeterías y más.
             </p>

@@ -1,14 +1,11 @@
+import Logo from './Logo'
+
 export default function Navbar() {
   return (
     <header className="fr-navbar">
       <div className="container">
         <div className="d-flex align-items-center justify-content-between py-2">
-          <a className="fr-logo text-decoration-none d-flex align-items-center gap-2" href="#">
-            <i className="bi bi-bag-fill" />
-            <span>
-              Food<span className="text-rush">Rush</span>
-            </span>
-          </a>
+          <Logo />
           <div className="d-flex align-items-center">
             <nav className="d-none d-md-flex align-items-center gap-4 me-4" aria-label="Navegación principal">
               <a className="fr-nav-link" href="#">

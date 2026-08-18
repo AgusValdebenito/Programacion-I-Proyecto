@@ -5,7 +5,7 @@ export const categories = [
     subtitle: 'Pide comida deliciosa',
     emoji: '🍔',
     gradient: 'fr-grad-1',
-    image: '',
+    image: '/images/restaurantes.png',
   },
   {
     id: 2,
@@ -13,7 +13,7 @@ export const categories = [
     subtitle: 'Compras en un solo lugar',
     emoji: '🛒',
     gradient: 'fr-grad-2',
-    image: '',
+    image: '/images/super-kioscos.png',
   },
   {
     id: 3,
@@ -21,7 +21,7 @@ export const categories = [
     subtitle: 'Bebidas y más',
     emoji: '☕',
     gradient: 'fr-grad-3',
-    image: '',
+    image: '/images/cafeterias.png',
   },
   {
     id: 4,
@@ -29,7 +29,7 @@ export const categories = [
     subtitle: 'Postres y más',
     emoji: '🍨',
     gradient: 'fr-grad-4',
-    image: '',
+    image: '/images/helados.png',
   },
   {
     id: 5,
@@ -37,7 +37,7 @@ export const categories = [
     subtitle: 'Salud y bienestar',
     emoji: '💊',
     gradient: 'fr-grad-5',
-    image: '',
+    image: '/images/farmacia.png',
   },
 ]
 
