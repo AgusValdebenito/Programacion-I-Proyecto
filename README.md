@@ -181,9 +181,10 @@ Restricciones recomendadas:
 
 ### Frontend
 
-* HTML
-* CSS
-* JavaScript
+* React 19
+* Vite 8 (dev server, HMR)
+* JavaScript (JSX) / HTML / CSS
+* npm (Node.js)
 
 ### Base de datos
 
@@ -205,9 +206,9 @@ cd tu-repo
 ### 2. Crear entorno virtual
 
 ```bash
-python -m venv venv
-source venv/bin/activate   # Linux / Mac
-venv\Scripts\activate      # Windows
+python -m venv .venv
+source .venv/bin/activate   # Linux / Mac
+.venv\Scripts\activate      # Windows
 ```
 
 ---
@@ -325,6 +326,20 @@ python manage.py runserver
 
 ---
 
+### 6. Frontend (React + Vite)
+
+El frontend vive en `frontend/` (hermano del backend, mismo repositorio) y se sirve con Vite en el puerto 3000:
+
+```bash
+cd frontend
+npm install        # primera vez
+npm run dev        # http://localhost:3000
+```
+
+El bosquejo de diseno (componentes y flujo) esta en `docs/diagrama.md`.
+
+---
+
 ## 📡 Endpoints principales
 
 ```plaintext
@@ -387,12 +402,11 @@ Ejemplo de registro:
   "name": "Juan Perez",
   "email": "juan@email.com",
   "password": "123456",
-  "phone": "1122334455",
-  "role": "cliente"
+  "phone": "1122334455"
 }
 ```
 
-Si el usuario elige `role = "vendedor"`, luego podra crear su tienda y publicar productos.
+El registro siempre crea el usuario con rol `cliente`. Para ser `vendedor`, el usuario crea su tienda y el sistema lo promueve automaticamente. Solo los usuarios `vendedor` o `admin` pueden publicar productos.
 
 Ejemplo de login (obtener JWT):
 

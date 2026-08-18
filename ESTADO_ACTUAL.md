@@ -1,10 +1,15 @@
 # Estado Actual Del Proyecto
 
+> ⚠️ **IMPORTANTE (leer primero):** este proyecto existe en UNA sola carpeta del disco.
+> Ver seccion "RESUELTO: carpeta definitiva" mas abajo para las reglas de trabajo.
+
 ## Resumen
 
 El proyecto backend esta iniciado con Django y Django REST Framework.
 La base del TP1 ya fue puesta en marcha y el TP2 quedo implementado en su estructura principal: modelos, migraciones, admin, serializers, vistas CRUD, rutas de API y Swagger.
 El TP3 fue implementado completamente: autenticacion JWT, permisos por rol, registro, perfil y logout.
+El TP4 esta pendiente (se hace en otro momento).
+El TP5 (frontend React con Vite) esta COMPLETO: el `frontend/` corre en el puerto 3000 y la rama esta en PR #6 esperando approval del compañero.
 
 ## Estado actual
 
@@ -25,9 +30,12 @@ El TP3 fue implementado completamente: autenticacion JWT, permisos por rol, regi
 * Swagger disponible en `/api/docs/`
 * El endpoint de carritos reutiliza el carrito existente de un usuario para respetar la relacion `OneToOne`
 * Se agregaron permisos basicos para evitar modificaciones globales y restringir recursos por propietario
-* La creacion de tiendas ya esta restringida a usuarios con rol `vendedor`
+* La creacion de productos esta restringida a usuarios con rol `vendedor` o `admin`
+* Cualquier usuario autenticado puede crear una tienda (se promueve automaticamente a `vendedor` via signals)
 * README del proyecto actualizado con la estructura y endpoints actuales
 * Servidor local, panel admin y superusuario ya fueron probados por el equipo
+* Node.js instalado en el sistema: `v24.19.0` (npm `11.17.0`) en `C:\Program Files\nodejs`
+* Chocolatey instalado (v2.7.3) y Python 3.14.6 instalados por el bootstrapper de VS Build Tools (no bloquean nada)
 
 ## Modelos implementados
 
@@ -59,12 +67,13 @@ Estas partes ya estan pensadas o documentadas, pero todavia no estan completas e
 
 * filtros y consultas mas especificas en la API
 * historial de compras y flujo real de confirmacion de pedidos
+* TP4 completo (matriz de pruebas, stock en productos, validaciones de compra, coleccion Postman, reporte, capturas)
 
 ## Limpieza realizada
 
 Para dejar el repositorio mas prolijo:
 
-* se agrego `.gitignore` en la raiz
+* se agrego `.gitignore` en la raiz (incluye `node_modules/` y `dist/` para el frontend)
 * se agrego `.env.example` como referencia para la configuracion local
 * se elimino el archivo `umllmkey` del repositorio
 * se eliminaron archivos `__pycache__` versionados
@@ -76,7 +85,9 @@ Para dejar el repositorio mas prolijo:
 
 * TP1: base del proyecto completada y validada por el equipo
 * TP2: implementado en su parte principal
-* TP3: implementado completamente
+* TP3: implementado completamente y aprobado por el compañero (PR #3 y PR #5 mergeados en `main`)
+* TP4: pendiente (se va a hacer en otro momento)
+* TP5: implementado (frontend React con Vite en `frontend/`) y pendiente de approval del PR #6
 
 Puntos cubiertos del TP2:
 
@@ -106,9 +117,52 @@ Puntos cubiertos del TP3:
 * Endpoint `POST /api/logout/` con blacklist de tokens
 * Tests actualizados y pasando
 
+Puntos cubiertos del TP5:
+
+* Node.js instalado (`v24.19.0`) y npm (`11.17.0`)
+* Proyecto `frontend/` creado con Vite + template React (React 19, Vite 8), hermano del backend en el mismo repo
+* `vite.config.js` configurado con `server: { port: 3000 }`
+* Verificado: `npm run dev` sirve en `http://localhost:3000` (HTTP 200) y `npm run lint` sin errores
+* Bosquejo de diseno en `docs/diagrama.md` (arquitectura 2 capas, componentes, rutas y flujo de datos)
+* Ruleset "Global PR protection" ajustado: ahora protege solo `main` (PR + approval para mergear) y habilita el push a ramas `TPn`
+* PR a `main` abierto: **PR #6** (`TP5 -> main`)
+
+## RESUELTO: carpeta definitiva
+
+> Antes existian DOS carpetas con el mismo proyecto en el disco, lo que causaba confusion.
+> Esto ya quedo resuelto:
+
+* **Carpeta definitiva (A):** `C:\Users\mvaldebenito\Documents\Programacion-I-Proyecto` (la de VS Code donde se programa).
+  AL DIA: TP1+TP2+TP3+TP5 (frontend incluido), rama `TP5` pusheada, working tree limpio.
+* **Carpeta B:** `C:\Users\mvaldebenito\Documents\GitHub\Programacion-I-Proyecto` fue **ELIMINADA del disco**
+  (era una copia vieja sin TP3 y con el `frontend/` de Vite creado por error). No era parte del repo.
+* El `frontend/` ya fue **creado desde cero en la carpeta A** (React + Vite en el puerto 3000), al mismo nivel del backend.
+
+**REGLAS PARA EVITAR QUE VUELVA A PASAR:**
+* Trabajar siempre en `C:\Users\mvaldebenito\Documents\Programacion-I-Proyecto` (la unica que queda).
+* El backend NO esta en `backend/`: vive en la raiz (`FoodRush/`, `core/`, `users/`). El TP5 pide crear `frontend/` al mismo nivel sin mover el backend.
+
+## Estado del TP5 (progreso)
+
+* [x] Node.js instalado y verificado (`node -v` = v24.19.0, `npm -v` = 11.17.0)
+* [x] `.gitignore` actualizado con `node_modules/` y `dist/`
+* [x] Rama `TP5` creada sobre `main` actualizado (commit `20d8150`) y pusheada a `origin/TP5`
+      (se elimino y recreo la rama remota porque estaba en un commit viejo)
+* [x] Resuelta la confusion de las DOS carpetas: A (VS Code) es la definitiva y B fue eliminada
+* [x] `frontend/` de Vite creado e instalado en la carpeta A (React 19, Vite 8)
+* [x] `vite.config.js` con `server: { port: 3000 }`
+* [x] Verificado: `npm run dev` sirve en `http://localhost:3000` (HTTP 200 OK) y `npm run lint` sin errores
+* [x] `docs/diagrama.md` con el bosquejo de la Home (componentes + flujo + rutas)
+* [x] Commits claros en `TP5` y push a `origin/TP5` (`c0813da`, `39f45cc`, `3e8af2e`, `694678e`)
+* [x] Ruleset "Global PR protection" ajustado: protege **solo `main`** (PR + 1 approval para mergear); el push a ramas `TPn` quedo habilitado
+* [x] PR a `main` abierto y actualizado: **PR #6** (`TP5 -> main`, reabierto tras la solucion del ruleset; pendiente de approval del compañero)
+
 ## Observaciones
 
 * La API ya tiene autenticacion JWT completamente funcional.
 * La creacion de una tienda promueve automaticamente al usuario a `vendedor` via signals.
 * Al eliminar una tienda, el usuario vuelve a `cliente` automaticamente.
 * Ya no quedan credenciales de base de datos hardcodeadas en `settings.py`.
+* El instalador de VS Build Tools quedo a medias/cancelado pero NO es necesario para React/Vite.
+* Las reglas de GitHub (ruleset "Global PR protection") exigen PR + 1 approval del compañero para mergear a `main`. El push directo a ramas `TPn` esta habilitado (el ruleset fue acotado a `main` en esta sesion).
+* El backend NO esta en una carpeta `backend/`: vive en la raiz (`FoodRush/`, `core/`, `users/`). El TP5 pide crear `frontend/` al mismo nivel sin mover el backend.
