@@ -9,7 +9,8 @@ El proyecto backend esta iniciado con Django y Django REST Framework.
 La base del TP1 ya fue puesta en marcha y el TP2 quedo implementado en su estructura principal: modelos, migraciones, admin, serializers, vistas CRUD, rutas de API y Swagger.
 El TP3 fue implementado completamente: autenticacion JWT, permisos por rol, registro, perfil y logout.
 El TP4 esta pendiente (se hace en otro momento).
-El TP5 (frontend React con Vite) esta COMPLETO: el `frontend/` corre en el puerto 3000 y la rama esta en PR #6 esperando approval del compañero.
+El TP5 (frontend React con Vite) esta COMPLETO y mergeado a `main` (PR #6).
+El TP6 (maquetado de la Home con Bootstrap) esta IMPLEMENTADO en la rama `TP6/feat-HomeBootstrap` y espera approval del compañero en PR #8.
 
 ## Estado actual
 
@@ -87,7 +88,8 @@ Para dejar el repositorio mas prolijo:
 * TP2: implementado en su parte principal
 * TP3: implementado completamente y aprobado por el compañero (PR #3 y PR #5 mergeados en `main`)
 * TP4: pendiente (se va a hacer en otro momento)
-* TP5: implementado (frontend React con Vite en `frontend/`) y pendiente de approval del PR #6
+* TP5: implementado y mergeado a `main` (PR #6)
+* TP6: implementado (maquetado de la Home con Bootstrap, imagenes reales conectadas) y pendiente de approval del PR #8
 
 Puntos cubiertos del TP2:
 
@@ -127,13 +129,26 @@ Puntos cubiertos del TP5:
 * Ruleset "Global PR protection" ajustado: ahora protege solo `main` (PR + approval para mergear) y habilita el push a ramas `TPn`
 * PR a `main` abierto: **PR #6** (`TP5 -> main`)
 
+## Estado del TP6 (progreso)
+
+* [x] Rama `TP6/feat-HomeBootstrap` creada desde `main` actualizado y pusheada
+* [x] Dependencias instaladas en `frontend/`: `bootstrap@^5.3.8`, `bootstrap-icons@^1.13.1`, `@fontsource/poppins`
+* [x] Template de Vite limpiado (sin `App.css`, `index.css` ni assets de ejemplo)
+* [x] Estructura creada: `src/components/` (Navbar, Logo, Hero, CategoryCard, SectionHeader, StoreLogo, Footer, BottomNav), `src/views/Home.jsx`, `src/data/homeData.js`, `src/styles/theme.css`
+* [x] Home responsive: movil con header compacto + bottom nav fija; md+ con navbar clasica + footer
+* [x] Paleta FoodRush (morado/amarillo) y Poppins en variables CSS del tema
+* [x] Imagenes reales conectadas en `frontend/public/images/`: 5 categorias + logo (transparente) en Navbar y Footer
+* [x] Placeholders reemplazables: tiendas con iniciales, hero con emojis (pendiente imagen final si se define)
+* [x] Verificado: `npm run dev` sirve en `http://localhost:3000` (HTTP 200) y `npm run lint` sin errores
+* [x] PR a `main` abierto: **PR #8** (`TP6/feat-HomeBootstrap -> main`, pendiente de approval del compañero)
+
 ## RESUELTO: carpeta definitiva
 
 > Antes existian DOS carpetas con el mismo proyecto en el disco, lo que causaba confusion.
 > Esto ya quedo resuelto:
 
 * **Carpeta definitiva (A):** `C:\Users\mvaldebenito\Documents\Programacion-I-Proyecto` (la de VS Code donde se programa).
-  AL DIA: TP1+TP2+TP3+TP5 (frontend incluido), rama `TP5` pusheada, working tree limpio.
+  AL DIA: TP1+TP2+TP3+TP5+TP6 (frontend incluido), `main` con TP1-TP5 mergeados, rama `TP6/feat-HomeBootstrap` pusheada, working tree limpio.
 * **Carpeta B:** `C:\Users\mvaldebenito\Documents\GitHub\Programacion-I-Proyecto` fue **ELIMINADA del disco**
   (era una copia vieja sin TP3 y con el `frontend/` de Vite creado por error). No era parte del repo.
 * El `frontend/` ya fue **creado desde cero en la carpeta A** (React + Vite en el puerto 3000), al mismo nivel del backend.
