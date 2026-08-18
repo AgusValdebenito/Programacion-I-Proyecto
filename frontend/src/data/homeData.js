@@ -5,6 +5,7 @@ export const categories = [
     subtitle: 'Pide comida deliciosa',
     emoji: '🍔',
     gradient: 'fr-grad-1',
+    image: '',
   },
   {
     id: 2,
@@ -12,6 +13,7 @@ export const categories = [
     subtitle: 'Compras en un solo lugar',
     emoji: '🛒',
     gradient: 'fr-grad-2',
+    image: '',
   },
   {
     id: 3,
@@ -19,6 +21,7 @@ export const categories = [
     subtitle: 'Bebidas y más',
     emoji: '☕',
     gradient: 'fr-grad-3',
+    image: '',
   },
   {
     id: 4,
@@ -26,6 +29,7 @@ export const categories = [
     subtitle: 'Postres y más',
     emoji: '🍨',
     gradient: 'fr-grad-4',
+    image: '',
   },
   {
     id: 5,
@@ -33,13 +37,14 @@ export const categories = [
     subtitle: 'Salud y bienestar',
     emoji: '💊',
     gradient: 'fr-grad-5',
+    image: '',
   },
 ]
 
 export const stores = [
-  { name: 'La Esquina', tagline: 'Burger & Grill', initials: 'LE', gradient: 'fr-grad-1' },
-  { name: 'Pizza Norte', tagline: 'Pizzería', initials: 'PN', gradient: 'fr-grad-2' },
-  { name: 'Verde Fresh', tagline: 'Bowls & Ensaladas', initials: 'VF', gradient: 'fr-grad-3' },
-  { name: 'Don Pancho', tagline: 'Hamburguesas', initials: 'DP', gradient: 'fr-grad-4' },
-  { name: 'Dulce Momento', tagline: 'Postres & Café', initials: 'DM', gradient: 'fr-grad-5' },
+  { name: 'La Esquina', tagline: 'Burger & Grill', initials: 'LE', gradient: 'fr-grad-1', image: '' },
+  { name: 'Pizza Norte', tagline: 'Pizzería', initials: 'PN', gradient: 'fr-grad-2', image: '' },
+  { name: 'Verde Fresh', tagline: 'Bowls & Ensaladas', initials: 'VF', gradient: 'fr-grad-3', image: '' },
+  { name: 'Don Pancho', tagline: 'Hamburguesas', initials: 'DP', gradient: 'fr-grad-4', image: '' },
+  { name: 'Dulce Momento', tagline: 'Postres & Café', initials: 'DM', gradient: 'fr-grad-5', image: '' },
 ]

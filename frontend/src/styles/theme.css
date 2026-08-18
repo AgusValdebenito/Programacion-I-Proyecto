@@ -169,6 +169,12 @@ body {
   color: var(--white);
 }
 
+.fr-card-img-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .fr-card-title {
   font-weight: 700;
   font-size: 1.05rem;
@@ -216,6 +222,13 @@ body {
   font-weight: 700;
   font-size: 1.5rem;
   box-shadow: var(--shadow-soft);
+}
+
+.fr-store-logo-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 @media (min-width: 768px) {
