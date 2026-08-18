@@ -139,13 +139,17 @@ Puntos cubiertos del TP3:
 * [x] Rama `TP5` creada sobre `main` actualizado (commit `20d8150`) y pusheada a `origin/TP5`
       (se elimino y recreo la rama remota porque estaba en un commit viejo)
 * [x] Resuelta la confusion de las DOS carpetas: A (VS Code) es la definitiva y B fue eliminada
-* [ ] Crear `frontend/` con Vite en la carpeta A (`npm create vite@latest frontend -- --template react`)
-* [ ] Instalar dependencias (`npm install`) y verificar `npm run dev`
-* [ ] Configurar `vite.config.js` con `server: { port: 3000 }`
-* [ ] Verificar `npm run dev` en `http://localhost:3000`
-* [ ] Crear `docs/diagrama.md` con el bosquejo de la Home (componentes + flujo)
-* [ ] Commits claros en `TP5` y push
-* [ ] PR a `main` (necesita approval del compañero por las reglas del repo)
+* [x] `frontend/` de Vite creado e instalado en la carpeta A (React 19, Vite 8)
+* [x] `vite.config.js` con `server: { port: 3000 }`
+* [x] Verificado: `npm run dev` sirve en `http://localhost:3000` (HTTP 200 OK) y `npm run lint` sin errores
+* [x] `docs/diagrama.md` con el bosquejo de la Home (componentes + flujo + rutas)
+* [x] Commits claros en `TP5` y push (commits `c0813da` y `39f45cc`)
+* [x] PR a `main` abierto: **PR #6** (pendiente de approval del compañero por las reglas del repo)
+
+> Nota: el commit local `091bca9` (solo marcar estos checkboxes) NO se pudo pushear a
+> `origin/TP5` porque la rama es la cabeza de un PR abierto y las reglas del repo bloquean
+> el push directo a ramas existentes (borrarla cerraria el PR #6). El PR #6 ya contiene todo
+> el contenido del TP5 funcionando; el commit local es un detalle de documentacion.
 
 ## Observaciones
 
