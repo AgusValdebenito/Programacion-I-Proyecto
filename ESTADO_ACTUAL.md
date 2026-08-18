@@ -9,7 +9,7 @@ El proyecto backend esta iniciado con Django y Django REST Framework.
 La base del TP1 ya fue puesta en marcha y el TP2 quedo implementado en su estructura principal: modelos, migraciones, admin, serializers, vistas CRUD, rutas de API y Swagger.
 El TP3 fue implementado completamente: autenticacion JWT, permisos por rol, registro, perfil y logout.
 El TP4 esta pendiente (se hace en otro momento).
-El TP5 (frontend React con Vite) esta EN PROGRESO.
+El TP5 (frontend React con Vite) esta COMPLETO: el `frontend/` corre en el puerto 3000 y la rama esta en PR #6 esperando approval del compañero.
 
 ## Estado actual
 
@@ -87,7 +87,7 @@ Para dejar el repositorio mas prolijo:
 * TP2: implementado en su parte principal
 * TP3: implementado completamente y aprobado por el compañero (PR #3 y PR #5 mergeados en `main`)
 * TP4: pendiente (se va a hacer en otro momento)
-* TP5: en progreso (crear el `frontend/` de Vite en la carpeta definitiva)
+* TP5: implementado (frontend React con Vite en `frontend/`) y pendiente de approval del PR #6
 
 Puntos cubiertos del TP2:
 
@@ -117,16 +117,26 @@ Puntos cubiertos del TP3:
 * Endpoint `POST /api/logout/` con blacklist de tokens
 * Tests actualizados y pasando
 
+Puntos cubiertos del TP5:
+
+* Node.js instalado (`v24.19.0`) y npm (`11.17.0`)
+* Proyecto `frontend/` creado con Vite + template React (React 19, Vite 8), hermano del backend en el mismo repo
+* `vite.config.js` configurado con `server: { port: 3000 }`
+* Verificado: `npm run dev` sirve en `http://localhost:3000` (HTTP 200) y `npm run lint` sin errores
+* Bosquejo de diseno en `docs/diagrama.md` (arquitectura 2 capas, componentes, rutas y flujo de datos)
+* Ruleset "Global PR protection" ajustado: ahora protege solo `main` (PR + approval para mergear) y habilita el push a ramas `TPn`
+* PR a `main` abierto: **PR #6** (`TP5 -> main`)
+
 ## RESUELTO: carpeta definitiva
 
 > Antes existian DOS carpetas con el mismo proyecto en el disco, lo que causaba confusion.
 > Esto ya quedo resuelto:
 
 * **Carpeta definitiva (A):** `C:\Users\mvaldebenito\Documents\Programacion-I-Proyecto` (la de VS Code donde se programa).
-  AL DIA: TP1+TP2+TP3, rama `TP5` saneada y pusheada, working tree limpio.
+  AL DIA: TP1+TP2+TP3+TP5 (frontend incluido), rama `TP5` pusheada, working tree limpio.
 * **Carpeta B:** `C:\Users\mvaldebenito\Documents\GitHub\Programacion-I-Proyecto` fue **ELIMINADA del disco**
   (era una copia vieja sin TP3 y con el `frontend/` de Vite creado por error). No era parte del repo.
-* El `frontend/` se va a **crear desde cero en la carpeta A**, al mismo nivel que el backend.
+* El `frontend/` ya fue **creado desde cero en la carpeta A** (React + Vite en el puerto 3000), al mismo nivel del backend.
 
 **REGLAS PARA EVITAR QUE VUELVA A PASAR:**
 * Trabajar siempre en `C:\Users\mvaldebenito\Documents\Programacion-I-Proyecto` (la unica que queda).
@@ -143,13 +153,9 @@ Puntos cubiertos del TP3:
 * [x] `vite.config.js` con `server: { port: 3000 }`
 * [x] Verificado: `npm run dev` sirve en `http://localhost:3000` (HTTP 200 OK) y `npm run lint` sin errores
 * [x] `docs/diagrama.md` con el bosquejo de la Home (componentes + flujo + rutas)
-* [x] Commits claros en `TP5` y push (commits `c0813da` y `39f45cc`)
-* [x] PR a `main` abierto: **PR #6** (pendiente de approval del compañero por las reglas del repo)
-
-> Nota: el commit local `091bca9` (solo marcar estos checkboxes) NO se pudo pushear a
-> `origin/TP5` porque la rama es la cabeza de un PR abierto y las reglas del repo bloquean
-> el push directo a ramas existentes (borrarla cerraria el PR #6). El PR #6 ya contiene todo
-> el contenido del TP5 funcionando; el commit local es un detalle de documentacion.
+* [x] Commits claros en `TP5` y push a `origin/TP5` (`c0813da`, `39f45cc`, `3e8af2e`, `694678e`)
+* [x] Ruleset "Global PR protection" ajustado: protege **solo `main`** (PR + 1 approval para mergear); el push a ramas `TPn` quedo habilitado
+* [x] PR a `main` abierto y actualizado: **PR #6** (`TP5 -> main`, reabierto tras la solucion del ruleset; pendiente de approval del compañero)
 
 ## Observaciones
 
@@ -158,5 +164,5 @@ Puntos cubiertos del TP3:
 * Al eliminar una tienda, el usuario vuelve a `cliente` automaticamente.
 * Ya no quedan credenciales de base de datos hardcodeadas en `settings.py`.
 * El instalador de VS Build Tools quedo a medias/cancelado pero NO es necesario para React/Vite.
-* Las reglas de GitHub del repo exigen 1 approval por PR para mergear (no hay bypass ni como admin).
+* Las reglas de GitHub (ruleset "Global PR protection") exigen PR + 1 approval del compañero para mergear a `main`. El push directo a ramas `TPn` esta habilitado (el ruleset fue acotado a `main` en esta sesion).
 * El backend NO esta en una carpeta `backend/`: vive en la raiz (`FoodRush/`, `core/`, `users/`). El TP5 pide crear `frontend/` al mismo nivel sin mover el backend.

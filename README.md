@@ -181,9 +181,10 @@ Restricciones recomendadas:
 
 ### Frontend
 
-* HTML
-* CSS
-* JavaScript
+* React 19
+* Vite 8 (dev server, HMR)
+* JavaScript (JSX) / HTML / CSS
+* npm (Node.js)
 
 ### Base de datos
 
@@ -322,6 +323,20 @@ CREATE TABLE order_items (
 ```bash
 python manage.py runserver
 ```
+
+---
+
+### 6. Frontend (React + Vite)
+
+El frontend vive en `frontend/` (hermano del backend, mismo repositorio) y se sirve con Vite en el puerto 3000:
+
+```bash
+cd frontend
+npm install        # primera vez
+npm run dev        # http://localhost:3000
+```
+
+El bosquejo de diseno (componentes y flujo) esta en `docs/diagrama.md`.
 
 ---
 

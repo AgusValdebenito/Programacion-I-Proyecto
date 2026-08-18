@@ -1,16 +1,38 @@
-# React + Vite
+# frontend/ - Cliente React (TP5)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Cliente single-page de la app de pedidos (estilo PedidosYa), creado con Vite + React.
+Vive al nivel del backend (mismo repositorio) y consume la API Django via JSON + JWT.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+* React 19
+* Vite 8 (dev server con HMR)
+* JavaScript (JSX)
+* npm (Node.js)
 
-## React Compiler
+## Requisitos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+* Node.js v18+ (probado con v24.19.0)
 
-## Expanding the ESLint configuration
+## Como correr
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install      # primera vez
+npm run dev      # dev server en http://localhost:3000
+```
+
+Otros scripts:
+
+* `npm run build` - build de produccion
+* `npm run lint` - ESLint
+* `npm run preview` - previsualizar el build
+
+## Puertos
+
+* Frontend (Vite): `http://localhost:3000` (configurado en `vite.config.js`)
+* Backend (Django): `http://localhost:8000/api/`
+
+## Diseno
+
+El bosquejo inicial de la Home / estructura de componentes (con flujo y rutas) esta en
+[`docs/diagrama.md`](../docs/diagrama.md) en la raiz del repositorio.
