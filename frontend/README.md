@@ -12,7 +12,7 @@ Vive al nivel del backend (mismo repositorio) y consume la API Django via JSON +
 
 ## Requisitos
 
-* Node.js v18+ (probado con v24.19.0)
+* Node.js `^20.19 || >=22.12` (requisito de Vite 8; probado con v24.19.0)
 
 ## Como correr
 
