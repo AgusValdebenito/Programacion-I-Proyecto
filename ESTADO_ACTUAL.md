@@ -1,7 +1,7 @@
 # Estado Actual Del Proyecto
 
-> ⚠️ **IMPORTANTE (leer primero):** este proyecto existe en DOS carpetas del disco.
-> Ver seccion "CRITICO: dos copias del repositorio" mas abajo antes de seguir trabajando.
+> ⚠️ **IMPORTANTE (leer primero):** este proyecto existe en UNA sola carpeta del disco.
+> Ver seccion "RESUELTO: carpeta definitiva" mas abajo para las reglas de trabajo.
 
 ## Resumen
 
@@ -87,7 +87,7 @@ Para dejar el repositorio mas prolijo:
 * TP2: implementado en su parte principal
 * TP3: implementado completamente y aprobado por el compañero (PR #3 y PR #5 mergeados en `main`)
 * TP4: pendiente (se va a hacer en otro momento)
-* TP5: en progreso (solo se creo el proyecto Vite en la copia equivocada del repo)
+* TP5: en progreso (crear el `frontend/` de Vite en la carpeta definitiva)
 
 Puntos cubiertos del TP2:
 
@@ -117,23 +117,20 @@ Puntos cubiertos del TP3:
 * Endpoint `POST /api/logout/` con blacklist de tokens
 * Tests actualizados y pasando
 
-## CRITICO: dos copias del repositorio
+## RESUELTO: carpeta definitiva
 
-Actualmente existen DOS carpetas con el mismo proyecto en el disco. Esto causo confusion
-y hay que resolverlo antes de seguir:
+> Antes existian DOS carpetas con el mismo proyecto en el disco, lo que causaba confusion.
+> Esto ya quedo resuelto:
 
-| Copia | Ruta | Estado |
-| :--- | :--- | :--- |
-| **A** | `C:\Users\mvaldebenito\Documents\Programacion-I-Proyecto` | AL DIA: TP1+TP2+TP3, rama `TP5` saneada y pusheada, working tree limpio |
-| **B** | `C:\Users\mvaldebenito\Documents\GitHub\Programacion-I-Proyecto` | VIEJA: sin TP3, rama `TP5` en commit `99ac11f`. ACÁ se creo el `frontend/` de Vite por error |
+* **Carpeta definitiva (A):** `C:\Users\mvaldebenito\Documents\Programacion-I-Proyecto` (la de VS Code donde se programa).
+  AL DIA: TP1+TP2+TP3, rama `TP5` saneada y pusheada, working tree limpio.
+* **Carpeta B:** `C:\Users\mvaldebenito\Documents\GitHub\Programacion-I-Proyecto` fue **ELIMINADA del disco**
+  (era una copia vieja sin TP3 y con el `frontend/` de Vite creado por error). No era parte del repo.
+* El `frontend/` se va a **crear desde cero en la carpeta A**, al mismo nivel que el backend.
 
-Detalle de la copia B: el proyecto Vite se creo en `C:\Users\mvaldebenito\Documents\GitHub\Programacion-I-Proyecto\Frontend`
-(con `npm create vite@latest frontend -- --template react`). Incluye `node_modules/`, `src/`, `public/`,
-`index.html`, `vite.config.js`, `package.json`, etc. Ya instalo dependencias (135 paquetes, 0 vulnerabilidades)
-y levanto el dev server en `http://localhost:5173/` (aun NO configurado para puerto 3000).
-
-**PENDIENTE (decisión del usuario):** elegir cual carpeta sera la definitiva (A o B), mover/crear el
-`frontend/` en la definitiva, configurar `vite.config.js` con `server.port = 3000`, y borrar o ignorar la otra copia.
+**REGLAS PARA EVITAR QUE VUELVA A PASAR:**
+* Trabajar siempre en `C:\Users\mvaldebenito\Documents\Programacion-I-Proyecto` (la unica que queda).
+* El backend NO esta en `backend/`: vive en la raiz (`FoodRush/`, `core/`, `users/`). El TP5 pide crear `frontend/` al mismo nivel sin mover el backend.
 
 ## Estado del TP5 (progreso)
 
@@ -141,8 +138,9 @@ y levanto el dev server en `http://localhost:5173/` (aun NO configurado para pue
 * [x] `.gitignore` actualizado con `node_modules/` y `dist/`
 * [x] Rama `TP5` creada sobre `main` actualizado (commit `20d8150`) y pusheada a `origin/TP5`
       (se elimino y recreo la rama remota porque estaba en un commit viejo)
-* [x] Proyecto Vite creado en `Frontend/` pero en la COPIA B (equivocada)
-* [ ] Mover el frontend a la copia definitiva del repo
+* [x] Resuelta la confusion de las DOS carpetas: A (VS Code) es la definitiva y B fue eliminada
+* [ ] Crear `frontend/` con Vite en la carpeta A (`npm create vite@latest frontend -- --template react`)
+* [ ] Instalar dependencias (`npm install`) y verificar `npm run dev`
 * [ ] Configurar `vite.config.js` con `server: { port: 3000 }`
 * [ ] Verificar `npm run dev` en `http://localhost:3000`
 * [ ] Crear `docs/diagrama.md` con el bosquejo de la Home (componentes + flujo)
