@@ -183,6 +183,8 @@ Restricciones recomendadas:
 
 * React 19
 * Vite 8 (dev server, HMR)
+* Bootstrap 5 + bootstrap-icons (maquetado de la Home, TP6)
+* Poppins (tipografia FoodRush)
 * JavaScript (JSX) / HTML / CSS
 * npm (Node.js)
 
@@ -334,6 +336,7 @@ El frontend vive en `frontend/` (hermano del backend, mismo repositorio) y se si
 cd frontend
 npm install        # primera vez
 npm run dev        # http://localhost:3000
+npm run lint       # ESLint
 ```
 
 El bosquejo de diseno (componentes y flujo) esta en `docs/diagrama.md`.
@@ -446,6 +449,10 @@ Principales ventajas que llevaron a elegir JWT en este proyecto:
 ## 📌 Estado del proyecto
 
 > 📄 El detalle completo del estado del proyecto y cada TP está en [`ESTADO_ACTUAL.md`](ESTADO_ACTUAL.md).
+
+* TP1 a TP3: backend (API Django + JWT) implementado y aprobado
+* TP5: frontend React con Vite (`frontend/`, puerto 3000) mergeado a `main`
+* TP6: maquetado de la Home con Bootstrap en PR #8 (`TP6/feat-HomeBootstrap`)
 
 ---
 
