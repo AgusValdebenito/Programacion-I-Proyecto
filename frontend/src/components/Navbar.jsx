@@ -8,7 +8,7 @@ export default function Navbar() {
           <Logo />
           <div className="d-flex align-items-center">
             <nav className="d-none d-md-flex align-items-center gap-4 me-4" aria-label="Navegación principal">
-              <a className="fr-nav-link" href="#">
+              <a className="fr-nav-link" href="#inicio">
                 Inicio
               </a>
               <a className="fr-nav-link" href="#categorias">
