@@ -5,8 +5,8 @@ import StoreLogo from '../components/StoreLogo.jsx'
 import { categories, stores } from '../data/homeData.js'
 
 export default function Home() {
-  const mainCategories = categories.slice(0, 2)
-  const secondaryCategories = categories.slice(2)
+  const mainCategories = categories.filter((category) => category.featured)
+  const secondaryCategories = categories.filter((category) => !category.featured)
 
   return (
     <>

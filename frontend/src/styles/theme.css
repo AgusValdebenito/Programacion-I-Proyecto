@@ -11,6 +11,7 @@
   --inactive: #666666;
   --radius-lg: 24px;
   --shadow-soft: 0 8px 24px rgba(17, 17, 17, 0.08);
+  --bottom-nav-buffer: 86px;
 }
 
 body {
@@ -322,7 +323,7 @@ body {
 }
 
 .footer-spacer {
-  padding-bottom: 86px;
+  padding-bottom: var(--bottom-nav-buffer);
 }
 
 @media (min-width: 768px) {

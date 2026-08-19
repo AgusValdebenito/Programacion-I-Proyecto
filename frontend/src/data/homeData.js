@@ -6,6 +6,7 @@ export const categories = [
     emoji: '🍔',
     gradient: 'fr-grad-1',
     image: '/images/restaurantes.png',
+    featured: true,
   },
   {
     id: 2,
@@ -14,6 +15,7 @@ export const categories = [
     emoji: '🛒',
     gradient: 'fr-grad-2',
     image: '/images/super-kioscos.png',
+    featured: true,
   },
   {
     id: 3,
@@ -22,6 +24,7 @@ export const categories = [
     emoji: '☕',
     gradient: 'fr-grad-3',
     image: '/images/cafeterias.png',
+    featured: false,
   },
   {
     id: 4,
@@ -30,6 +33,7 @@ export const categories = [
     emoji: '🍨',
     gradient: 'fr-grad-4',
     image: '/images/helados.png',
+    featured: false,
   },
   {
     id: 5,
@@ -38,6 +42,7 @@ export const categories = [
     emoji: '💊',
     gradient: 'fr-grad-5',
     image: '/images/farmacia.png',
+    featured: false,
   },
 ]
 
