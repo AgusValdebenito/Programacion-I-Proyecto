@@ -10,7 +10,7 @@ La base del TP1 ya fue puesta en marcha y el TP2 quedo implementado en su estruc
 El TP3 fue implementado completamente: autenticacion JWT, permisos por rol, registro, perfil y logout.
 El TP4 esta pendiente (se hace en otro momento).
 El TP5 (frontend React con Vite) esta COMPLETO y mergeado a `main` (PR #6).
-El TP6 (maquetado de la Home con Bootstrap) esta IMPLEMENTADO en la rama `TP6/feat-HomeBootstrap` y espera approval del compañero en PR #8.
+El TP6 (maquetado de la Home con Bootstrap) esta IMPLEMENTADO en la rama `TP6/feat-HomeBootstrap`. El feedback del review de PR #8 ya fue aplicado y la rama espera un nuevo approval del compañero para mergear.
 
 ## Estado actual
 
@@ -69,6 +69,8 @@ Estas partes ya estan pensadas o documentadas, pero todavia no estan completas e
 * filtros y consultas mas especificas en la API
 * historial de compras y flujo real de confirmacion de pedidos
 * TP4 completo (matriz de pruebas, stock en productos, validaciones de compra, coleccion Postman, reporte, capturas)
+* TP7: reemplazar los `<a href="#">` placeholders por el router de React (navegacion real)
+* Sugerencia del review (pendiente): sumar un job de frontend al CI (`npm ci`, `npm run lint`, `npm run build`)
 
 ## Limpieza realizada
 
@@ -89,7 +91,7 @@ Para dejar el repositorio mas prolijo:
 * TP3: implementado completamente y aprobado por el compañero (PR #3 y PR #5 mergeados en `main`)
 * TP4: pendiente (se va a hacer en otro momento)
 * TP5: implementado y mergeado a `main` (PR #6)
-* TP6: implementado (maquetado de la Home con Bootstrap, imagenes reales conectadas) y pendiente de approval del PR #8
+* TP6: implementado (maquetado de la Home con Bootstrap, imagenes reales conectadas) con feedback del review aplicado; PR #8 pendiente de RE-approval del compañero
 
 Puntos cubiertos del TP2:
 
@@ -140,7 +142,15 @@ Puntos cubiertos del TP5:
 * [x] Imagenes reales conectadas en `frontend/public/images/`: 5 categorias + logo (transparente) en Navbar y Footer
 * [x] Placeholders reemplazables: tiendas con iniciales, hero con emojis (pendiente imagen final si se define)
 * [x] Verificado: `npm run dev` sirve en `http://localhost:3000` (HTTP 200) y `npm run lint` sin errores
-* [x] PR a `main` abierto: **PR #8** (`TP6/feat-HomeBootstrap -> main`, pendiente de approval del compañero)
+* [x] PR a `main` abierto: **PR #8** (`TP6/feat-HomeBootstrap -> main`)
+* [x] Review del compañero: aprobada una vez, pero el push posterior invalido el approval (regla `dismiss_stale_reviews_on_push`)
+* [x] Feedback del review aplicado:
+  * [x] Navegacion movil < 768px funcional: anchors reales en `BottomNav` (`#inicio`, `#categorias`) + `aria-current` en el item activo
+  * [x] Trailing newlines agregados a los archivos `src` (13)
+  * [x] Indentacion corregida en `CategoryCard.jsx` y `StoreLogo.jsx`
+  * [x] `Home.jsx` ya no usa `slice(0,2)`/`slice(2)`: las categorias ahora usan el flag `featured` en `homeData.js`
+  * [x] `footer-spacer` usa la variable CSS `--bottom-nav-buffer` (deja de estar acoplado al valor fijo 86px)
+* [ ] Pendiente del PR #8: **re-approval** del compañero para poder mergear (los push despues del approval lo invalidan)
 
 ## RESUELTO: carpeta definitiva
 
