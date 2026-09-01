@@ -1,6 +1,16 @@
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 import Logo from './Logo'
 
 export default function Navbar() {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
   return (
     <header className="fr-navbar">
       <div className="container">
@@ -8,25 +18,38 @@ export default function Navbar() {
           <Logo />
           <div className="d-flex align-items-center">
             <nav className="d-none d-md-flex align-items-center gap-4 me-4" aria-label="Navegación principal">
-              <a className="fr-nav-link" href="#inicio">
+              <Link className="fr-nav-link" to="/">
                 Inicio
-              </a>
-              <a className="fr-nav-link" href="#categorias">
+              </Link>
+              <Link className="fr-nav-link" to="/explorar">
                 Explorar
-              </a>
-              <a className="fr-nav-link" href="#tiendas">
+              </Link>
+              <Link className="fr-nav-link" to="/tiendas">
                 Tiendas
-              </a>
-              <a className="fr-nav-link" href="#">
+              </Link>
+              <Link className="fr-nav-link" to="/perfil">
                 Mi perfil
-              </a>
+              </Link>
             </nav>
-            <button type="button" className="fr-icon-btn" aria-label="Notificaciones">
-              <i className="bi bi-bell" />
-            </button>
-            <button type="button" className="fr-icon-btn ms-2" aria-label="Carrito">
-              <i className="bi bi-cart3" />
-            </button>
+            {user && (
+              <button type="button" className="fr-icon-btn" aria-label="Notificaciones">
+                <i className="bi bi-bell" />
+              </button>
+            )}
+            {user && (
+              <button type="button" className="fr-icon-btn ms-2" aria-label="Carrito">
+                <i className="bi bi-cart3" />
+              </button>
+            )}
+            {user && (
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-danger ms-2"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            )}
           </div>
         </div>
 
