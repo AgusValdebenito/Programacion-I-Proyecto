@@ -14,7 +14,7 @@ export default function BottomNav() {
     <nav className="fr-bottom-nav d-md-none" aria-label="Navegación inferior">
       <div className="d-flex justify-content-around">
         {items.map((item) => {
-          const isActive = item.to === '/' ? pathname === '/' : pathname.startsWith(item.to)
+          const isActive = pathname === item.to
           return (
             <Link
               key={item.label}

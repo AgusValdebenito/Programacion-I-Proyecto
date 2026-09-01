@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 export default function Login() {
@@ -8,6 +8,8 @@ export default function Login() {
   const [error, setError] = useState('')
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const from = location.state?.from?.pathname || '/'
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -18,8 +20,12 @@ export default function Login() {
       return
     }
 
-    login(email, password)
-    navigate('/')
+    const success = login(email, password)
+    if (success) {
+      navigate(from)
+    } else {
+      setError('Credenciales incorrectas')
+    }
   }
 
   return (

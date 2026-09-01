@@ -15,7 +15,9 @@ export function AuthProvider({ children }) {
     const found = users.find(u => u.email === email && u.password === password)
     if (found) {
       setUser(found)
+      return true
     }
+    return false
   }
 
   const register = (name, email, password) => {
