@@ -452,7 +452,7 @@ Principales ventajas que llevaron a elegir JWT en este proyecto:
 
 * TP1 a TP3: backend (API Django + JWT) implementado y aprobado
 * TP5: frontend React con Vite (`frontend/`, puerto 3000) mergeado a `main`
-* TP6: maquetado de la Home con Bootstrap en PR #8 (`TP6/feat-HomeBootstrap`)
+* TP6: maquetado de la Home con Bootstrap mergeado a `main` (PR #8)
 
 ---
 

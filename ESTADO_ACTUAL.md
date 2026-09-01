@@ -10,7 +10,7 @@ La base del TP1 ya fue puesta en marcha y el TP2 quedo implementado en su estruc
 El TP3 fue implementado completamente: autenticacion JWT, permisos por rol, registro, perfil y logout.
 El TP4 esta pendiente (se hace en otro momento).
 El TP5 (frontend React con Vite) esta COMPLETO y mergeado a `main` (PR #6).
-El TP6 (maquetado de la Home con Bootstrap) esta IMPLEMENTADO en la rama `TP6/feat-HomeBootstrap`. El feedback del review de PR #8 ya fue aplicado y la rama espera un nuevo approval del compañero para mergear.
+El TP6 (maquetado de la Home con Bootstrap) esta COMPLETO y mergeado a `main` (PR #8).
 
 ## Estado actual
 
@@ -91,7 +91,7 @@ Para dejar el repositorio mas prolijo:
 * TP3: implementado completamente y aprobado por el compañero (PR #3 y PR #5 mergeados en `main`)
 * TP4: pendiente (se va a hacer en otro momento)
 * TP5: implementado y mergeado a `main` (PR #6)
-* TP6: implementado (maquetado de la Home con Bootstrap, imagenes reales conectadas) con feedback del review aplicado; PR #8 pendiente de RE-approval del compañero
+* TP6: implementado y mergeado a `main` (PR #8)
 
 Puntos cubiertos del TP2:
 
@@ -142,7 +142,7 @@ Puntos cubiertos del TP5:
 * [x] Imagenes reales conectadas en `frontend/public/images/`: 5 categorias + logo (transparente) en Navbar y Footer
 * [x] Placeholders reemplazables: tiendas con iniciales, hero con emojis (pendiente imagen final si se define)
 * [x] Verificado: `npm run dev` sirve en `http://localhost:3000` (HTTP 200) y `npm run lint` sin errores
-* [x] PR a `main` abierto: **PR #8** (`TP6/feat-HomeBootstrap -> main`)
+* [x] PR a `main` abierto y mergeado: **PR #8** (`TP6/feat-HomeBootstrap -> main`)
 * [x] Review del compañero: aprobada una vez, pero el push posterior invalido el approval (regla `dismiss_stale_reviews_on_push`)
 * [x] Feedback del review aplicado:
   * [x] Navegacion movil < 768px funcional: anchors reales en `BottomNav` (`#inicio`, `#categorias`) + `aria-current` en el item activo
@@ -150,7 +150,7 @@ Puntos cubiertos del TP5:
   * [x] Indentacion corregida en `CategoryCard.jsx` y `StoreLogo.jsx`
   * [x] `Home.jsx` ya no usa `slice(0,2)`/`slice(2)`: las categorias ahora usan el flag `featured` en `homeData.js`
   * [x] `footer-spacer` usa la variable CSS `--bottom-nav-buffer` (deja de estar acoplado al valor fijo 86px)
-* [ ] Pendiente del PR #8: **re-approval** del compañero para poder mergear (los push despues del approval lo invalidan)
+* [x] PR #8 mergeado a `main`
 
 ## RESUELTO: carpeta definitiva
 
@@ -158,7 +158,7 @@ Puntos cubiertos del TP5:
 > Esto ya quedo resuelto:
 
 * **Carpeta definitiva (A):** `C:\Users\mvaldebenito\Documents\Programacion-I-Proyecto` (la de VS Code donde se programa).
-  AL DIA: TP1+TP2+TP3+TP5+TP6 (frontend incluido), `main` con TP1-TP5 mergeados, rama `TP6/feat-HomeBootstrap` pusheada, working tree limpio.
+  AL DIA: TP1+TP2+TP3+TP5+TP6 (frontend incluido), `main` con todos los TPs mergeados, working tree limpio.
 * **Carpeta B:** `C:\Users\mvaldebenito\Documents\GitHub\Programacion-I-Proyecto` fue **ELIMINADA del disco**
   (era una copia vieja sin TP3 y con el `frontend/` de Vite creado por error). No era parte del repo.
 * El `frontend/` ya fue **creado desde cero en la carpeta A** (React + Vite en el puerto 3000), al mismo nivel del backend.
@@ -180,7 +180,7 @@ Puntos cubiertos del TP5:
 * [x] `docs/diagrama.md` con el bosquejo de la Home (componentes + flujo + rutas)
 * [x] Commits claros en `TP5` y push a `origin/TP5` (`c0813da`, `39f45cc`, `3e8af2e`, `694678e`)
 * [x] Ruleset "Global PR protection" ajustado: protege **solo `main`** (PR + 1 approval para mergear); el push a ramas `TPn` quedo habilitado
-* [x] PR a `main` abierto y actualizado: **PR #6** (`TP5 -> main`, reabierto tras la solucion del ruleset; pendiente de approval del compañero)
+* [x] PR a `main` mergeado: **PR #6** (`TP5 -> main`)
 
 ## Observaciones
 
