@@ -43,7 +43,7 @@ class IsOrderParticipantOrAdmin(permissions.BasePermission):
             return True
 
         # Es el vendedor dueño de la tienda del pedido
-        if order.store.owner == request.user:
+        if order.store and order.store.owner == request.user:
             return True
 
         return False

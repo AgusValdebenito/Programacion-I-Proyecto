@@ -46,6 +46,7 @@ class Product(models.Model):
         verbose_name="precio",
     )
     is_available = models.BooleanField(default=True, verbose_name="disponible")
+    stock = models.PositiveIntegerField(default=0, verbose_name="stock")
     image = models.ImageField(
         upload_to="products/",
         blank=True,
@@ -122,8 +123,6 @@ class Order(models.Model):
     store = models.ForeignKey(
         Store,
         on_delete=models.PROTECT,
-        null=True,
-        blank=True,
         related_name="orders",
         verbose_name="tienda",
     )

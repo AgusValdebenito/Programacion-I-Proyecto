@@ -21,6 +21,12 @@ from .serializers import (
 )
 
 
+def is_admin_user(user):
+    return user.is_authenticated and (
+        user.is_staff or getattr(user, "role", None) == Usuario.RoleChoices.ADMIN
+    )
+
+
 class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.all().order_by("id")
     serializer_class = StoreSerializer
@@ -45,7 +51,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         store = serializer.validated_data["store"]
-        if store.owner != self.request.user and not self.request.user.is_staff:
+        if store.owner != self.request.user and not is_admin_user(self.request.user):
             raise PermissionDenied("Solo el propietario de la tienda puede publicar productos.")
 
         serializer.save()
@@ -57,12 +63,13 @@ class CartViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsResourceOwnerOrReadOnly]
 
     def get_queryset(self):
-        if self.request.user.is_staff:
+        if is_admin_user(self.request.user):
             return super().get_queryset()
 
         return self.queryset.filter(user=self.request.user)
 
     def create(self, request, *args, **kwargs):
+        # Reutilizar el carrito existente del usuario o crearlo si no existe (relacion OneToOne)
         serializer = self.get_serializer(data={})
         serializer.is_valid(raise_exception=True)
         cart, created = Cart.objects.get_or_create(user=request.user)
@@ -79,7 +86,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsResourceOwnerOrReadOnly]
 
     def get_queryset(self):
-        if self.request.user.is_staff:
+        if is_admin_user(self.request.user):
             return super().get_queryset()
 
         return self.queryset.filter(cart__user=self.request.user)
@@ -93,12 +100,25 @@ class CartItemViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("Solo podes agregar items a tu propio carrito.")
 
         product = serializer.validated_data["product"]
+        quantity = serializer.validated_data["quantity"]
 
-        # 1. Validar disponibilidad del producto
+        # 1. Validar cantidad mínima
+        if quantity < 1:
+            raise ValidationError({"quantity": "La cantidad debe ser mayor o igual a 1."})
+
+        # 2. Validar disponibilidad del producto
         if not product.is_available:
             raise ValidationError({"product": "Este producto no se encuentra disponible actualmente."})
 
-        # 2. Validar regla de mono-tienda en el carrito
+        # 3. Validar stock disponible
+        existing_item = CartItem.objects.filter(cart=cart, product=product).first()
+        total_requested = (existing_item.quantity if existing_item else 0) + quantity
+        if product.stock < total_requested:
+            raise ValidationError({
+                "quantity": f"Stock insuficiente para '{product.name}'. Stock disponible: {product.stock}."
+            })
+
+        # 4. Validar regla de mono-tienda en el carrito
         existing_items = CartItem.objects.filter(cart=cart).select_related("product__store")
         if existing_items.exists():
             current_store = existing_items.first().product.store
@@ -110,7 +130,6 @@ class CartItemViewSet(viewsets.ModelViewSet):
                     )
                 })
 
-        quantity = serializer.validated_data["quantity"]
         cart_item, created = CartItem.objects.get_or_create(
             cart=cart,
             product=product,
@@ -134,10 +153,10 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff or getattr(user, "role", None) == Usuario.RoleChoices.ADMIN:
+        if is_admin_user(user):
             return super().get_queryset()
 
-        # Si el usuario es dueño de una tienda, también puede ver los pedidos realizados a su tienda
+        # Un usuario ve los pedidos que hizo como cliente y los pedidos recibidos en su tienda
         return self.queryset.filter(models.Q(user=user) | models.Q(store__owner=user)).distinct()
 
     def perform_create(self, serializer):
@@ -153,7 +172,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             serializer.save()
             return
 
-        is_admin = user.is_staff or getattr(user, "role", None) == Usuario.RoleChoices.ADMIN
+        is_admin = is_admin_user(user)
         is_vendor = instance.store.owner == user
         is_client = instance.user == user
 
@@ -172,11 +191,15 @@ class OrderViewSet(viewsets.ModelViewSet):
                 raise PermissionDenied("Los clientes solo pueden consultar o cancelar sus pedidos pendientes.")
 
         if is_vendor:
-            # Validar transiciones de tienda: preparing -> delivering -> delivered (o cancelled)
+            # Transiciones válidas del vendedor:
+            # Pending -> Preparing o Cancelled
+            # Preparing -> Delivering o Cancelled
+            # Delivering -> Delivered
+            # Delivered y Cancelled son estados finales y no pueden modificarse
             allowed_transitions = {
                 Order.StatusChoices.PENDING: [Order.StatusChoices.PREPARING, Order.StatusChoices.CANCELLED],
                 Order.StatusChoices.PREPARING: [Order.StatusChoices.DELIVERING, Order.StatusChoices.CANCELLED],
-                Order.StatusChoices.DELIVERING: [Order.StatusChoices.DELIVERED, Order.StatusChoices.CANCELLED],
+                Order.StatusChoices.DELIVERING: [Order.StatusChoices.DELIVERED],
                 Order.StatusChoices.DELIVERED: [],
                 Order.StatusChoices.CANCELLED: [],
             }
@@ -197,7 +220,7 @@ class OrderItemViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff or getattr(user, "role", None) == Usuario.RoleChoices.ADMIN:
+        if is_admin_user(user):
             return super().get_queryset()
 
         return self.queryset.filter(
@@ -207,20 +230,33 @@ class OrderItemViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         order = serializer.validated_data["order"]
         product = serializer.validated_data["product"]
+        quantity = serializer.validated_data["quantity"]
         user = self.request.user
 
-        if order.user != user and not (user.is_staff or getattr(user, "role", None) == Usuario.RoleChoices.ADMIN):
+        if order.user != user and not is_admin_user(user):
             raise PermissionDenied("Solo podes agregar items a tus propios pedidos.")
 
-        # Validar disponibilidad del producto
+        # 1. Validar cantidad mínima
+        if quantity < 1:
+            raise ValidationError({"quantity": "La cantidad debe ser mayor o igual a 1."})
+
+        # 2. Validar disponibilidad del producto
         if not product.is_available:
             raise ValidationError({"product": "Este producto no se encuentra disponible."})
 
-        # Validar mono-tienda (el producto debe pertenecer a la misma tienda del pedido)
+        # 3. Validar stock disponible
+        if product.stock < quantity:
+            raise ValidationError({
+                "quantity": f"Stock insuficiente para '{product.name}'. Stock disponible: {product.stock}."
+            })
+
+        # 4. Validar mono-tienda (el producto debe pertenecer a la misma tienda del pedido)
         if product.store != order.store:
             raise ValidationError({
                 "detail": f"El producto '{product.name}' pertenece a otra tienda y no puede agregarse a este pedido."
             })
 
-        serializer.save()
+        # 5. Fijar unit_price desde el precio real del producto para evitar manipulación
+        serializer.save(unit_price=product.price)
+
 

@@ -68,12 +68,11 @@ Decisiones tomadas en el modelo y logica de negocio:
 
 ## Pendiente de implementacion
 
-Estas partes ya estan pensadas o documentadas, pero todavia no estan completas en codigo:
+Estas partes ya estan pensadas o documentadas para siguientes sprints:
 
 * filtros y consultas mas especificas en la API
 * flujo de checkout que convierta automaticamente carrito en orden y vacie el carrito
 * sistema de moderacion avanzada / reportes de usuarios y tiendas (rama feature posterior)
-* TP4 completo (matriz de pruebas, stock en productos, validaciones de compra, coleccion Postman, reporte, capturas)
 * TP7: reemplazar los `<a href="#">` placeholders por el router de React (navegacion real)
 * Sugerencia del review (pendiente): sumar un job de frontend al CI (`npm ci`, `npm run lint`, `npm run build`)
 

@@ -35,13 +35,17 @@ Esta matriz define los escenarios de prueba para validar que la separacion de ro
 | **NEG-01** | `/api/register/` | `POST` | Anonimo | Registro con email ya existente | `400 Bad Request` ("email ya existe") | `400 Bad Request` | ✅ PASS |
 | **NEG-02** | `/api/products/` | `POST` | `VENDEDOR` | Crear producto con precio negativo (`-10.00`) | `400 Bad Request` (validador MinValue) | `400 Bad Request` | ✅ PASS |
 | **NEG-03** | `/api/cart-items/` | `POST` | `CLIENTE` | Agregar producto no disponible (`is_available=False`) | `400 Bad Request` ("no disponible") | `400 Bad Request` | ✅ PASS |
-| **NEG-04** | `/api/cart-items/` | `POST` | `CLIENTE` | Agregar producto de una tienda B teniendo items de tienda A | `400 Bad Request` (Regla Mono-tienda) | `400 Bad Request` | ✅ PASS |
-| **NEG-05** | `/api/cart-items/` | `POST` | `CLIENTE` | Re-agregar el mismo producto al carrito | `200 OK` (incrementa cantidad, no duplica) | `200 OK` | ✅ PASS |
-| **NEG-06** | `/api/orders/{id}/` | `PATCH` | `CLIENTE` | Intentar marcar pedido como `delivered` | `403 Forbidden` (solo vendedor/admin) | `403 Forbidden` | ✅ PASS |
-| **NEG-07** | `/api/orders/{id}/` | `PATCH` | `CLIENTE` | Cancelar pedido propio en estado `pending` | `200 OK` (`status: cancelled`) | `200 OK` | ✅ PASS |
-| **NEG-08** | `/api/orders/{id}/` | `PATCH` | `VENDEDOR` (dueno) | Transicionar estado `pending` -> `preparing` -> `delivering` -> `delivered` | `200 OK` | `200 OK` | ✅ PASS |
-| **NEG-09** | `/api/orders/{id}/` | `PATCH` | `VENDEDOR` (ajeno) | Intentar alterar estado de pedido de otra tienda | `404 Not Found` o `403 Forbidden` | `404 Not Found` | ✅ PASS |
-| **NEG-10** | `/api/order-items/` | `POST` | `CLIENTE` | Agregar item con producto de otra tienda al pedido | `400 Bad Request` (Regla Mono-tienda pedido) | `400 Bad Request` | ✅ PASS |
+| **NEG-04** | `/api/cart-items/` | `POST` | `CLIENTE` | Agregar cantidad que supera el stock disponible | `400 Bad Request` ("stock insuficiente") | `400 Bad Request` | ✅ PASS |
+| **NEG-05** | `/api/cart-items/` | `POST` | `CLIENTE` | Agregar producto de una tienda B teniendo items de tienda A | `400 Bad Request` (Regla Mono-tienda) | `400 Bad Request` | ✅ PASS |
+| **NEG-06** | `/api/cart-items/` | `POST` | `CLIENTE` | Re-agregar el mismo producto al carrito | `200 OK` (incrementa cantidad, no duplica) | `200 OK` | ✅ PASS |
+| **NEG-07** | `/api/orders/` | `POST` | `CLIENTE` | Intentar crear pedido sin tienda asociada | `400 Bad Request` (campo `store` requerido) | `400 Bad Request` | ✅ PASS |
+| **NEG-08** | `/api/orders/{id}/` | `PATCH` | `CLIENTE` | Intentar marcar pedido como `delivered` | `403 Forbidden` (solo vendedor/admin) | `403 Forbidden` | ✅ PASS |
+| **NEG-09** | `/api/orders/{id}/` | `PATCH` | `CLIENTE` | Cancelar pedido propio en estado `pending` | `200 OK` (`status: cancelled`) | `200 OK` | ✅ PASS |
+| **NEG-10** | `/api/orders/{id}/` | `PATCH` | `VENDEDOR` (dueno) | Transicionar estado `pending` -> `preparing` -> `delivering` -> `delivered` | `200 OK` | `200 OK` | ✅ PASS |
+| **NEG-11** | `/api/orders/{id}/` | `PATCH` | `VENDEDOR` (dueno) | Intentar cancelar un pedido ya entregado (`delivered`) | `400 Bad Request` | `400 Bad Request` | ✅ PASS |
+| **NEG-12** | `/api/orders/{id}/` | `PATCH` | `VENDEDOR` (ajeno) | Intentar alterar estado de pedido de otra tienda | `404 Not Found` | `404 Not Found` | ✅ PASS |
+| **NEG-13** | `/api/order-items/` | `POST` | `CLIENTE` | Agregar item con producto de otra tienda al pedido | `400 Bad Request` (Regla Mono-tienda pedido) | `400 Bad Request` | ✅ PASS |
+| **NEG-14** | `/api/order-items/` | `POST` | `CLIENTE` | Intentar enviar `unit_price` manipulado | `201 Created` (unit_price forzado desde el producto) | `201 Created` | ✅ PASS |
 
 ---
 
@@ -49,23 +53,29 @@ Esta matriz define los escenarios de prueba para validar que la separacion de ro
 
 | ID | Flujo | Pasos Ejecutados | Resultado Esperado | Resultado Obtenido | Estado |
 | :--- | :--- | :--- | :--- | :--- | :---: |
-| **FLUJO-01** | **Flujo Completo de Compra y Despacho** | 1. Registro e inicio de sesion del cliente (`POST /api/token/`)<br>2. Consulta de catalogo y tiendas (`GET /api/products/`)<br>3. Agregado de items al carrito (`POST /api/cart-items/`)<br>4. Creacion del pedido (`POST /api/orders/`)<br>5. Despacho por la tienda (`PATCH /api/orders/{id}/` a `preparing`, `delivering`, `delivered`) | Flujo completado sin inconsistencias y respetando autorizaciones en cada paso | Completado con exito | ✅ PASS |
+| **FLUJO-01** | **Flujo Completo de Compra y Despacho** | 1. Registro e inicio de sesion del cliente (`POST /api/token/`)<br>2. Consulta de catalogo, stock y tiendas (`GET /api/products/`)<br>3. Agregado de items al carrito con validacion de stock (`POST /api/cart-items/`)<br>4. Creacion del pedido vinculado a la tienda (`POST /api/orders/`)<br>5. Despacho por la tienda (`PATCH /api/orders/{id}/` a `preparing`, `delivering`, `delivered`) | Flujo completado sin inconsistencias y respetando autorizaciones en cada paso | Completado con exito | ✅ PASS |
 
 ---
 
 ## 2. Deteccion y Correccion de Errores (Ciclo de Vida de Bugs)
 
-Durante el proceso de validacion de la API para el TP4, se detectaron los siguientes casos de borde que fueron corregidos en el backend:
+Durante el proceso de validacion de la API para el TP4 y el code review, se detectaron los siguientes casos de borde que fueron corregidos en el backend:
 
-1. **Bug #1: Mezcla de productos de distintas tiendas en el mismo carrito / pedido.**
-   - *Comportamiento previo:* El carrito permitia agregar productos de multiples comercios simultaneamente.
-   - *Correccion:* Se agrego validacion en `CartItemViewSet.create` y `OrderItemViewSet.perform_create` para garantizar la regla de mono-tienda (`400 Bad Request`).
-2. **Bug #2: Clientes podian forzar el estado de entrega (`delivered`) de sus pedidos.**
-   - *Comportamiento previo:* Al tener permisos de propietario sobre el pedido, el cliente podia editar libremente `status`.
-   - *Correccion:* Se implemento `OrderViewSet.perform_update` restringiendo el avance de estados a la tienda duena y permitiendo al cliente unicamente cancelar si esta `pending`.
-3. **Bug #3: Productos no disponibles podian ser agregados al carrito.**
-   - *Comportamiento previo:* No existia flag de disponibilidad en el modelo.
-   - *Correccion:* Se anadio `is_available = BooleanField(default=True)` y validacion previa en el endpoint de items.
+1. **Bug #1: Pedidos huerfanos sin tienda asociada (`Order.store` nullable).**
+   - *Comportamiento previo:* El modelo permitia `null=True`, pudiendo originar pedidos sin tienda y errores `AttributeError` en permisos.
+   - *Correccion:* Se hizo obligatorio el campo `store = ForeignKey(Store, on_delete=models.PROTECT)` con validacion en la creacion del pedido.
+2. **Bug #2: Ausencia de control de stock en productos e items.**
+   - *Comportamiento previo:* No habia campo `stock` ni validacion de inventario al comprar o agregar al carrito.
+   - *Correccion:* Se agrego el campo `stock` a `Product` y validaciones en `CartItemViewSet` y `OrderItemViewSet` que impiden superar el stock disponible (`400 Bad Request`).
+3. **Bug #3: Mezcla de productos de distintas tiendas en el mismo carrito / pedido.**
+   - *Comportamiento previo:* El carrito y pedido permitian agregar productos de multiples comercios simultaneamente.
+   - *Correccion:* Se agrego validacion estricta mono-tienda en `CartItemViewSet` y `OrderItemViewSet`.
+4. **Bug #4: Clientes podian forzar el estado de entrega (`delivered`) o vendedores cancelar pedidos ya entregados.**
+   - *Comportamiento previo:* Los clientes podian editar libremente el estado y el vendedor podia cancelar en cualquier instancia.
+   - *Correccion:* Se restringio el flujo en `OrderViewSet.perform_update` (`pending` -> `preparing` -> `delivering` -> `delivered`) impidiendo transiciones invalidas o cancelaciones post-entrega.
+5. **Bug #5: Manipulacion del precio unitario (`unit_price`) en items de pedido.**
+   - *Comportamiento previo:* El cliente podia enviar un `unit_price` arbitrario en el body JSON.
+   - *Correccion:* Se configuro `unit_price` como de solo lectura en el serializer y se asigna obligatoriamente desde `product.price` en backend.
 
 ---
 

@@ -81,6 +81,7 @@ Productos asociados a cada tienda.
 * description
 * price
 * is_available
+* stock
 * image
 * store_id (FK -> stores.id)
 * created_at
@@ -88,6 +89,7 @@ Productos asociados a cada tienda.
 Restricciones recomendadas:
 
 * `price` debe ser mayor o igual a 0
+* `stock` debe ser mayor o igual a 0
 * `is_available` es un booleano que define si el producto esta activo o pausado
 
 ---
@@ -288,6 +290,7 @@ CREATE TABLE products (
     description TEXT,
     price DECIMAL(10,2),
     is_available BOOLEAN DEFAULT TRUE,
+    stock INT DEFAULT 0,
     image VARCHAR(100),
     store_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

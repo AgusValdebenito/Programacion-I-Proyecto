@@ -116,6 +116,8 @@ class CartItemViewSetTests(APITestCase):
             name="Pizza",
             description="Muzza",
             price=Decimal("15.00"),
+            stock=10,
+            is_available=True,
         )
         self.cart = Cart.objects.create(user=self.user)
 
@@ -151,6 +153,7 @@ class CartItemViewSetTests(APITestCase):
             store=self.store,
             name="Empanada",
             price=Decimal("5.00"),
+            stock=10,
             is_available=False,
         )
         self.client.force_authenticate(user=self.user)
@@ -177,6 +180,8 @@ class CartItemViewSetTests(APITestCase):
             store=other_store,
             name="Sushi",
             price=Decimal("20.00"),
+            stock=10,
+            is_available=True,
         )
 
         # Agregamos primero un producto de la tienda 1
@@ -288,4 +293,112 @@ class OrderViewSetTests(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_vendor_cannot_cancel_delivered_order(self):
+        self.order.status = Order.StatusChoices.DELIVERED
+        self.order.save()
+        self.client.force_authenticate(user=self.vendor_user)
+
+        response = self.client.patch(
+            reverse("orders-detail", args=[self.order.id]),
+            {"status": Order.StatusChoices.CANCELLED},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_order_creation_requires_store(self):
+        self.client.force_authenticate(user=self.client_user)
+
+        response = self.client.post(
+            reverse("orders-list"),
+            {"total": "50.00", "status": "pending"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("store", response.data)
+
+
+class OrderItemViewSetTests(APITestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.client_user = user_model.objects.create_user(
+            username="item-client-user",
+            password="testpass123",
+            email="item-client@example.com",
+            role="cliente",
+        )
+        self.vendor_user = user_model.objects.create_user(
+            username="item-vendor-user",
+            password="testpass123",
+            email="item-vendor@example.com",
+            role="vendedor",
+        )
+        self.other_vendor = user_model.objects.create_user(
+            username="item-other-vendor",
+            password="testpass123",
+            email="item-other@example.com",
+            role="vendedor",
+        )
+        self.store = Store.objects.create(owner=self.vendor_user, name="Tienda Items A")
+        self.other_store = Store.objects.create(owner=self.other_vendor, name="Tienda Items B")
+        self.product_a = Product.objects.create(
+            store=self.store,
+            name="Burger A",
+            price=Decimal("20.00"),
+            stock=5,
+            is_available=True,
+        )
+        self.product_b = Product.objects.create(
+            store=self.other_store,
+            name="Burger B",
+            price=Decimal("25.00"),
+            stock=10,
+            is_available=True,
+        )
+        self.order = Order.objects.create(
+            user=self.client_user,
+            store=self.store,
+            total=Decimal("100.00"),
+            status=Order.StatusChoices.PENDING,
+        )
+
+    def test_order_item_rejects_quantity_exceeding_stock(self):
+        self.client.force_authenticate(user=self.client_user)
+
+        response = self.client.post(
+            reverse("order-items-list"),
+            {"order": self.order.id, "product": self.product_a.id, "quantity": 10},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("quantity", response.data)
+
+    def test_order_item_rejects_product_from_different_store(self):
+        self.client.force_authenticate(user=self.client_user)
+
+        response = self.client.post(
+            reverse("order-items-list"),
+            {"order": self.order.id, "product": self.product_b.id, "quantity": 1},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("detail", response.data)
+
+    def test_order_item_forces_unit_price_from_product(self):
+        self.client.force_authenticate(user=self.client_user)
+
+        response = self.client.post(
+            reverse("order-items-list"),
+            {
+                "order": self.order.id,
+                "product": self.product_a.id,
+                "quantity": 2,
+                "unit_price": "0.01",  # Intento de manipulacion
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        created_item = OrderItem.objects.get(id=response.data["id"])
+        self.assertEqual(created_item.unit_price, self.product_a.price)
+
 
