@@ -94,10 +94,11 @@ Para dejar el repositorio mas prolijo:
 * TP1: base del proyecto completada y validada por el equipo
 * TP2: implementado en su parte principal
 * TP3: implementado completamente y aprobado por el compañero (PR #3 y PR #5 mergeados en `main`)
-* TP4: completo en rama `TP4/refactor/business-logic` (matriz de pruebas en `docs/matriz_pruebas_tp4.md`, colección Postman en `postman/FoodRush_TP4.postman_collection.json`, lógica mono-tienda, disponibilidad `is_available`, imágenes, flujo de pedidos y tests automatizados)
+* TP4: completo y mergeado a `main` (PR #10) (matriz de pruebas en `docs/matriz_pruebas_tp4.md`, colección Postman en `postman/FoodRush_TP4.postman_collection.json`, lógica mono-tienda, disponibilidad `is_available`, imágenes, flujo de pedidos y tests automatizados)
 * TP5: implementado y mergeado a `main` (PR #6)
 * TP6: implementado y mergeado a `main` (PR #8)
-* TP8: implementado completamente en la rama `TP8/feat-connect-frontend-backend` (autenticación real con JWT, `AuthContext`, login, registro con validación, logout con blacklist, guardias `ProtectedRoute`, obtención de perfil autenticado en `Home` y `Navbar`, refresco automático y tests 100% pasando)
+* TP7: autenticación y rutas con React Router y mock data mergeado a `main` (PR #9)
+* TP8: implementado completamente en la rama `TP8` (autenticación real con JWT, `AuthContext`, login, registro con validación, logout con blacklist, guardias `ProtectedRoute`, obtención de perfil autenticado en `Home` y `Navbar`, refresco automático y tests 100% pasando)
 
 Puntos cubiertos del TP2:
 
@@ -157,6 +158,20 @@ Puntos cubiertos del TP5:
   * [x] `Home.jsx` ya no usa `slice(0,2)`/`slice(2)`: las categorias ahora usan el flag `featured` en `homeData.js`
   * [x] `footer-spacer` usa la variable CSS `--bottom-nav-buffer` (deja de estar acoplado al valor fijo 86px)
 * [x] PR #8 mergeado a `main`
+
+## Puntos cubiertos del TP8 (Conexión Frontend con Backend)
+
+* [x] Backend: Serializador `EmailTokenObtainPairSerializer` para login con `email` y `password`, devolviendo tokens `access`, `refresh` y payload con datos de usuario (`id`, `email`, `name`, `role`).
+* [x] Backend: Soporte de registro público asignando rol `cliente` por defecto y creación de usuario completa.
+* [x] Frontend: Conexión con `fetch` nativo sin librerías externas adicionales.
+* [x] Frontend: `AuthContext.jsx` conectado a endpoints reales con manejo de `localStorage` (`access_token`, `refresh_token`, `user`).
+* [x] Frontend: Decodificación y expiración de JWT (`exp`), silent refresh automático mediante `POST /api/token/refresh/`.
+* [x] Frontend: Login (`Login.jsx`) con estados de carga, captura de errores de la API y redirección a la ruta previa o `/`.
+* [x] Frontend: Registro (`Register.jsx`) con validación, feedback de error/éxito y redirección a `/login`.
+* [x] Frontend: Cierre de sesión (`Navbar.jsx` / `AuthContext.jsx`) con blacklist en `POST /api/logout/` y redirección a `/login`.
+* [x] Frontend: Saludo personalizado en `Hero.jsx` consumiendo `GET /api/profile/` con header `Authorization: Bearer <token>`.
+* [x] Frontend: `ProtectedRoute.jsx` verificando vigencia del token y autenticación antes de dar acceso.
+* [x] Verificado: `npm run lint` 0 errores, `npm run build` exitoso y tests de Django 18/18 pasando.
 
 ## RESUELTO: carpeta definitiva
 
