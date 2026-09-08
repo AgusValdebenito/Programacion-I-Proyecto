@@ -60,7 +60,7 @@ export default function Navbar() {
                 <Link to="/login" className="btn btn-sm btn-outline-primary">
                   Iniciar sesión
                 </Link>
-                <Link to="/registro" className="btn btn-sm btn-primary">
+                <Link to="/register" className="btn btn-sm btn-primary">
                   Registrarse
                 </Link>
               </div>
