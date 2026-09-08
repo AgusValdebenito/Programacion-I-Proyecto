@@ -4,26 +4,36 @@ import { useAuth } from '../hooks/useAuth'
 
 export default function Register() {
   const [name, setName] = useState('')
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { register } = useAuth()
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setSuccessMsg('')
 
     if (!name || !email || !password) {
-      setError('Por favor completa todos los campos')
+      setError('Por favor completa los campos obligatorios')
       return
     }
 
-    const success = register(name, email, password)
-    if (success) {
-      navigate('/login')
+    setIsSubmitting(true)
+    const result = await register(name, email, password, username || undefined)
+    setIsSubmitting(false)
+
+    if (result.success) {
+      setSuccessMsg('¡Cuenta creada con éxito! Redirigiendo al inicio de sesión...')
+      setTimeout(() => {
+        navigate('/login')
+      }, 1500)
     } else {
-      setError('El email ya está registrado')
+      setError(result.error || 'Error al registrar la cuenta')
     }
   }
 
@@ -39,9 +49,15 @@ export default function Register() {
             </div>
           )}
 
+          {successMsg && (
+            <div className="alert alert-success" role="alert">
+              {successMsg}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
-              <label htmlFor="name" className="form-label">Nombre</label>
+              <label htmlFor="name" className="form-label">Nombre completo</label>
               <input
                 type="text"
                 className="form-control"
@@ -49,6 +65,19 @@ export default function Register() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Tu nombre"
+                required
+              />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="username" className="form-label">Nombre de usuario (opcional)</label>
+              <input
+                type="text"
+                className="form-control"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="usuario123"
               />
             </div>
 
@@ -61,6 +90,7 @@ export default function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="tu@email.com"
+                required
               />
             </div>
 
@@ -73,11 +103,12 @@ export default function Register() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••"
+                required
               />
             </div>
 
-            <button type="submit" className="btn btn-primary w-100">
-              Registrarse
+            <button type="submit" className="btn btn-primary w-100" disabled={isSubmitting}>
+              {isSubmitting ? 'Registrando...' : 'Registrarse'}
             </button>
           </form>
 

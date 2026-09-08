@@ -1,10 +1,12 @@
-export default function Hero() {
+export default function Hero({ userName }) {
   return (
     <div className="container py-4" id="inicio">
       <div className="fr-hero p-4 p-md-5">
         <div className="row align-items-center g-0">
           <div className="col-12 col-md-6">
-            <span className="fr-promo-badge">Exclusivo FoodRush</span>
+            <span className="fr-promo-badge">
+              {userName ? `¡Hola, ${userName}! Exclusivo FoodRush` : 'Exclusivo FoodRush'}
+            </span>
             <h1 className="mt-3 mb-3">
               Nuestras mejores
               <br />

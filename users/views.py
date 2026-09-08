@@ -33,7 +33,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         return queryset.none()
 
     def perform_create(self, serializer):
-        serializer.save(role=Usuario.RoleChoices.CLIENTE)
+        serializer.save()
 
     @action(detail=False, methods=["get", "patch"], permission_classes=[permissions.IsAuthenticated])
     def profile(self, request):

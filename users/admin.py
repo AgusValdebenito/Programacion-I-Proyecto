@@ -17,4 +17,10 @@ class UsuarioAdmin(UserAdmin):
             {"fields": ("name", "phone", "role", "created_at")},
         ),
     )
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        (
+            "Informacion adicional",
+            {"fields": ("email", "name", "phone", "role")},
+        ),
+    )
     readonly_fields = ("created_at",)

@@ -8,9 +8,10 @@
 El proyecto backend esta iniciado con Django y Django REST Framework.
 La base del TP1 ya fue puesta en marcha y el TP2 quedo implementado en su estructura principal: modelos, migraciones, admin, serializers, vistas CRUD, rutas de API y Swagger.
 El TP3 fue implementado completamente: autenticacion JWT, permisos por rol, registro, perfil y logout.
-El TP4 esta pendiente (se hace en otro momento).
+El TP4 esta completo en rama `TP4/refactor/business-logic`.
 El TP5 (frontend React con Vite) esta COMPLETO y mergeado a `main` (PR #6).
 El TP6 (maquetado de la Home con Bootstrap) esta COMPLETO y mergeado a `main` (PR #8).
+El TP8 (Conexión Frontend con Backend) esta COMPLETO en la rama `TP8/feat-connect-frontend-backend`.
 
 ## Estado actual
 
@@ -96,6 +97,7 @@ Para dejar el repositorio mas prolijo:
 * TP4: completo en rama `TP4/refactor/business-logic` (matriz de pruebas en `docs/matriz_pruebas_tp4.md`, colección Postman en `postman/FoodRush_TP4.postman_collection.json`, lógica mono-tienda, disponibilidad `is_available`, imágenes, flujo de pedidos y tests automatizados)
 * TP5: implementado y mergeado a `main` (PR #6)
 * TP6: implementado y mergeado a `main` (PR #8)
+* TP8: implementado completamente en la rama `TP8/feat-connect-frontend-backend` (autenticación real con JWT, `AuthContext`, login, registro con validación, logout con blacklist, guardias `ProtectedRoute`, obtención de perfil autenticado en `Home` y `Navbar`, refresco automático y tests 100% pasando)
 
 Puntos cubiertos del TP2:
 
