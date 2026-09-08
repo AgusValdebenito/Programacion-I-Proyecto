@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import Cart, CartItem, Product, Store
+from .models import Cart, CartItem, Order, OrderItem, Product, Store
 
 
 class ProductViewSetTests(APITestCase):
@@ -145,3 +145,147 @@ class CartItemViewSetTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(CartItem.objects.get(cart=self.cart, product=self.product).quantity, 2)
+
+    def test_create_cart_item_fails_if_product_is_not_available(self):
+        unavailable_product = Product.objects.create(
+            store=self.store,
+            name="Empanada",
+            price=Decimal("5.00"),
+            is_available=False,
+        )
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(
+            reverse("cart-items-list"),
+            {"cart": self.cart.id, "product": unavailable_product.id, "quantity": 1},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("product", response.data)
+
+    def test_create_cart_item_fails_when_mixing_different_stores(self):
+        user_model = get_user_model()
+        other_owner = user_model.objects.create_user(
+            username="other-vendor",
+            password="testpass123",
+            email="other-vendor@example.com",
+            role="vendedor",
+        )
+        other_store = Store.objects.create(owner=other_owner, name="Segunda tienda")
+        product_other_store = Product.objects.create(
+            store=other_store,
+            name="Sushi",
+            price=Decimal("20.00"),
+        )
+
+        # Agregamos primero un producto de la tienda 1
+        CartItem.objects.create(cart=self.cart, product=self.product, quantity=1)
+        self.client.force_authenticate(user=self.user)
+
+        # Intentamos agregar un producto de la tienda 2
+        response = self.client.post(
+            reverse("cart-items-list"),
+            {"cart": self.cart.id, "product": product_other_store.id, "quantity": 1},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("detail", response.data)
+
+
+class OrderViewSetTests(APITestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.client_user = user_model.objects.create_user(
+            username="client-order-user",
+            password="testpass123",
+            email="client-order@example.com",
+            role="cliente",
+        )
+        self.vendor_user = user_model.objects.create_user(
+            username="vendor-order-user",
+            password="testpass123",
+            email="vendor-order@example.com",
+            role="vendedor",
+        )
+        self.other_vendor = user_model.objects.create_user(
+            username="other-vendor-order-user",
+            password="testpass123",
+            email="other-vendor-order@example.com",
+            role="vendedor",
+        )
+        self.store = Store.objects.create(owner=self.vendor_user, name="Tienda de Pedidos")
+        self.other_store = Store.objects.create(owner=self.other_vendor, name="Tienda Ajena")
+        self.order = Order.objects.create(
+            user=self.client_user,
+            store=self.store,
+            total=Decimal("100.00"),
+            status=Order.StatusChoices.PENDING,
+        )
+
+    def test_vendor_can_transition_order_status_sequence(self):
+        self.client.force_authenticate(user=self.vendor_user)
+
+        # Pending -> Preparing
+        response = self.client.patch(
+            reverse("orders-detail", args=[self.order.id]),
+            {"status": Order.StatusChoices.PREPARING},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.StatusChoices.PREPARING)
+
+        # Preparing -> Delivering
+        response = self.client.patch(
+            reverse("orders-detail", args=[self.order.id]),
+            {"status": Order.StatusChoices.DELIVERING},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.StatusChoices.DELIVERING)
+
+        # Delivering -> Delivered
+        response = self.client.patch(
+            reverse("orders-detail", args=[self.order.id]),
+            {"status": Order.StatusChoices.DELIVERED},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.StatusChoices.DELIVERED)
+
+    def test_client_cannot_mark_order_as_delivered(self):
+        self.client.force_authenticate(user=self.client_user)
+
+        response = self.client.patch(
+            reverse("orders-detail", args=[self.order.id]),
+            {"status": Order.StatusChoices.DELIVERED},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_client_can_cancel_pending_order(self):
+        self.client.force_authenticate(user=self.client_user)
+
+        response = self.client.patch(
+            reverse("orders-detail", args=[self.order.id]),
+            {"status": Order.StatusChoices.CANCELLED},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, Order.StatusChoices.CANCELLED)
+
+    def test_other_vendor_cannot_modify_order(self):
+        self.client.force_authenticate(user=self.other_vendor)
+
+        response = self.client.patch(
+            reverse("orders-detail", args=[self.order.id]),
+            {"status": Order.StatusChoices.PREPARING},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+

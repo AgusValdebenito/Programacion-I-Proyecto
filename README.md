@@ -63,6 +63,7 @@ Representa las tiendas disponibles y su usuario propietario.
 * owner_id (FK -> users.id)
 * name
 * description
+* image
 * created_at
 
 Restricciones recomendadas:
@@ -79,12 +80,15 @@ Productos asociados a cada tienda.
 * name
 * description
 * price
+* is_available
+* image
 * store_id (FK -> stores.id)
 * created_at
 
 Restricciones recomendadas:
 
 * `price` debe ser mayor o igual a 0
+* `is_available` es un booleano que define si el producto esta activo o pausado
 
 ---
 
@@ -99,6 +103,7 @@ Representa el carrito activo de cada usuario.
 Restricciones recomendadas:
 
 * un usuario debe tener un solo carrito activo
+* regla mono-tienda: todos los items del carrito deben pertenecer a una misma tienda
 
 ---
 
@@ -115,6 +120,7 @@ Restricciones recomendadas:
 
 * `quantity` debe ser mayor a 0
 * no debe repetirse el mismo `product_id` dentro del mismo `cart_id`
+* el producto debe estar disponible (`is_available = True`)
 
 ---
 
@@ -124,17 +130,18 @@ Representa los pedidos confirmados por un usuario.
 
 * id (PK)
 * user_id (FK -> users.id)
+* store_id (FK -> stores.id)
 * total
 * status
 * created_at
 
-Estados posibles sugeridos:
+Estados posibles:
 
-* pending
-* preparing
-* delivering
-* delivered
-* cancelled
+* pending (Pendiente)
+* preparing (En preparacion)
+* delivering (En reparto)
+* delivered (Entregado)
+* cancelled (Cancelado)
 
 ---
 
@@ -152,6 +159,7 @@ Restricciones recomendadas:
 
 * `quantity` debe ser mayor a 0
 * `unit_price` debe ser mayor o igual a 0
+* el producto debe pertenecer a la tienda del pedido
 
 ---
 
@@ -161,10 +169,10 @@ Restricciones recomendadas:
 * Un producto pertenece a una tienda
 * Un usuario puede registrarse como `cliente`, `vendedor` o `admin`
 * Una tienda pertenece a un unico usuario propietario
-* Un usuario tiene un carrito activo
+* Un usuario tiene un carrito activo (asociado a una tienda a la vez)
 * Un carrito tiene muchos items
 * Cada item del carrito corresponde a un producto
-* Un usuario puede tener muchos pedidos
+* Un pedido pertenece a un usuario y a una unica tienda (`store`)
 * Un pedido tiene muchos items
 * Cada item del pedido corresponde a un producto
 
@@ -178,6 +186,8 @@ Restricciones recomendadas:
 * Django
 * Django REST Framework
 * Django REST Framework SimpleJWT (autenticación JWT)
+* Pillow (procesamiento y validación de imágenes)
+* python-decouple (variables de entorno)
 
 ### Frontend
 
@@ -267,6 +277,7 @@ CREATE TABLE stores (
     owner_id INT UNIQUE,
     name VARCHAR(100),
     description TEXT,
+    image VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );
@@ -276,6 +287,8 @@ CREATE TABLE products (
     name VARCHAR(100),
     description TEXT,
     price DECIMAL(10,2),
+    is_available BOOLEAN DEFAULT TRUE,
+    image VARCHAR(100),
     store_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (store_id) REFERENCES stores(id)
@@ -301,10 +314,12 @@ CREATE TABLE cart_items (
 CREATE TABLE orders (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT,
+    store_id INT,
     total DECIMAL(10,2),
     status VARCHAR(20) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (store_id) REFERENCES stores(id)
 );
 
 CREATE TABLE order_items (
@@ -388,15 +403,18 @@ GET    /api/docs/
 ```
 
 Nota:
-`POST /api/carts/` reutiliza el carrito existente del usuario si ya tiene uno creado.
+* `POST /api/carts/` reutiliza el carrito existente del usuario si ya tiene uno creado.
+* Para el detalle exhaustivo de la matriz de permisos y transiciones de estado, consultar [`docs/roles_y_permisos.md`](docs/roles_y_permisos.md).
 
 La API actual aplica las siguientes restricciones:
 * autenticacion via JWT (token Bearer) requerida para la mayoria de endpoints
 * los recursos personales (`users`, `carts`, `cart-items`, `orders`, `order-items`) requieren autenticacion para modificar datos
 * solo el propietario puede modificar sus propios recursos
 * la creacion de productos esta restringida a ADMIN o VENDEDOR
-* la lectura de productos es publica
+* la lectura de productos y tiendas es publica
 * cualquier usuario autenticado puede crear una tienda (se promueve automaticamente a `vendedor`)
+* **Regla Mono-tienda:** tanto el carrito como los pedidos están restringidos a productos de un único comercio.
+* **Flujo de pedidos:** el vendedor gestiona el avance `pending` -> `preparing` -> `delivering` -> `delivered`, mientras que el cliente puede cancelar pedidos en estado `pending`.
 
 Ejemplo de registro:
 

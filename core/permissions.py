@@ -27,6 +27,28 @@ class IsCliente(permissions.BasePermission):
         return request.user.is_authenticated and request.user.role == Usuario.RoleChoices.CLIENTE
 
 
+class IsOrderParticipantOrAdmin(permissions.BasePermission):
+    """
+    Permite acceso al creador del pedido (cliente), al dueño de la tienda receptora (vendedor) o admin.
+    """
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_staff or request.user.role == Usuario.RoleChoices.ADMIN:
+            return True
+
+        # Obj puede ser Order o OrderItem
+        order = obj if isinstance(obj, Order) else obj.order
+
+        # Es el cliente creador
+        if order.user == request.user:
+            return True
+
+        # Es el vendedor dueño de la tienda del pedido
+        if order.store.owner == request.user:
+            return True
+
+        return False
+
+
 class IsResourceOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
@@ -50,3 +72,4 @@ class IsResourceOwnerOrReadOnly(permissions.BasePermission):
             owner = obj.order.user
 
         return owner == request.user
+

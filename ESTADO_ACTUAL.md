@@ -17,7 +17,7 @@ El TP6 (maquetado de la Home con Bootstrap) esta COMPLETO y mergeado a `main` (P
 * Repositorio Git creado y en uso
 * Proyecto Django creado en la carpeta `FoodRush/`
 * Aplicaciones `core` y `users` creadas
-* Dependencias principales instaladas: `Django`, `djangorestframework`, `djangorestframework-simplejwt`, `django-cors-headers`, `drf-spectacular`, `psycopg[binary]`
+* Dependencias principales instaladas: `Django`, `djangorestframework`, `djangorestframework-simplejwt`, `django-cors-headers`, `drf-spectacular`, `psycopg[binary]`, `Pillow`, `python-decouple`
 * Configuracion de `INSTALLED_APPS` realizada
 * Configuracion de CORS agregada
 * Base de datos definida para trabajar con PostgreSQL
@@ -52,22 +52,27 @@ Actualmente existen estos modelos:
 
 ## Modelado definido hasta ahora
 
-Decisiones tomadas en el modelo:
+Decisiones tomadas en el modelo y logica de negocio:
 
 * un usuario puede registrarse como `cliente`, `vendedor` o `admin`
 * `cliente` es el rol por defecto
 * un usuario con rol `vendedor` podra tener una sola tienda
-* la tienda podra publicar productos
+* la tienda podra publicar productos, gestionar su imagen y disponibilidad con `is_available`
 * un usuario tiene un solo carrito activo
-* un carrito no puede repetir el mismo producto
-* un pedido tiene multiples items y guarda `unit_price`
+* un carrito solo puede contener productos de una unica tienda (regla mono-tienda)
+* un carrito no puede repetir el mismo producto (incrementa la cantidad)
+* un pedido pertenece a una unica tienda (`store`) y tiene multiples items con `unit_price`
+* flujo de pedidos controlado por la tienda: `pending` -> `preparing` -> `delivering` -> `delivered` (o `cancelled`)
+* el cliente solo puede cancelar pedidos en estado `pending`
+* especificacion completa documentada en `docs/roles_y_permisos.md`
 
 ## Pendiente de implementacion
 
 Estas partes ya estan pensadas o documentadas, pero todavia no estan completas en codigo:
 
 * filtros y consultas mas especificas en la API
-* historial de compras y flujo real de confirmacion de pedidos
+* flujo de checkout que convierta automaticamente carrito en orden y vacie el carrito
+* sistema de moderacion avanzada / reportes de usuarios y tiendas (rama feature posterior)
 * TP4 completo (matriz de pruebas, stock en productos, validaciones de compra, coleccion Postman, reporte, capturas)
 * TP7: reemplazar los `<a href="#">` placeholders por el router de React (navegacion real)
 * Sugerencia del review (pendiente): sumar un job de frontend al CI (`npm ci`, `npm run lint`, `npm run build`)
@@ -89,7 +94,7 @@ Para dejar el repositorio mas prolijo:
 * TP1: base del proyecto completada y validada por el equipo
 * TP2: implementado en su parte principal
 * TP3: implementado completamente y aprobado por el compañero (PR #3 y PR #5 mergeados en `main`)
-* TP4: pendiente (se va a hacer en otro momento)
+* TP4: en progreso en rama `TP4/refactor/business-logic` (lógica de negocio mono-tienda, roles, disponibilidad `is_available`, imágenes y flujo de pedidos implementados y testeados)
 * TP5: implementado y mergeado a `main` (PR #6)
 * TP6: implementado y mergeado a `main` (PR #8)
 

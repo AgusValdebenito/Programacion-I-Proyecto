@@ -14,6 +14,12 @@ class Store(models.Model):
     )
     name = models.CharField(max_length=100, verbose_name="nombre")
     description = models.TextField(blank=True, null=True, verbose_name="descripcion")
+    image = models.ImageField(
+        upload_to="stores/",
+        blank=True,
+        null=True,
+        verbose_name="imagen de la tienda",
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="fecha de creacion")
 
     class Meta:
@@ -38,6 +44,13 @@ class Product(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(Decimal("0.00"))],
         verbose_name="precio",
+    )
+    is_available = models.BooleanField(default=True, verbose_name="disponible")
+    image = models.ImageField(
+        upload_to="products/",
+        blank=True,
+        null=True,
+        verbose_name="imagen del producto",
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="fecha de creacion")
 
@@ -105,6 +118,14 @@ class Order(models.Model):
         on_delete=models.CASCADE,
         related_name="orders",
         verbose_name="usuario",
+    )
+    store = models.ForeignKey(
+        Store,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="orders",
+        verbose_name="tienda",
     )
     total = models.DecimalField(
         max_digits=10,
