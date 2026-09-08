@@ -94,7 +94,7 @@ Para dejar el repositorio mas prolijo:
 * TP1: base del proyecto completada y validada por el equipo
 * TP2: implementado en su parte principal
 * TP3: implementado completamente y aprobado por el compañero (PR #3 y PR #5 mergeados en `main`)
-* TP4: en progreso en rama `TP4/refactor/business-logic` (lógica de negocio mono-tienda, roles, disponibilidad `is_available`, imágenes y flujo de pedidos implementados y testeados)
+* TP4: completo en rama `TP4/refactor/business-logic` (matriz de pruebas en `docs/matriz_pruebas_tp4.md`, colección Postman en `postman/FoodRush_TP4.postman_collection.json`, lógica mono-tienda, disponibilidad `is_available`, imágenes, flujo de pedidos y tests automatizados)
 * TP5: implementado y mergeado a `main` (PR #6)
 * TP6: implementado y mergeado a `main` (PR #8)
 

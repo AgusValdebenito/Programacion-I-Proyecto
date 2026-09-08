@@ -1,0 +1,645 @@
+﻿{
+	"info": {
+		"_postman_id": "995260f4-4608-4c9e-ac3c-5b4d9904bdbe",
+		"name": "FoodRush - TP4 Validación API & Roles",
+		"description": "Colección de pruebas para el TP4: Roles y Permisos, Reglas de Negocio, Casos de Borde y Flujo Completo de Compra.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "00 - Autenticacion & Tokens",
+			"item": [
+				{
+					"name": "Login como ADMIN",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/token/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"token",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login como VENDEDOR",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"vendedor1\",\n  \"password\": \"vendedor123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/token/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"token",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login como CLIENTE",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"cliente1\",\n  \"password\": \"cliente123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/token/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"token",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "01 - Roles y Permisos (CRUD)",
+			"item": [
+				{
+					"name": "ROL-01: Listar Productos (Público / Anónimo)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ROL-02: [FAIL] Cliente intenta crear Producto (403 Forbidden)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_cliente}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"store\": 1,\n  \"name\": \"Hamburguesa No Autorizada\",\n  \"description\": \"Intento de creacion por cliente\",\n  \"price\": \"1200.00\",\n  \"is_available\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/products/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ROL-03: Vendedor crea Producto para su Tienda (201 Created)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_vendedor}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"store\": 1,\n  \"name\": \"Hamburguesa Completa\",\n  \"description\": \"Carne, queso y papas\",\n  \"price\": \"4500.00\",\n  \"is_available\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/products/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ROL-04: [FAIL] Cliente intenta borrar Producto (403 Forbidden)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_cliente}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/products/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ROL-05: [FAIL] Vendedor intenta borrar Producto ajeno (403 Forbidden)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_vendedor_ajeno}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/products/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ROL-06: Admin borra Producto ajeno (204 No Content)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_admin}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/products/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02 - Logica de Negocio y Casos de Borde",
+			"item": [
+				{
+					"name": "NEG-01: [FAIL] Registro con Email Duplicado (400 Bad Request)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"nuevo_usuario\",\n  \"email\": \"existente@foodrush.com\",\n  \"password\": \"pass123\",\n  \"name\": \"Duplicado\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/register/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "NEG-02: [FAIL] Producto con Precio Negativo (400 Bad Request)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_vendedor}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"store\": 1,\n  \"name\": \"Promo Negativa\",\n  \"price\": \"-500.00\",\n  \"is_available\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/products/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "NEG-03: [FAIL] Agregar Producto No Disponible al Carrito (400 Bad Request)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_cliente}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cart\": 1,\n  \"product\": 2,\n  \"quantity\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cart-items/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart-items",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "NEG-04: [FAIL] Mezclar Tiendas en Carrito - Mono-tienda (400 Bad Request)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_cliente}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cart\": 1,\n  \"product\": 99,\n  \"quantity\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cart-items/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart-items",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "NEG-06: [FAIL] Cliente intenta marcar Pedido como Delivered (403 Forbidden)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_cliente}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"delivered\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "NEG-07: Cliente cancela Pedido en estado Pending (200 OK)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_cliente}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"cancelled\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "03 - Flujos Completos",
+			"item": [
+				{
+					"name": "1. Cliente consulta Catálogo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"products",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Cliente agrega Item a su Carrito",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_cliente}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cart\": 1,\n  \"product\": 1,\n  \"quantity\": 2\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cart-items/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart-items",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Cliente crea Pedido",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_cliente}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"store\": 1,\n  \"total\": \"9000.00\",\n  \"status\": \"pending\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Vendedor pasa Pedido a Preparing",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_vendedor}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"preparing\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Vendedor pasa Pedido a Delivering",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_vendedor}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"delivering\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. Vendedor marca Pedido como Delivered",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_vendedor}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"delivered\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/1/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000/api"
+		},
+		{
+			"key": "token_admin",
+			"value": ""
+		},
+		{
+			"key": "token_vendedor",
+			"value": ""
+		},
+		{
+			"key": "token_cliente",
+			"value": ""
+		},
+		{
+			"key": "token_vendedor_ajeno",
+			"value": ""
+		}
+	]
+}
