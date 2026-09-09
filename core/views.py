@@ -38,6 +38,11 @@ class StoreViewSet(viewsets.ModelViewSet):
 
         serializer.save(owner=self.request.user)
 
+        user = self.request.user
+        if user.role != Usuario.RoleChoices.VENDEDOR:
+            user.role = Usuario.RoleChoices.VENDEDOR
+            user.save(update_fields=["role"])
+
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all().order_by("id")

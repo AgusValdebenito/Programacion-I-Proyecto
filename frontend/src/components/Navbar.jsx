@@ -6,8 +6,8 @@ export default function Navbar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate('/login')
   }
 
@@ -27,28 +27,43 @@ export default function Navbar() {
               <Link className="fr-nav-link" to="/tiendas">
                 Tiendas
               </Link>
-              <Link className="fr-nav-link" to="/perfil">
-                Mi perfil
-              </Link>
+              {user && (
+                <Link className="fr-nav-link" to="/perfil">
+                  Mi perfil
+                </Link>
+              )}
             </nav>
-            {user && (
-              <button type="button" className="fr-icon-btn" aria-label="Notificaciones">
-                <i className="bi bi-bell" />
-              </button>
-            )}
-            {user && (
-              <button type="button" className="fr-icon-btn ms-2" aria-label="Carrito">
-                <i className="bi bi-cart3" />
-              </button>
-            )}
-            {user && (
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-danger ms-2"
-                onClick={handleLogout}
-              >
-                Logout
-              </button>
+            {user ? (
+              <div className="d-flex align-items-center gap-2">
+                <span className="badge bg-light text-dark border d-none d-sm-inline-block">
+                  <i className="bi bi-person-fill me-1 text-primary"></i>
+                  {user.name || user.username || user.email}
+                </span>
+                <button type="button" className="fr-icon-btn" aria-label="Notificaciones">
+                  <i className="bi bi-bell" />
+                </button>
+                <button type="button" className="fr-icon-btn" aria-label="Carrito">
+                  <i className="bi bi-cart3" />
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-danger ms-1"
+                  onClick={handleLogout}
+                  title="Cerrar sesión"
+                >
+                  <i className="bi bi-box-arrow-right me-1 d-none d-sm-inline"></i>
+                  Salir
+                </button>
+              </div>
+            ) : (
+              <div className="d-flex align-items-center gap-2">
+                <Link to="/login" className="btn btn-sm btn-outline-primary">
+                  Iniciar sesión
+                </Link>
+                <Link to="/register" className="btn btn-sm btn-primary">
+                  Registrarse
+                </Link>
+              </div>
             )}
           </div>
         </div>

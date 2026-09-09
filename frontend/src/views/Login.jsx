@@ -6,12 +6,13 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const from = location.state?.from?.pathname || '/'
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
@@ -20,11 +21,14 @@ export default function Login() {
       return
     }
 
-    const success = login(email, password)
-    if (success) {
-      navigate(from)
+    setIsSubmitting(true)
+    const result = await login(email, password)
+    setIsSubmitting(false)
+
+    if (result.success) {
+      navigate(from, { replace: true })
     } else {
-      setError('Credenciales incorrectas')
+      setError(result.error || 'Credenciales incorrectas')
     }
   }
 
@@ -65,8 +69,8 @@ export default function Login() {
               />
             </div>
 
-            <button type="submit" className="btn btn-primary w-100">
-              Ingresar
+            <button type="submit" className="btn btn-primary w-100" disabled={isSubmitting}>
+              {isSubmitting ? 'Iniciando sesión...' : 'Ingresar'}
             </button>
           </form>
 

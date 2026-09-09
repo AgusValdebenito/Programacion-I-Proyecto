@@ -1,7 +1,7 @@
-# frontend/ - Cliente React (TP5 y TP6)
+# frontend/ - Cliente React (TP5, TP6, TP7 y TP8)
 
 Cliente single-page de la app de pedidos (estilo PedidosYa), creado con Vite + React.
-Vive al nivel del backend (mismo repositorio) y consume la API Django via JSON + JWT.
+Vive al nivel del backend (mismo repositorio) y consume la API Django vía JSON + JWT (conectado en TP8).
 
 ## Stack
 
@@ -54,4 +54,14 @@ src/
 
 * Movil (< 768px): header compacto + BottomNav fija con anchors reales a las secciones.
 * md+ : navbar clasica + footer.
-* Enlaces `<a href="#">` aun son placeholders, para reemplazar por el router en el TP7.
+
+## Navegación y Autenticación (TP7 y TP8)
+
+* Rutas implementadas con `react-router-dom`: `/` (Home, protegida), `/login`, `/register`.
+* Rutas protegidas mediante componente `ProtectedRoute`.
+* Autenticación real contra Django REST Framework mediante JWT (`fetch` nativo hacia `VITE_API_URL`):
+  * `POST /api/token/` para inicio de sesión con email.
+  * `POST /api/register/` para registro de usuarios.
+  * `POST /api/token/refresh/` para refresco silencioso automático de token JWT.
+  * `POST /api/logout/` para cierre de sesión con blacklist.
+  * `GET /api/profile/` para saludo personalizado en Hero y badge en Navbar.

@@ -471,9 +471,12 @@ Principales ventajas que llevaron a elegir JWT en este proyecto:
 
 > 📄 El detalle completo del estado del proyecto y cada TP está en [`ESTADO_ACTUAL.md`](ESTADO_ACTUAL.md).
 
-* TP1 a TP3: backend (API Django + JWT) implementado y aprobado
-* TP5: frontend React con Vite (`frontend/`, puerto 3000) mergeado a `main`
+* TP1 a TP3: backend (API Django + JWT) implementado y aprobado (mergeados a `main`)
+* TP4: validación de API, matriz de pruebas, tests y reglas de negocio completado y mergeado a `main` (PR #10)
+* TP5: frontend React con Vite (`frontend/`, puerto 3000) mergeado a `main` (PR #6)
 * TP6: maquetado de la Home con Bootstrap mergeado a `main` (PR #8)
+* TP7: autenticación y rutas con React Router y mock data mergeado a `main` (PR #9)
+* TP8: conexión de frontend React con backend Django REST (JWT, login, registro, logout y perfil) en rama `TP8` (PR abierto)
 
 ---
 
