@@ -32,8 +32,9 @@ export default function Home() {
           setUser((prev) => ({ ...prev, ...data }))
           localStorage.setItem('user', JSON.stringify(data))
         }
-      } catch {
+      } catch (err) {
         // En caso de fallo de red, mantener los datos cacheados
+        console.warn('No se pudo actualizar el perfil desde el backend, usando datos locales:', err)
       }
     }
 

@@ -23,6 +23,11 @@ export default function Register() {
       return
     }
 
+    if (password.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres')
+      return
+    }
+
     setIsSubmitting(true)
     const result = await register(name, email, password, username || undefined)
     setIsSubmitting(false)
@@ -103,8 +108,10 @@ export default function Register() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••"
+                minLength={8}
                 required
               />
+              <div className="form-text">Mínimo 8 caracteres.</div>
             </div>
 
             <button type="submit" className="btn btn-primary w-100" disabled={isSubmitting}>

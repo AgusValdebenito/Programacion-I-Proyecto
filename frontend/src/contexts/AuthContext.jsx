@@ -64,7 +64,8 @@ export function AuthProvider({ children }) {
         return data.access
       }
       return null
-    } catch {
+    } catch (err) {
+      console.warn('Error al renovar el token de acceso:', err)
       logoutLocal()
       return null
     }
@@ -177,8 +178,9 @@ export function AuthProvider({ children }) {
           },
           body: JSON.stringify({ refresh })
         })
-      } catch {
-        // Silenciosamente continuar con el borrado local
+      } catch (err) {
+        // Loguear advertencia y continuar con el borrado local de sesión
+        console.warn('No se pudo comunicar el cierre de sesión al backend:', err)
       }
     }
 
