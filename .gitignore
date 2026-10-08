@@ -7,6 +7,6 @@ umllmkey
 .env
 .env.*
 !.env.example
-
+tps/
 node_modules/
 dist/

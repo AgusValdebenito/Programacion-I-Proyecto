@@ -437,13 +437,23 @@ Ejemplo de login (obtener JWT):
 ```json
 POST /api/token/
 {
-  "username": "juanperez",
+  "email": "juan@email.com",
   "password": "123456"
 }
-// Respuesta:
+```
+
+Respuesta esperada:
+
+```json
 {
   "access": "eyJhbGciOiJIUzI1NiIs...",
-  "refresh": "eyJhbGciOiJIUzI1NiIs..."
+  "refresh": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": 1,
+    "email": "juan@email.com",
+    "name": "Juan Perez",
+    "role": "cliente"
+  }
 }
 ```
 
