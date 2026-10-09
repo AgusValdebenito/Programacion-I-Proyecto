@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, useCallback } from 'react'
+import { authService } from '../services/authService'
 import {
   clearStoredTokens,
   getStoredAccessToken,
@@ -7,8 +8,6 @@ import {
   isTokenExpired,
   setStoredTokens,
 } from '../utils/token'
-
-const API_URL = import.meta.env.VITE_API_URL
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext()
@@ -33,22 +32,13 @@ export function AuthProvider({ children }) {
     }
 
     try {
-      const response = await fetch(`${API_URL}/token/refresh/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh })
-      })
-
-      if (!response.ok) {
-        logoutLocal()
-        return null
+      const newAccess = await authService.refreshAccessToken(refresh)
+      if (newAccess) {
+        setStoredTokens({ access: newAccess })
+        return newAccess
       }
 
-      const data = await response.json()
-      if (data.access) {
-        setStoredTokens({ access: data.access })
-        return data.access
-      }
+      logoutLocal()
       return null
     } catch (err) {
       console.warn('Error al renovar el token de acceso:', err)
@@ -90,19 +80,12 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch(`${API_URL}/token/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        const errorMsg = data.detail || (typeof data === 'string' ? data : (data.non_field_errors?.[0] || 'Credenciales incorrectas'))
-        return { success: false, error: errorMsg }
+      const result = await authService.login(email, password)
+      if (!result.success) {
+        return result
       }
 
+      const { data } = result
       const userData = data.user || { email }
       setStoredTokens({
         access: data.access,
@@ -124,28 +107,10 @@ export function AuthProvider({ children }) {
         name,
         email,
         password,
-        role: 'cliente'
+        role: 'cliente',
       }
 
-      const response = await fetch(`${API_URL}/register/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userPayload)
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        let errorMsg = 'Error al registrar el usuario'
-        if (data.email) errorMsg = Array.isArray(data.email) ? data.email[0] : data.email
-        else if (data.username) errorMsg = Array.isArray(data.username) ? data.username[0] : data.username
-        else if (data.password) errorMsg = Array.isArray(data.password) ? data.password[0] : data.password
-        else if (data.detail) errorMsg = data.detail
-
-        return { success: false, error: errorMsg }
-      }
-
-      return { success: true, data }
+      return await authService.register(userPayload)
     } catch (err) {
       return { success: false, error: err.message || 'Error de conexión con el servidor' }
     }
@@ -157,16 +122,8 @@ export function AuthProvider({ children }) {
 
     if (refresh && token) {
       try {
-        await fetch(`${API_URL}/logout/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ refresh })
-        })
+        await authService.logout(refresh, token)
       } catch (err) {
-        // Loguear advertencia y continuar con el borrado local de sesión
         console.warn('No se pudo comunicar el cierre de sesión al backend:', err)
       }
     }
@@ -186,7 +143,7 @@ export function AuthProvider({ children }) {
         getToken,
         isTokenExpired,
         getValidToken,
-        refreshAccessToken
+        refreshAccessToken,
       }}
     >
       {children}
