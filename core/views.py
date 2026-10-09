@@ -1,5 +1,5 @@
 from django.db import models
-from rest_framework import permissions, status, viewsets
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 
@@ -10,6 +10,7 @@ from .permissions import (
     IsAdminOrVendedor,
     IsOrderParticipantOrAdmin,
     IsResourceOwnerOrReadOnly,
+    is_admin_user,
 )
 from .serializers import (
     CartItemSerializer,
@@ -19,12 +20,7 @@ from .serializers import (
     ProductSerializer,
     StoreSerializer,
 )
-
-
-def is_admin_user(user):
-    return user.is_authenticated and (
-        user.is_staff or getattr(user, "role", None) == Usuario.RoleChoices.ADMIN
-    )
+from .services import CartService, OrderService
 
 
 class StoreViewSet(viewsets.ModelViewSet):
@@ -48,6 +44,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all().order_by("id")
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsResourceOwnerOrReadOnly]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["name", "description"]
 
     def get_permissions(self):
         if self.action in ("create", "update", "partial_update", "destroy"):
@@ -74,7 +72,6 @@ class CartViewSet(viewsets.ModelViewSet):
         return self.queryset.filter(user=self.request.user)
 
     def create(self, request, *args, **kwargs):
-        # Reutilizar el carrito existente del usuario o crearlo si no existe (relacion OneToOne)
         serializer = self.get_serializer(data={})
         serializer.is_valid(raise_exception=True)
         cart, created = Cart.objects.get_or_create(user=request.user)
@@ -101,49 +98,15 @@ class CartItemViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         cart = serializer.validated_data["cart"]
-        if cart.user != self.request.user:
-            raise PermissionDenied("Solo podes agregar items a tu propio carrito.")
-
         product = serializer.validated_data["product"]
         quantity = serializer.validated_data["quantity"]
 
-        # 1. Validar cantidad mínima
-        if quantity < 1:
-            raise ValidationError({"quantity": "La cantidad debe ser mayor o igual a 1."})
-
-        # 2. Validar disponibilidad del producto
-        if not product.is_available:
-            raise ValidationError({"product": "Este producto no se encuentra disponible actualmente."})
-
-        # 3. Validar stock disponible
-        existing_item = CartItem.objects.filter(cart=cart, product=product).first()
-        total_requested = (existing_item.quantity if existing_item else 0) + quantity
-        if product.stock < total_requested:
-            raise ValidationError({
-                "quantity": f"Stock insuficiente para '{product.name}'. Stock disponible: {product.stock}."
-            })
-
-        # 4. Validar regla de mono-tienda en el carrito
-        existing_items = CartItem.objects.filter(cart=cart).select_related("product__store")
-        if existing_items.exists():
-            current_store = existing_items.first().product.store
-            if product.store != current_store:
-                raise ValidationError({
-                    "detail": (
-                        f"No podes agregar productos de '{product.store.name}' porque ya tenes items "
-                        f"de '{current_store.name}' en tu carrito. Vacia el carrito para cambiar de tienda."
-                    )
-                })
-
-        cart_item, created = CartItem.objects.get_or_create(
+        cart_item, created = CartService.add_item_to_cart(
             cart=cart,
             product=product,
-            defaults={"quantity": quantity},
+            quantity=quantity,
+            user=request.user,
         )
-
-        if not created:
-            cart_item.quantity += quantity
-            cart_item.save(update_fields=["quantity"])
 
         response_serializer = self.get_serializer(cart_item)
         response_status = status.HTTP_201_CREATED if created else status.HTTP_200_OK
@@ -161,7 +124,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         if is_admin_user(user):
             return super().get_queryset()
 
-        # Un usuario ve los pedidos que hizo como cliente y los pedidos recibidos en su tienda
         return self.queryset.filter(models.Q(user=user) | models.Q(store__owner=user)).distinct()
 
     def perform_create(self, serializer):
@@ -169,53 +131,18 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         instance = self.get_object()
-        user = self.request.user
         new_status = serializer.validated_data.get("status", instance.status)
 
-        # Si el estado no cambia, permitir la actualización ordinaria
         if new_status == instance.status:
             serializer.save()
             return
 
-        is_admin = is_admin_user(user)
-        is_vendor = instance.store.owner == user
-        is_client = instance.user == user
-
-        if is_admin:
-            serializer.save()
-            return
-
-        if is_client and not is_vendor:
-            # El cliente solo puede cancelar un pedido si todavia esta pendiente
-            if new_status == Order.StatusChoices.CANCELLED:
-                if instance.status != Order.StatusChoices.PENDING:
-                    raise ValidationError({"detail": "Solo podes cancelar pedidos en estado 'Pendiente'."})
-                serializer.save()
-                return
-            else:
-                raise PermissionDenied("Los clientes solo pueden consultar o cancelar sus pedidos pendientes.")
-
-        if is_vendor:
-            # Transiciones válidas del vendedor:
-            # Pending -> Preparing o Cancelled
-            # Preparing -> Delivering o Cancelled
-            # Delivering -> Delivered
-            # Delivered y Cancelled son estados finales y no pueden modificarse
-            allowed_transitions = {
-                Order.StatusChoices.PENDING: [Order.StatusChoices.PREPARING, Order.StatusChoices.CANCELLED],
-                Order.StatusChoices.PREPARING: [Order.StatusChoices.DELIVERING, Order.StatusChoices.CANCELLED],
-                Order.StatusChoices.DELIVERING: [Order.StatusChoices.DELIVERED],
-                Order.StatusChoices.DELIVERED: [],
-                Order.StatusChoices.CANCELLED: [],
-            }
-            if new_status not in allowed_transitions.get(instance.status, []):
-                raise ValidationError({
-                    "detail": f"Transicion de estado no valida de '{instance.status}' a '{new_status}'."
-                })
-            serializer.save()
-            return
-
-        raise PermissionDenied("No tenes permisos para modificar este pedido.")
+        order = OrderService.transition_status(
+            order=instance,
+            new_status=new_status,
+            user=self.request.user,
+        )
+        serializer.instance = order
 
 
 class OrderItemViewSet(viewsets.ModelViewSet):
@@ -236,32 +163,12 @@ class OrderItemViewSet(viewsets.ModelViewSet):
         order = serializer.validated_data["order"]
         product = serializer.validated_data["product"]
         quantity = serializer.validated_data["quantity"]
-        user = self.request.user
 
-        if order.user != user and not is_admin_user(user):
-            raise PermissionDenied("Solo podes agregar items a tus propios pedidos.")
+        unit_price = OrderService.validate_and_prepare_item(
+            order=order,
+            product=product,
+            quantity=quantity,
+            user=self.request.user,
+        )
 
-        # 1. Validar cantidad mínima
-        if quantity < 1:
-            raise ValidationError({"quantity": "La cantidad debe ser mayor o igual a 1."})
-
-        # 2. Validar disponibilidad del producto
-        if not product.is_available:
-            raise ValidationError({"product": "Este producto no se encuentra disponible."})
-
-        # 3. Validar stock disponible
-        if product.stock < quantity:
-            raise ValidationError({
-                "quantity": f"Stock insuficiente para '{product.name}'. Stock disponible: {product.stock}."
-            })
-
-        # 4. Validar mono-tienda (el producto debe pertenecer a la misma tienda del pedido)
-        if product.store != order.store:
-            raise ValidationError({
-                "detail": f"El producto '{product.name}' pertenece a otra tienda y no puede agregarse a este pedido."
-            })
-
-        # 5. Fijar unit_price desde el precio real del producto para evitar manipulación
-        serializer.save(unit_price=product.price)
-
-
+        serializer.save(unit_price=unit_price)

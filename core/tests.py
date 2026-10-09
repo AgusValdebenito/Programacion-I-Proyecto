@@ -41,6 +41,23 @@ class ProductViewSetTests(APITestCase):
         self.assertEqual(response.data["name"], self.product.name)
         self.assertEqual(response.data["store"], self.store.id)
 
+    def test_search_products_by_name_and_description(self):
+        Product.objects.create(
+            store=self.store,
+            name="Ensalada Caesar",
+            description="Lechuga y pollo",
+            price=Decimal("8.00"),
+        )
+        response = self.client.get(reverse("products-list") + "?search=Hamburguesa")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["name"], "Hamburguesa")
+
+        response_desc = self.client.get(reverse("products-list") + "?search=pollo")
+        self.assertEqual(response_desc.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response_desc.data), 1)
+        self.assertEqual(response_desc.data[0]["name"], "Ensalada Caesar")
+
 
 class StoreViewSetTests(APITestCase):
     def setUp(self):
@@ -400,5 +417,23 @@ class OrderItemViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         created_item = OrderItem.objects.get(id=response.data["id"])
         self.assertEqual(created_item.unit_price, self.product_a.price)
+
+    def test_order_item_creation_reduces_product_stock(self):
+        self.client.force_authenticate(user=self.client_user)
+        initial_stock = self.product_a.stock
+
+        response = self.client.post(
+            reverse("order-items-list"),
+            {
+                "order": self.order.id,
+                "product": self.product_a.id,
+                "quantity": 3,
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.product_a.refresh_from_db()
+        self.assertEqual(self.product_a.stock, initial_stock - 3)
+
 
 

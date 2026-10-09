@@ -5,6 +5,13 @@ from users.models import Usuario
 from .models import Cart, CartItem, Order, OrderItem, Product, Store
 
 
+def is_admin_user(user):
+    """Comprueba si un usuario tiene privilegios de administrador (staff o rol admin)."""
+    return user and user.is_authenticated and (
+        user.is_staff or getattr(user, "role", None) == Usuario.RoleChoices.ADMIN
+    )
+
+
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role == Usuario.RoleChoices.ADMIN
