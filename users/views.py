@@ -1,7 +1,7 @@
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 from .models import Usuario
 from .serializers import UsuarioSerializer
@@ -48,11 +48,16 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"], permission_classes=[permissions.IsAuthenticated])
     def logout(self, request):
-        try:
-            refresh_token = request.data["refresh"]
-            token = OutstandingToken.objects.get(token=refresh_token)
-            BlacklistedToken.objects.get_or_create(token=token)
-        except (KeyError, OutstandingToken.DoesNotExist):
-            pass
+        refresh_token = request.data.get("refresh")
+        if not refresh_token:
+            return Response(
+                {"detail": "El campo 'refresh' es obligatorio."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        return Response({"detail": "Sesion cerrada correctamente."}, status=status.HTTP_200_OK)
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"detail": "Sesion cerrada correctamente."}, status=status.HTTP_200_OK)
+        except TokenError as err:
+            return Response({"detail": str(err)}, status=status.HTTP_400_BAD_REQUEST)

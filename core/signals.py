@@ -8,10 +8,13 @@ from .models import Store
 
 @receiver(post_save, sender=Store)
 def sync_store_owner_role_on_create(sender, instance, created, **kwargs):
-    if created and instance.owner.role != Usuario.RoleChoices.VENDEDOR:
+    if created and instance.owner.role == Usuario.RoleChoices.CLIENTE:
         Usuario.objects.filter(pk=instance.owner_id).update(role=Usuario.RoleChoices.VENDEDOR)
 
 
 @receiver(post_delete, sender=Store)
 def sync_store_owner_role_on_delete(sender, instance, **kwargs):
-    Usuario.objects.filter(pk=instance.owner_id).update(role=Usuario.RoleChoices.CLIENTE)
+    user = Usuario.objects.filter(pk=instance.owner_id).first()
+    if user and user.role == Usuario.RoleChoices.VENDEDOR:
+        user.role = Usuario.RoleChoices.CLIENTE
+        user.save(update_fields=["role"])
