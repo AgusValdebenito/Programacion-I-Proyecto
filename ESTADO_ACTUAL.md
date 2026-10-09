@@ -76,6 +76,7 @@ Estas partes ya estan pensadas o documentadas para siguientes sprints:
 * sistema de moderacion avanzada / reportes de usuarios y tiendas (rama feature posterior)
 * TP7: reemplazar los `<a href="#">` placeholders por el router de React (navegacion real)
 * Sugerencia del review (pendiente): sumar un job de frontend al CI (`npm ci`, `npm run lint`, `npm run build`)
+* Propuesta arquitectónica: gestión de disponibilidad gastronómica (`is_available` + desactivación automática) y stock híbrido documentada en `docs/propuesta_disponibilidad_gastronomica.md`
 
 ## Limpieza realizada
 
