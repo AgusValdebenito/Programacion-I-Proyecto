@@ -1,4 +1,12 @@
 import { createContext, useState, useEffect, useCallback } from 'react'
+import {
+  clearStoredTokens,
+  getStoredAccessToken,
+  getStoredRefreshToken,
+  getStoredUser,
+  isTokenExpired,
+  setStoredTokens,
+} from '../utils/token'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -6,36 +14,14 @@ const API_URL = import.meta.env.VITE_API_URL
 export const AuthContext = createContext()
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem('user')
-      return savedUser ? JSON.parse(savedUser) : null
-    } catch {
-      return null
-    }
-  })
+  const [user, setUser] = useState(() => getStoredUser())
   const [loading, setLoading] = useState(true)
 
-  const getToken = () => localStorage.getItem('access_token')
-  const getRefreshToken = () => localStorage.getItem('refresh_token')
-
-  const isTokenExpired = (token) => {
-    if (!token) return true
-    try {
-      const payloadBase64 = token.split('.')[1]
-      const decodedJson = atob(payloadBase64)
-      const decoded = JSON.parse(decodedJson)
-      const now = Math.floor(Date.now() / 1000)
-      return decoded.exp < now
-    } catch {
-      return true
-    }
-  }
+  const getToken = useCallback(() => getStoredAccessToken(), [])
+  const getRefreshToken = useCallback(() => getStoredRefreshToken(), [])
 
   const logoutLocal = useCallback(() => {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
-    localStorage.removeItem('user')
+    clearStoredTokens()
     setUser(null)
   }, [])
 
@@ -60,7 +46,7 @@ export function AuthProvider({ children }) {
 
       const data = await response.json()
       if (data.access) {
-        localStorage.setItem('access_token', data.access)
+        setStoredTokens({ access: data.access })
         return data.access
       }
       return null
@@ -69,7 +55,7 @@ export function AuthProvider({ children }) {
       logoutLocal()
       return null
     }
-  }, [logoutLocal])
+  }, [logoutLocal, getRefreshToken])
 
   const getValidToken = useCallback(async () => {
     const token = getToken()
@@ -80,7 +66,7 @@ export function AuthProvider({ children }) {
     }
 
     return await refreshAccessToken()
-  }, [refreshAccessToken])
+  }, [refreshAccessToken, getToken])
 
   // Validar estado de sesión inicial al cargar la app
   useEffect(() => {
@@ -100,7 +86,7 @@ export function AuthProvider({ children }) {
     }
 
     initAuth()
-  }, [refreshAccessToken, logoutLocal])
+  }, [refreshAccessToken, logoutLocal, getToken])
 
   const login = async (email, password) => {
     try {
@@ -117,11 +103,12 @@ export function AuthProvider({ children }) {
         return { success: false, error: errorMsg }
       }
 
-      localStorage.setItem('access_token', data.access)
-      localStorage.setItem('refresh_token', data.refresh)
-
       const userData = data.user || { email }
-      localStorage.setItem('user', JSON.stringify(userData))
+      setStoredTokens({
+        access: data.access,
+        refresh: data.refresh,
+        user: userData,
+      })
       setUser(userData)
 
       return { success: true }
