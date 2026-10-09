@@ -1,41 +1,26 @@
 import { createContext, useState, useEffect, useCallback } from 'react'
-
-const API_URL = import.meta.env.VITE_API_URL
+import { authService } from '../services/authService'
+import {
+  clearStoredTokens,
+  getStoredAccessToken,
+  getStoredRefreshToken,
+  getStoredUser,
+  isTokenExpired,
+  setStoredTokens,
+} from '../utils/token'
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext()
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem('user')
-      return savedUser ? JSON.parse(savedUser) : null
-    } catch {
-      return null
-    }
-  })
+  const [user, setUser] = useState(() => getStoredUser())
   const [loading, setLoading] = useState(true)
 
-  const getToken = () => localStorage.getItem('access_token')
-  const getRefreshToken = () => localStorage.getItem('refresh_token')
-
-  const isTokenExpired = (token) => {
-    if (!token) return true
-    try {
-      const payloadBase64 = token.split('.')[1]
-      const decodedJson = atob(payloadBase64)
-      const decoded = JSON.parse(decodedJson)
-      const now = Math.floor(Date.now() / 1000)
-      return decoded.exp < now
-    } catch {
-      return true
-    }
-  }
+  const getToken = useCallback(() => getStoredAccessToken(), [])
+  const getRefreshToken = useCallback(() => getStoredRefreshToken(), [])
 
   const logoutLocal = useCallback(() => {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
-    localStorage.removeItem('user')
+    clearStoredTokens()
     setUser(null)
   }, [])
 
@@ -47,29 +32,20 @@ export function AuthProvider({ children }) {
     }
 
     try {
-      const response = await fetch(`${API_URL}/token/refresh/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh })
-      })
-
-      if (!response.ok) {
-        logoutLocal()
-        return null
+      const newAccess = await authService.refreshAccessToken(refresh)
+      if (newAccess) {
+        setStoredTokens({ access: newAccess })
+        return newAccess
       }
 
-      const data = await response.json()
-      if (data.access) {
-        localStorage.setItem('access_token', data.access)
-        return data.access
-      }
+      logoutLocal()
       return null
     } catch (err) {
       console.warn('Error al renovar el token de acceso:', err)
       logoutLocal()
       return null
     }
-  }, [logoutLocal])
+  }, [logoutLocal, getRefreshToken])
 
   const getValidToken = useCallback(async () => {
     const token = getToken()
@@ -80,7 +56,7 @@ export function AuthProvider({ children }) {
     }
 
     return await refreshAccessToken()
-  }, [refreshAccessToken])
+  }, [refreshAccessToken, getToken])
 
   // Validar estado de sesión inicial al cargar la app
   useEffect(() => {
@@ -100,28 +76,22 @@ export function AuthProvider({ children }) {
     }
 
     initAuth()
-  }, [refreshAccessToken, logoutLocal])
+  }, [refreshAccessToken, logoutLocal, getToken])
 
   const login = async (email, password) => {
     try {
-      const response = await fetch(`${API_URL}/token/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        const errorMsg = data.detail || (typeof data === 'string' ? data : (data.non_field_errors?.[0] || 'Credenciales incorrectas'))
-        return { success: false, error: errorMsg }
+      const result = await authService.login(email, password)
+      if (!result.success) {
+        return result
       }
 
-      localStorage.setItem('access_token', data.access)
-      localStorage.setItem('refresh_token', data.refresh)
-
+      const { data } = result
       const userData = data.user || { email }
-      localStorage.setItem('user', JSON.stringify(userData))
+      setStoredTokens({
+        access: data.access,
+        refresh: data.refresh,
+        user: userData,
+      })
       setUser(userData)
 
       return { success: true }
@@ -137,28 +107,10 @@ export function AuthProvider({ children }) {
         name,
         email,
         password,
-        role: 'cliente'
+        role: 'cliente',
       }
 
-      const response = await fetch(`${API_URL}/register/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userPayload)
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        let errorMsg = 'Error al registrar el usuario'
-        if (data.email) errorMsg = Array.isArray(data.email) ? data.email[0] : data.email
-        else if (data.username) errorMsg = Array.isArray(data.username) ? data.username[0] : data.username
-        else if (data.password) errorMsg = Array.isArray(data.password) ? data.password[0] : data.password
-        else if (data.detail) errorMsg = data.detail
-
-        return { success: false, error: errorMsg }
-      }
-
-      return { success: true, data }
+      return await authService.register(userPayload)
     } catch (err) {
       return { success: false, error: err.message || 'Error de conexión con el servidor' }
     }
@@ -170,16 +122,8 @@ export function AuthProvider({ children }) {
 
     if (refresh && token) {
       try {
-        await fetch(`${API_URL}/logout/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ refresh })
-        })
+        await authService.logout(refresh, token)
       } catch (err) {
-        // Loguear advertencia y continuar con el borrado local de sesión
         console.warn('No se pudo comunicar el cierre de sesión al backend:', err)
       }
     }
@@ -199,7 +143,7 @@ export function AuthProvider({ children }) {
         getToken,
         isTokenExpired,
         getValidToken,
-        refreshAccessToken
+        refreshAccessToken,
       }}
     >
       {children}

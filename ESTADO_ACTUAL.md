@@ -76,6 +76,7 @@ Estas partes ya estan pensadas o documentadas para siguientes sprints:
 * sistema de moderacion avanzada / reportes de usuarios y tiendas (rama feature posterior)
 * TP7: reemplazar los `<a href="#">` placeholders por el router de React (navegacion real)
 * Sugerencia del review (pendiente): sumar un job de frontend al CI (`npm ci`, `npm run lint`, `npm run build`)
+* Propuesta arquitectónica: gestión de disponibilidad gastronómica (`is_available` + desactivación automática) y stock híbrido documentada en `docs/propuesta_disponibilidad_gastronomica.md`
 
 ## Limpieza realizada
 
@@ -91,14 +92,19 @@ Para dejar el repositorio mas prolijo:
 
 ## Estado del TP
 
-* TP1: base del proyecto completada y validada por el equipo
-* TP2: implementado en su parte principal
-* TP3: implementado completamente y aprobado por el compañero (PR #3 y PR #5 mergeados en `main`)
-* TP4: completo y mergeado a `main` (PR #10) (matriz de pruebas en `docs/matriz_pruebas_tp4.md`, colección Postman en `postman/FoodRush_TP4.postman_collection.json`, lógica mono-tienda, disponibilidad `is_available`, imágenes, flujo de pedidos y tests automatizados)
-* TP5: implementado y mergeado a `main` (PR #6)
-* TP6: implementado y mergeado a `main` (PR #8)
-* TP7: autenticación y rutas con React Router y mock data mergeado a `main` (PR #9)
-* TP8: implementado completamente en la rama `TP8` (autenticación real con JWT, `AuthContext`, login, registro con validación, logout con blacklist, guardias `ProtectedRoute`, obtención de perfil autenticado en `Home` y `Navbar`, refresco automático y tests 100% pasando)
+* TP1: base del proyecto completada y validada por el equipo (saneado en rama refactor con `test_setup.py` y decouple)
+* TP2: implementado en su parte principal (serializers explícitos y `test_models.py` en rama refactor)
+* TP3: implementado completamente y aprobado por el compañero (PR #3 y PR #5 mergeados en `main`, 16 tests automatizados en `users/tests.py`, signals protegidas contra degradación de admin)
+* TP4: completo y mergeado a `main` (PR #10) (Service Layer `CartService` y `OrderService`, búsqueda en productos, descuento de stock y tests de borde)
+* TP5: implementado y mergeado a `main` (PR #6) (Infraestructura Vitest + Testing Library agregada al frontend)
+* TP6: implementado y mergeado a `main` (PR #8) (Suites de tests unitarios de componentes UI: CategoryCard, StoreLogo, Hero, BottomNav)
+* TP7: autenticación y rutas con React Router y mock data mergeado a `main` (PR #9) (Módulo puro `token.js` con tests unitarios y ProtectedRoute testeado)
+* TP8: implementado completamente y desacoplado (capa `authService.js`, `Home.jsx` refactorizado, 38 tests frontend y 49 tests backend pasando al 100%)
+
+### Rama de Refactorización Integral: `refactor/clean-code-tdd`
+* **Backend:** 49 tests automatizados pasando en verde (`manage.py test`). Thin controllers (Service Layer desacoplado), permisos centralizados, señales blindadas y configuración 12-factor limpia.
+* **Frontend:** 38 tests unitarios pasando en verde (`npm test` con Vitest). 0 errores de ESLint (`npm run lint`), build de producción optimizado (`npm run build`). Capas desacopladas `token.js` y `authService.js`.
+* **Documentación:** Propuesta arquitectónica de disponibilidad gastronómica documentada en `docs/propuesta_disponibilidad_gastronomica.md` y consignas oficiales en `tps/`.
 
 Puntos cubiertos del TP2:
 

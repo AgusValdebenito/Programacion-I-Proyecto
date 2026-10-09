@@ -5,8 +5,8 @@ import SectionHeader from '../components/SectionHeader.jsx'
 import StoreLogo from '../components/StoreLogo.jsx'
 import { categories, stores } from '../data/homeData.js'
 import { useAuth } from '../hooks/useAuth'
-
-const API_URL = import.meta.env.VITE_API_URL
+import { authService } from '../services/authService'
+import { setStoredTokens } from '../utils/token'
 
 export default function Home() {
   const { user, setUser, getValidToken } = useAuth()
@@ -20,17 +20,11 @@ export default function Home() {
       if (!token) return
 
       try {
-        const response = await fetch(`${API_URL}/profile/`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
-
-        if (response.ok && isMounted) {
-          const data = await response.json()
+        const data = await authService.getProfile(token)
+        if (data && isMounted) {
           setProfile(data)
           setUser((prev) => ({ ...prev, ...data }))
-          localStorage.setItem('user', JSON.stringify(data))
+          setStoredTokens({ user: data })
         }
       } catch (err) {
         // En caso de fallo de red, mantener los datos cacheados
