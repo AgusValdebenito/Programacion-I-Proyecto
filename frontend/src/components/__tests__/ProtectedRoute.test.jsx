@@ -88,4 +88,59 @@ describe('ProtectedRoute Component (TP7)', () => {
     expect(screen.getByText('Contenido Protegido')).toBeInTheDocument()
     expect(screen.queryByText('Pantalla de Login')).not.toBeInTheDocument()
   })
+
+  it('renders children when user role matches one of the allowedRoles', () => {
+    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+      user: { id: 2, name: 'Admin User', role: 'admin' },
+      loading: false,
+      getToken: () => 'valid-admin-token',
+      isTokenExpired: () => false,
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/admin-panel']}>
+        <Routes>
+          <Route path="/" element={<div>Inicio</div>} />
+          <Route
+            path="/admin-panel"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'vendedor']}>
+                <div>Panel Administrativo</div>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText('Panel Administrativo')).toBeInTheDocument()
+  })
+
+  it('redirects to / when user does not have an allowed role', () => {
+    vi.spyOn(useAuthModule, 'useAuth').mockReturnValue({
+      user: { id: 3, name: 'Cliente Normal', role: 'cliente' },
+      loading: false,
+      getToken: () => 'valid-client-token',
+      isTokenExpired: () => false,
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/admin-panel']}>
+        <Routes>
+          <Route path="/" element={<div>Inicio</div>} />
+          <Route
+            path="/admin-panel"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'vendedor']}>
+                <div>Panel Administrativo</div>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText('Inicio')).toBeInTheDocument()
+    expect(screen.queryByText('Panel Administrativo')).not.toBeInTheDocument()
+  })
 })

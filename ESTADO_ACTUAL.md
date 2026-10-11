@@ -67,16 +67,20 @@ Decisiones tomadas en el modelo y logica de negocio:
 * el cliente solo puede cancelar pedidos en estado `pending`
 * especificacion completa documentada en `docs/roles_y_permisos.md`
 
-## Pendiente de implementacion
+## Pendiente de implementación (Backlog y Roadmap)
 
-Estas partes ya estan pensadas o documentadas para siguientes sprints:
+Todas las tareas pendientes y futuras funcionalidades se encuentran organizadas y registradas como **GitHub Issues (#13 al #26)** agrupadas en 5 Milestones temáticos:
 
-* filtros y consultas mas especificas en la API
-* flujo de checkout que convierta automaticamente carrito en orden y vacie el carrito
-* sistema de moderacion avanzada / reportes de usuarios y tiendas (rama feature posterior)
-* TP7: reemplazar los `<a href="#">` placeholders por el router de React (navegacion real)
-* Sugerencia del review (pendiente): sumar un job de frontend al CI (`npm ci`, `npm run lint`, `npm run build`)
-* Propuesta arquitectónica: gestión de disponibilidad gastronómica (`is_available` + desactivación automática) y stock híbrido documentada en `docs/propuesta_disponibilidad_gastronomica.md`
+* **M1: Catálogo Real y Carrito en Frontend:** Issues [#13](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/13), [#14](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/14) y [#15](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/15).
+* **M2: Checkout Transaccional y Gestión de Pedidos:** Issues [#16](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/16), [#17](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/17) y [#18](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/18).
+* **M3: Panel de Vendedor y Gestión de Tienda:** Issues [#19](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/19), [#20](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/20) y [#21](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/21).
+* **M4: Reglas Gastronómicas y Stock Híbrido:** Issues [#22](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/22) y [#23](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/23) (especificado en `docs/propuesta_disponibilidad_gastronomica.md`).
+* **M5: Calidad, Moderación y DevOps:** Issues [#24](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/24), [#25](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/25) y [#26](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/26).
+
+Asimismo, los trabajos prácticos y refactorizaciones ya entregadas fueron formalizados como **Issues Históricas Cerradas ([#27 al #36](https://github.com/AgusValdebenito/Programacion-I-Proyecto/milestone/6?closed=1))** vinculadas a sus respectivos PRs (#1 al #12).
+
+> 📌 Para consultar el desglose técnico detallado con checklists, ver [`docs/plan_issues_github.md`](docs/plan_issues_github.md).
+
 
 ## Limpieza realizada
 
