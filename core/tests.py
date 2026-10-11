@@ -215,6 +215,26 @@ class CartItemViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("detail", response.data)
 
+    def test_get_active_cart_returns_items_and_product_details(self):
+        CartItem.objects.create(cart=self.cart, product=self.product, quantity=2)
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.get(reverse("carts-active"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["items"]), 1)
+        item = response.data["items"][0]
+        self.assertEqual(item["product"], self.product.id)
+        self.assertEqual(item["quantity"], 2)
+        self.assertEqual(item["product_details"]["name"], "Pizza")
+
+    def test_clear_cart_action_removes_all_cart_items(self):
+        CartItem.objects.create(cart=self.cart, product=self.product, quantity=3)
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.delete(reverse("carts-clear"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(CartItem.objects.filter(cart=self.cart).count(), 0)
+
 
 class OrderViewSetTests(APITestCase):
     def setUp(self):

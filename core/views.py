@@ -1,5 +1,6 @@
 from django.db import models
 from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 
@@ -80,6 +81,20 @@ class CartViewSet(viewsets.ModelViewSet):
         response_status = status.HTTP_201_CREATED if created else status.HTTP_200_OK
         headers = self.get_success_headers(response_serializer.data)
         return Response(response_serializer.data, status=response_status, headers=headers)
+
+    @action(detail=False, methods=["get"], url_path="active", url_name="active")
+    def active_cart(self, request):
+        """Retorna el carrito activo del usuario con sus items y detalles de producto."""
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+        serializer = self.get_serializer(cart)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["delete"], url_path="clear", url_name="clear")
+    def clear_cart(self, request):
+        """Vacia todos los items del carrito activo del usuario."""
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+        cart.items.all().delete()
+        return Response({"detail": "Carrito vaciado exitosamente."}, status=status.HTTP_200_OK)
 
 
 class CartItemViewSet(viewsets.ModelViewSet):

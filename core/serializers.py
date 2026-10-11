@@ -34,13 +34,6 @@ class ProductSerializer(serializers.ModelSerializer):
         read_only_fields = ["created_at"]
 
 
-class CartSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cart
-        fields = ["id", "user", "created_at"]
-        read_only_fields = ["user", "created_at"]
-
-
 class CartItemSerializer(serializers.ModelSerializer):
     """Serializador para items de carrito.
 
@@ -50,10 +43,21 @@ class CartItemSerializer(serializers.ModelSerializer):
     agregar el mismo producto al carrito.
     """
 
+    product_details = ProductSerializer(source="product", read_only=True)
+
     class Meta:
         model = CartItem
-        fields = ["id", "cart", "product", "quantity"]
+        fields = ["id", "cart", "product", "quantity", "product_details"]
         validators = []
+
+
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Cart
+        fields = ["id", "user", "items", "created_at"]
+        read_only_fields = ["user", "created_at"]
 
 
 class OrderSerializer(serializers.ModelSerializer):
