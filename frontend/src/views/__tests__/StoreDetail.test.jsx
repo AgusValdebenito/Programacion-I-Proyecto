@@ -1,9 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import StoreDetail from '../StoreDetail'
 import { storeService } from '../../services/storeService'
 import { productService } from '../../services/productService'
+
+const mockAddToCart = vi.fn()
+const mockClearCart = vi.fn()
+
+vi.mock('../../hooks/useCart', () => ({
+  useCart: () => ({
+    addToCart: mockAddToCart,
+    clearCart: mockClearCart,
+  }),
+}))
 
 vi.mock('../../services/storeService', () => ({
   storeService: {
@@ -118,6 +128,66 @@ describe('StoreDetail View Component (TP9 TDD)', () => {
     await waitFor(() => {
       expect(screen.getByText('Tienda no encontrada')).toBeInTheDocument()
       expect(screen.getByRole('link', { name: /volver al inicio/i })).toBeInTheDocument()
+    })
+  })
+
+  it('adds product to cart and displays success message toast', async () => {
+    storeService.getStoreById.mockResolvedValueOnce({ success: true, data: mockStore })
+    productService.getProducts.mockResolvedValueOnce({ success: true, data: mockProducts })
+    mockAddToCart.mockResolvedValueOnce({ success: true })
+
+    render(
+      <MemoryRouter initialEntries={['/tiendas/5']}>
+        <Routes>
+          <Route path="/tiendas/:id" element={<StoreDetail />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Crazy Burger Simple')).toBeInTheDocument()
+    })
+
+    const addButtons = screen.getAllByRole('button', { name: /agregar/i })
+    await act(async () => {
+      fireEvent.click(addButtons[0])
+    })
+
+    expect(mockAddToCart).toHaveBeenCalledWith(mockProducts[0])
+    await waitFor(() => {
+      expect(screen.getByText(/se agregó "Crazy Burger Simple" al carrito/i)).toBeInTheDocument()
+    })
+  })
+
+  it('displays mono-store conflict modal when attempting to add product from a different store', async () => {
+    storeService.getStoreById.mockResolvedValueOnce({ success: true, data: mockStore })
+    productService.getProducts.mockResolvedValueOnce({ success: true, data: mockProducts })
+    mockAddToCart.mockResolvedValueOnce({
+      success: false,
+      monoStoreConflict: true,
+      currentStoreId: 9,
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/tiendas/5']}>
+        <Routes>
+          <Route path="/tiendas/:id" element={<StoreDetail />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Crazy Burger Simple')).toBeInTheDocument()
+    })
+
+    const addButtons = screen.getAllByRole('button', { name: /agregar/i })
+    await act(async () => {
+      fireEvent.click(addButtons[0])
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText(/cambiar de comercio/i)).toBeInTheDocument()
+      expect(screen.getByText(/tu carrito ya contiene productos de otra tienda/i)).toBeInTheDocument()
     })
   })
 })

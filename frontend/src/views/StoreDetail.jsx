@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { storeService } from '../services/storeService'
 import { productService } from '../services/productService'
+import { useCart } from '../hooks/useCart'
 import ProductCard from '../components/ProductCard'
 
 /**
@@ -18,11 +19,13 @@ function getInitials(name) {
 
 export default function StoreDetail() {
   const { id } = useParams()
+  const { addToCart, clearCart } = useCart()
   const [store, setStore] = useState(null)
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [addedItemMessage, setAddedItemMessage] = useState(null)
+  const [conflictProduct, setConflictProduct] = useState(null)
 
   useEffect(() => {
     let isMounted = true
@@ -70,12 +73,34 @@ export default function StoreDetail() {
     }
   }, [id])
 
-  const handleAddToCart = (product) => {
-    // Feedback visual inmediato (se conectará a CartContext en la Issue #15)
-    setAddedItemMessage(`Se agregó "${product.name}" al carrito`)
-    setTimeout(() => {
-      setAddedItemMessage(null)
-    }, 3000)
+  const handleAddToCart = async (product) => {
+    const res = await addToCart(product)
+    if (res.monoStoreConflict) {
+      setConflictProduct(product)
+      return
+    }
+
+    if (res.success) {
+      setAddedItemMessage(`Se agregó "${product.name}" al carrito`)
+      setTimeout(() => {
+        setAddedItemMessage(null)
+      }, 3000)
+    } else if (res.error) {
+      setError(res.error)
+      setTimeout(() => setError(null), 4000)
+    }
+  }
+
+  const handleResolveConflictAndAdd = async () => {
+    if (!conflictProduct) return
+    const prodToAdd = conflictProduct
+    setConflictProduct(null)
+    await clearCart()
+    const res = await addToCart(prodToAdd)
+    if (res.success) {
+      setAddedItemMessage(`Se vació el carrito anterior y se agregó "${prodToAdd.name}"`)
+      setTimeout(() => setAddedItemMessage(null), 3000)
+    }
   }
 
   if (loading) {
@@ -122,6 +147,56 @@ export default function StoreDetail() {
         >
           <i className="bi bi-check-circle-fill me-2" />
           {addedItemMessage}
+        </div>
+      )}
+
+      {/* Modal de Advertencia Regla Mono-tienda */}
+      {conflictProduct && (
+        <div
+          className="modal fade show d-block"
+          tabIndex="-1"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow-lg rounded-4 p-2">
+              <div className="modal-header border-0 pb-0">
+                <h5 className="modal-title fw-bold text-dark">
+                  <i className="bi bi-exclamation-triangle-fill text-warning me-2" />
+                  Cambiar de comercio
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setConflictProduct(null)}
+                  aria-label="Cerrar modal"
+                />
+              </div>
+              <div className="modal-body py-3">
+                <p className="text-secondary mb-0">
+                  Tu carrito ya contiene productos de otra tienda. En FoodRush cada pedido es exclusivo de un único comercio.
+                  ¿Deseás vaciar el carrito actual para pedir en <strong>{store.name}</strong>?
+                </p>
+              </div>
+              <div className="modal-footer border-0 pt-0">
+                <button
+                  type="button"
+                  className="btn btn-light rounded-pill px-3"
+                  onClick={() => setConflictProduct(null)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary rounded-pill px-4"
+                  onClick={handleResolveConflictAndAdd}
+                >
+                  Vaciar y agregar este plato
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

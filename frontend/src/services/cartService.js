@@ -119,4 +119,52 @@ export const cartService = {
       return { success: false, error: 'Error de conexión al eliminar ítem' }
     }
   },
+
+  /**
+   * Obtiene el carrito activo del usuario con sus ítems anidados y datos de producto.
+   *
+   * @param {string} token
+   * @returns {Promise<{ success: boolean, data?: any, error?: string }>}
+   */
+  async getActiveCart(token) {
+    try {
+      const response = await fetch(`${API_URL}/carts/active/`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        return { success: false, error: data.detail || 'Error al obtener el carrito activo' }
+      }
+      return { success: true, data }
+    } catch {
+      return { success: false, error: 'Error de conexión al obtener el carrito activo' }
+    }
+  },
+
+  /**
+   * Vacía todos los ítems del carrito activo.
+   *
+   * @param {string} token
+   * @returns {Promise<{ success: boolean, error?: string }>}
+   */
+  async clearCart(token) {
+    try {
+      const response = await fetch(`${API_URL}/carts/clear/`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        return { success: false, error: data.detail || 'Error al vaciar el carrito' }
+      }
+      return { success: true }
+    } catch {
+      return { success: false, error: 'Error de conexión al vaciar el carrito' }
+    }
+  },
 }

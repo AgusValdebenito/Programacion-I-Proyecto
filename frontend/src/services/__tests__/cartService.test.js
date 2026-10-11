@@ -120,4 +120,46 @@ describe('cartService (TP9 Service Layer & TDD)', () => {
     expect(result.success).toBe(false)
     expect(result.error).toBe('No se pueden mezclar productos de distintas tiendas')
   })
+
+  it('getActiveCart fetches /carts/active/ with token', async () => {
+    const mockCart = { id: 10, items: [] }
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockCart,
+    })
+
+    const result = await cartService.getActiveCart('mock-token')
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/carts/active/'),
+      expect.objectContaining({
+        method: 'GET',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer mock-token',
+        }),
+      })
+    )
+    expect(result.success).toBe(true)
+    expect(result.data).toEqual(mockCart)
+  })
+
+  it('clearCart sends DELETE to /carts/clear/', async () => {
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ detail: 'Carrito vaciado exitosamente.' }),
+    })
+
+    const result = await cartService.clearCart('mock-token')
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/carts/clear/'),
+      expect.objectContaining({
+        method: 'DELETE',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer mock-token',
+        }),
+      })
+    )
+    expect(result.success).toBe(true)
+  })
 })

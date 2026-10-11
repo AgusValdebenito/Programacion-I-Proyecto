@@ -1,9 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useCart } from '../hooks/useCart'
 import Logo from './Logo'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
+  const { itemCount } = useCart()
   const navigate = useNavigate()
 
   const handleLogout = async () => {
@@ -42,9 +44,22 @@ export default function Navbar() {
                 <button type="button" className="fr-icon-btn" aria-label="Notificaciones">
                   <i className="bi bi-bell" />
                 </button>
-                <button type="button" className="fr-icon-btn" aria-label="Carrito">
+                <Link
+                  to="/carrito"
+                  className="fr-icon-btn position-relative"
+                  aria-label="Carrito"
+                >
                   <i className="bi bi-cart3" />
-                </button>
+                  {itemCount > 0 && (
+                    <span
+                      className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                      style={{ fontSize: '0.65rem' }}
+                    >
+                      {itemCount}
+                      <span className="visually-hidden">productos en el carrito</span>
+                    </span>
+                  )}
+                </Link>
                 <button
                   type="button"
                   className="btn btn-sm btn-outline-danger ms-1"
