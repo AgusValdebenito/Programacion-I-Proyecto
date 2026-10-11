@@ -5,6 +5,7 @@ import BottomNav from './components/BottomNav.jsx'
 import Home from './views/Home.jsx'
 import Login from './views/Login.jsx'
 import Register from './views/Register.jsx'
+import StoreDetail from './views/StoreDetail.jsx'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/tiendas/:id" element={<ProtectedRoute><StoreDetail /></ProtectedRoute>} />
         </Routes>
       </main>
       <Footer />
