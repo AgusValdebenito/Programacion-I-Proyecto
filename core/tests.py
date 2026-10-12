@@ -206,6 +206,16 @@ class CartItemViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("product", response.data)
 
+    def test_create_cart_item_fails_when_exceeding_max_quantity(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            reverse("cart-items-list"),
+            {"cart": self.cart.id, "product": self.product.id, "quantity": 11},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("quantity", response.data)
+
     def test_create_cart_item_fails_when_mixing_different_stores(self):
         user_model = get_user_model()
         other_owner = user_model.objects.create_user(

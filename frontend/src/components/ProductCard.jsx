@@ -72,12 +72,12 @@ export default function ProductCard({ product, onAddToCart }) {
           {product.description || 'Delicioso plato preparado con ingredientes frescos.'}
         </p>
 
-        <div className="d-flex align-items-center justify-content-between pt-2 border-top mt-auto">
-          <span className="fw-bold fs-5 text-dark">{formattedPrice}</span>
+        <div className="d-flex align-items-center justify-content-between pt-2 border-top mt-auto gap-2">
+          <span className="fw-bold fs-5 text-dark text-nowrap">{formattedPrice}</span>
 
           <button
             type="button"
-            className={`btn btn-sm ${isActionDisabled ? 'btn-secondary disabled' : 'btn-primary'} px-3 rounded-pill`}
+            className={`btn btn-sm ${isActionDisabled ? 'btn-secondary disabled' : 'btn-primary'} px-3 rounded-pill text-nowrap flex-shrink-0`}
             disabled={isActionDisabled}
             onClick={handleAdd}
             aria-label={

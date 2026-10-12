@@ -117,11 +117,23 @@ export function CartProvider({ children }) {
   }, [items])
 
   /**
-   * Agrega un producto al carrito respetando la regla mono-tienda.
+   * Agrega un producto al carrito respetando la regla mono-tienda y límite de unidades.
    */
   const addToCart = async (product, quantity = 1) => {
     if (!user) {
       return { success: false, requireAuth: true, error: 'Debes iniciar sesión para comprar' }
+    }
+
+    // Validación de límite de unidades por ítem (máx. 10)
+    const existingItem = items.find(
+      (i) => (i.product_details?.id || i.product) === product.id
+    )
+    const currentQty = existingItem ? Number(existingItem.quantity) || 0 : 0
+    if (currentQty + quantity > 10) {
+      return {
+        success: false,
+        error: 'El límite máximo por producto es de 10 unidades.',
+      }
     }
 
     // Validación de regla mono-tienda en frontend
@@ -163,6 +175,13 @@ export function CartProvider({ children }) {
 
     if (quantity <= 0) {
       return await removeItem(itemId)
+    }
+
+    if (quantity > 10) {
+      return {
+        success: false,
+        error: 'El límite máximo por producto es de 10 unidades.',
+      }
     }
 
     const res = await cartService.updateItemQuantity(itemId, quantity, token)

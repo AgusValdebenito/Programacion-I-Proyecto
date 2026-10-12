@@ -150,6 +150,19 @@ class CartItemViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(response_serializer.data)
         return Response(response_serializer.data, status=response_status, headers=headers)
 
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        new_quantity = serializer.validated_data.get("quantity", instance.quantity)
+        if new_quantity > CartService.MAX_QUANTITY_PER_ITEM:
+            raise ValidationError({
+                "quantity": f"El límite máximo por producto es de {CartService.MAX_QUANTITY_PER_ITEM} unidades."
+            })
+        if instance.product.stock < new_quantity:
+            raise ValidationError({
+                "quantity": f"Stock insuficiente para '{instance.product.name}'. Stock disponible: {instance.product.stock}."
+            })
+        serializer.save()
+
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all().order_by("id")

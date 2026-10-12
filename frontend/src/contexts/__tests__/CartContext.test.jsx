@@ -241,4 +241,49 @@ describe('CartContext & Provider (TP9 TDD)', () => {
     expect(checkoutResult.data).toEqual(mockOrder)
     expect(result.current.items).toHaveLength(0)
   })
+
+  it('rejects adding item if total requested quantity exceeds 10', async () => {
+    cartService.getActiveCart.mockResolvedValueOnce({
+      success: true,
+      data: mockInitialCart, // currently has quantity 2 of item 101
+    })
+
+    const { result } = renderHook(() => useTestCart(), {
+      wrapper: ({ children }) => <CartProvider>{children}</CartProvider>,
+    })
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    let response
+    await act(async () => {
+      // Adding 9 more would make it 11, exceeding 10
+      response = await result.current.addToCart(mockProductStoreA, 9)
+    })
+
+    expect(response.success).toBe(false)
+    expect(response.error).toContain('10 unidades')
+    expect(cartService.addItemToCart).not.toHaveBeenCalled()
+  })
+
+  it('rejects updating item quantity to more than 10', async () => {
+    cartService.getActiveCart.mockResolvedValueOnce({
+      success: true,
+      data: mockInitialCart,
+    })
+
+    const { result } = renderHook(() => useTestCart(), {
+      wrapper: ({ children }) => <CartProvider>{children}</CartProvider>,
+    })
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    let response
+    await act(async () => {
+      response = await result.current.updateQuantity(1, 11)
+    })
+
+    expect(response.success).toBe(false)
+    expect(response.error).toContain('10 unidades')
+    expect(cartService.updateItemQuantity).not.toHaveBeenCalled()
+  })
 })

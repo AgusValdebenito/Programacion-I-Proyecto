@@ -190,4 +190,36 @@ describe('StoreDetail View Component (TP9 TDD)', () => {
       expect(screen.getByText(/tu carrito ya contiene productos de otra tienda/i)).toBeInTheDocument()
     })
   })
+
+  it('displays error toast when adding product fails with error message without leaving the store view', async () => {
+    storeService.getStoreById.mockResolvedValueOnce({ success: true, data: mockStore })
+    productService.getProducts.mockResolvedValueOnce({ success: true, data: mockProducts })
+    mockAddToCart.mockResolvedValueOnce({
+      success: false,
+      error: 'El límite máximo por producto es de 10 unidades.',
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/tiendas/5']}>
+        <Routes>
+          <Route path="/tiendas/:id" element={<StoreDetail />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Crazy Burger Simple')).toBeInTheDocument()
+    })
+
+    const addButtons = screen.getAllByRole('button', { name: /agregar/i })
+    await act(async () => {
+      fireEvent.click(addButtons[0])
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('El límite máximo por producto es de 10 unidades.')).toBeInTheDocument()
+      // Store view remains visible, not replaced by store error page
+      expect(screen.getByText('Crazy Burger Simple')).toBeInTheDocument()
+    })
+  })
 })

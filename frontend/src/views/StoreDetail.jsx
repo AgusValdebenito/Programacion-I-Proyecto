@@ -25,6 +25,7 @@ export default function StoreDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [addedItemMessage, setAddedItemMessage] = useState(null)
+  const [actionErrorMessage, setActionErrorMessage] = useState(null)
   const [conflictProduct, setConflictProduct] = useState(null)
 
   useEffect(() => {
@@ -89,8 +90,8 @@ export default function StoreDetail() {
         setAddedItemMessage(null)
       }, 3000)
     } else if (res.error) {
-      setError(res.error)
-      setTimeout(() => setError(null), 4000)
+      setActionErrorMessage(res.error)
+      setTimeout(() => setActionErrorMessage(null), 4000)
     }
   }
 
@@ -103,6 +104,9 @@ export default function StoreDetail() {
     if (res.success) {
       setAddedItemMessage(`Se vació el carrito anterior y se agregó "${prodToAdd.name}"`)
       setTimeout(() => setAddedItemMessage(null), 3000)
+    } else if (res.error) {
+      setActionErrorMessage(res.error)
+      setTimeout(() => setActionErrorMessage(null), 4000)
     }
   }
 
@@ -141,7 +145,7 @@ export default function StoreDetail() {
 
   return (
     <div className="container py-4">
-      {/* Toast de notificación temporal */}
+      {/* Toast de notificación temporal de éxito */}
       {addedItemMessage && (
         <div
           className="alert alert-success position-fixed top-0 end-0 m-3 shadow-lg z-3"
@@ -150,6 +154,18 @@ export default function StoreDetail() {
         >
           <i className="bi bi-check-circle-fill me-2" />
           {addedItemMessage}
+        </div>
+      )}
+
+      {/* Toast de notificación temporal de error */}
+      {actionErrorMessage && (
+        <div
+          className="alert alert-danger position-fixed top-0 end-0 m-3 shadow-lg z-3 d-flex align-items-center"
+          style={{ maxWidth: '360px' }}
+          role="alert"
+        >
+          <i className="bi bi-exclamation-triangle-fill me-2 fs-5 flex-shrink-0" />
+          <div>{actionErrorMessage}</div>
         </div>
       )}
 

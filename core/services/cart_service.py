@@ -7,9 +7,11 @@ from core.permissions import is_admin_user
 class CartService:
     """Capa de servicio que encapsula las reglas de negocio del carrito de compras."""
 
-    @staticmethod
-    def add_item_to_cart(cart, product, quantity, user):
-        """Valida e incorpora un producto al carrito respetando stock, disponibilidad y mono-tienda."""
+    MAX_QUANTITY_PER_ITEM = 10
+
+    @classmethod
+    def add_item_to_cart(cls, cart, product, quantity, user):
+        """Valida e incorpora un producto al carrito respetando stock, disponibilidad, mono-tienda y límite máximo."""
         if cart.user != user and not is_admin_user(user):
             raise PermissionDenied("Solo podes agregar items a tu propio carrito.")
 
@@ -21,6 +23,11 @@ class CartService:
 
         existing_item = CartItem.objects.filter(cart=cart, product=product).first()
         total_requested = (existing_item.quantity if existing_item else 0) + quantity
+
+        if total_requested > cls.MAX_QUANTITY_PER_ITEM:
+            raise ValidationError({
+                "quantity": f"El límite máximo por producto es de {cls.MAX_QUANTITY_PER_ITEM} unidades."
+            })
 
         if product.stock < total_requested:
             raise ValidationError({

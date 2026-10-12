@@ -92,7 +92,39 @@ describe('Cart View Component (TP9 TDD)', () => {
     expect(screen.getByText('Crazy Burger Simple')).toBeInTheDocument()
     expect(screen.getByText('Papas Cheddar')).toBeInTheDocument()
     expect(screen.getAllByText(/10[.,]?400/).length).toBeGreaterThanOrEqual(1)
-    expect(screen.getByRole('link', { name: /continuar al checkout/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /confirmar pedido e ir a pagar/i })).toBeInTheDocument()
+  })
+
+  it('disables increment button when item quantity reaches 10', () => {
+    const itemsWithMaxQty = [
+      {
+        id: 1,
+        cart: 10,
+        product: 101,
+        quantity: 10,
+        product_details: { ...mockProduct1, stock: 50 },
+      },
+    ]
+
+    vi.spyOn(CartHook, 'useCart').mockReturnValue({
+      items: itemsWithMaxQty,
+      itemCount: 10,
+      totalAmount: 42000,
+      loading: false,
+      error: null,
+      updateQuantity: mockUpdateQuantity,
+      removeItem: mockRemoveItem,
+      clearCart: mockClearCart,
+    })
+
+    render(
+      <MemoryRouter>
+        <Cart />
+      </MemoryRouter>
+    )
+
+    const incrementBtn = screen.getByRole('button', { name: /aumentar cantidad/i })
+    expect(incrementBtn).toBeDisabled()
   })
 
   it('calls updateQuantity when increment and decrement buttons are pressed', async () => {

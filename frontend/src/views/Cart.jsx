@@ -30,11 +30,16 @@ export default function Cart() {
 
   const [processingId, setProcessingId] = useState(null)
   const [clearing, setClearing] = useState(false)
+  const [itemError, setItemError] = useState(null)
 
   const handleUpdate = async (itemId, quantity) => {
     setProcessingId(itemId)
+    setItemError(null)
     try {
-      await updateQuantity(itemId, quantity)
+      const res = await updateQuantity(itemId, quantity)
+      if (res && !res.success && res.error) {
+        setItemError(res.error)
+      }
     } finally {
       setProcessingId(null)
     }
@@ -108,10 +113,10 @@ export default function Cart() {
       </nav>
 
       {/* Alerta de error si surge */}
-      {error && (
+      {(error || itemError) && (
         <div className="alert alert-danger mb-4 rounded-3 d-flex align-items-center" role="alert">
           <i className="bi bi-exclamation-triangle-fill me-2" />
-          <span>{error}</span>
+          <span>{itemError || error}</span>
         </div>
       )}
 
@@ -149,51 +154,55 @@ export default function Cart() {
                     key={item.id}
                     className="p-3 rounded-3 border bg-light d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3"
                   >
-                    <div className="d-flex align-items-center gap-3 flex-grow-1">
+                    <div className="d-flex align-items-center gap-3 flex-grow-1 min-w-0">
                       {product.image ? (
                         <img
                           src={product.image}
                           alt={product.name || 'Producto'}
-                          className="rounded-3 object-fit-cover"
+                          className="rounded-3 object-fit-cover flex-shrink-0"
                           style={{ width: '64px', height: '64px' }}
                         />
                       ) : (
                         <div
-                          className="bg-white rounded-3 border d-flex align-items-center justify-content-center text-secondary opacity-75"
+                          className="bg-white rounded-3 border d-flex align-items-center justify-content-center text-secondary opacity-75 flex-shrink-0"
                           style={{ width: '64px', height: '64px', fontSize: '1.5rem' }}
                         >
                           <i className="bi bi-egg-fried" />
                         </div>
                       )}
 
-                      <div className="flex-grow-1">
-                        <h2 className="h6 fw-bold text-dark mb-1">{product.name || 'Producto'}</h2>
+                      <div className="flex-grow-1 min-w-0">
+                        <h2 className="h6 fw-bold text-dark mb-1 text-truncate">{product.name || 'Producto'}</h2>
                         <span className="text-muted small">
                           Precio unitario: {formatCurrency(product.price)}
                         </span>
                       </div>
                     </div>
 
-                    <div className="d-flex align-items-center justify-content-between justify-content-sm-end gap-3 pt-2 pt-sm-0 border-top border-sm-0">
+                    <div className="d-flex align-items-center justify-content-between justify-content-sm-end gap-3 pt-2 pt-sm-0 border-top border-sm-0 flex-nowrap flex-shrink-0">
                       {/* Controles de cantidad */}
-                      <div className="input-group input-group-sm" style={{ width: '110px' }}>
+                      <div className="input-group input-group-sm flex-nowrap" style={{ width: '120px' }}>
                         <button
                           type="button"
-                          className="btn btn-outline-secondary"
+                          className="btn btn-outline-secondary px-2"
                           onClick={() => handleUpdate(item.id, item.quantity - 1)}
                           disabled={isItemProcessing}
                           aria-label="Reducir cantidad"
                         >
                           <i className="bi bi-dash" />
                         </button>
-                        <span className="input-group-text bg-white fw-bold px-3 justify-content-center flex-grow-1">
+                        <span className="input-group-text bg-white fw-bold px-2 justify-content-center flex-grow-1">
                           {item.quantity}
                         </span>
                         <button
                           type="button"
-                          className="btn btn-outline-secondary"
+                          className="btn btn-outline-secondary px-2"
                           onClick={() => handleUpdate(item.id, item.quantity + 1)}
-                          disabled={isItemProcessing || (product.stock && item.quantity >= product.stock)}
+                          disabled={
+                            isItemProcessing ||
+                            item.quantity >= 10 ||
+                            (product.stock !== undefined && product.stock !== null && item.quantity >= product.stock)
+                          }
                           aria-label="Aumentar cantidad"
                         >
                           <i className="bi bi-plus" />
@@ -201,14 +210,14 @@ export default function Cart() {
                       </div>
 
                       {/* Subtotal */}
-                      <div className="text-end" style={{ minWidth: '90px' }}>
+                      <div className="text-end text-nowrap" style={{ minWidth: '90px' }}>
                         <span className="fw-bold text-dark">{formatCurrency(itemSubtotal)}</span>
                       </div>
 
                       {/* Botón eliminar */}
                       <button
                         type="button"
-                        className="btn btn-link text-danger p-1"
+                        className="btn btn-link text-danger p-1 flex-shrink-0"
                         onClick={() => handleRemove(item.id)}
                         disabled={isItemProcessing}
                         title="Eliminar producto"
@@ -248,7 +257,7 @@ export default function Cart() {
               to="/checkout"
               className="btn btn-primary w-100 py-2 rounded-pill fw-semibold shadow-sm mb-3"
             >
-              Continuar al checkout
+              Confirmar pedido e ir a pagar
               <i className="bi bi-arrow-right ms-2" />
             </Link>
 
