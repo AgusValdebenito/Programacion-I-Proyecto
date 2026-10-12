@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
+import { useAuth } from '../hooks/useAuth'
+import { useAddress } from '../hooks/useAddress'
 
 /**
  * Formatea valores numéricos en moneda argentina.
@@ -18,15 +20,31 @@ function formatCurrency(value) {
 
 export default function Checkout() {
   const { items, itemCount, totalAmount, checkout } = useCart()
+  const { user } = useAuth()
+  const { activeAddress } = useAddress()
 
-  const [address, setAddress] = useState('')
-  const [phone, setPhone] = useState('')
+  const [address, setAddress] = useState(() => activeAddress?.address || '')
+  const [phone, setPhone] = useState(() => user?.phone || '')
+  const [hasUserEditedAddress, setHasUserEditedAddress] = useState(false)
+  const [hasUserEditedPhone, setHasUserEditedPhone] = useState(false)
+  const [prevActiveAddress, setPrevActiveAddress] = useState(activeAddress?.address)
+  const [prevUserPhone, setPrevUserPhone] = useState(user?.phone)
   const [notes, setNotes] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
   const [fieldErrors, setFieldErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
   const [checkoutError, setCheckoutError] = useState(null)
   const [completedOrder, setCompletedOrder] = useState(null)
+
+  if (!hasUserEditedAddress && activeAddress?.address && activeAddress.address !== prevActiveAddress) {
+    setPrevActiveAddress(activeAddress.address)
+    setAddress(activeAddress.address)
+  }
+
+  if (!hasUserEditedPhone && user?.phone && user.phone !== prevUserPhone) {
+    setPrevUserPhone(user.phone)
+    setPhone(user.phone)
+  }
 
   const validate = () => {
     const errors = {}
@@ -192,6 +210,7 @@ export default function Checkout() {
                   value={address}
                   onChange={(e) => {
                     setAddress(e.target.value)
+                    setHasUserEditedAddress(true)
                     if (fieldErrors.address) setFieldErrors((prev) => ({ ...prev, address: null }))
                   }}
                 />
@@ -210,6 +229,7 @@ export default function Checkout() {
                   value={phone}
                   onChange={(e) => {
                     setPhone(e.target.value)
+                    setHasUserEditedPhone(true)
                     if (fieldErrors.phone) setFieldErrors((prev) => ({ ...prev, phone: null }))
                   }}
                 />

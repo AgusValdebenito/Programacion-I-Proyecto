@@ -3,6 +3,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Checkout from '../Checkout'
 import * as CartHook from '../../hooks/useCart'
+import * as AuthHook from '../../hooks/useAuth'
+import * as AddressHook from '../../hooks/useAddress'
 
 describe('Checkout View Component (TP9 TDD - Issue #17)', () => {
   const mockProduct = {
@@ -73,6 +75,40 @@ describe('Checkout View Component (TP9 TDD - Issue #17)', () => {
     expect(screen.getByRole('button', { name: /confirmar y realizar pedido/i })).toBeInTheDocument()
   })
 
+  it('autocompletes address from activeAddress and phone from user profile while keeping them editable', () => {
+    vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
+      user: { id: 1, phone: '11 4444-5555' },
+    })
+    vi.spyOn(AddressHook, 'useAddress').mockReturnValue({
+      activeAddress: { id: 'addr-1', label: 'Casa', address: 'Av. Corrientes 1234, 4to B' },
+    })
+    vi.spyOn(CartHook, 'useCart').mockReturnValue({
+      items: mockCartItems,
+      itemCount: 2,
+      totalAmount: 8400,
+      loading: false,
+      checkout: mockCheckout,
+    })
+
+    render(
+      <MemoryRouter>
+        <Checkout />
+      </MemoryRouter>
+    )
+
+    const addressInput = screen.getByLabelText(/dirección de entrega/i)
+    const phoneInput = screen.getByLabelText(/teléfono de contacto/i)
+
+    expect(addressInput.value).toBe('Av. Corrientes 1234, 4to B')
+    expect(phoneInput.value).toBe('11 4444-5555')
+
+    // User can edit prefilled inputs
+    fireEvent.change(addressInput, { target: { value: 'Mi nueva dirección 789' } })
+    expect(addressInput.value).toBe('Mi nueva dirección 789')
+    fireEvent.change(phoneInput, { target: { value: '11 9999-0000' } })
+    expect(phoneInput.value).toBe('11 9999-0000')
+  })
+
   it('validates required fields before allowing checkout submission', async () => {
     vi.spyOn(CartHook, 'useCart').mockReturnValue({
       items: mockCartItems,
@@ -87,6 +123,10 @@ describe('Checkout View Component (TP9 TDD - Issue #17)', () => {
         <Checkout />
       </MemoryRouter>
     )
+
+    // Clear any prefilled values to test validation
+    fireEvent.change(screen.getByLabelText(/dirección de entrega/i), { target: { value: '' } })
+    fireEvent.change(screen.getByLabelText(/teléfono de contacto/i), { target: { value: '' } })
 
     const submitBtn = screen.getByRole('button', { name: /confirmar y realizar pedido/i })
     fireEvent.click(submitBtn)

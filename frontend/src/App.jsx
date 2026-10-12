@@ -8,6 +8,7 @@ import Register from './views/Register.jsx'
 import StoreDetail from './views/StoreDetail.jsx'
 import Cart from './views/Cart.jsx'
 import Checkout from './views/Checkout.jsx'
+import Profile from './views/Profile.jsx'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 function App() {
@@ -22,6 +23,8 @@ function App() {
           <Route path="/tiendas/:id" element={<ProtectedRoute><StoreDetail /></ProtectedRoute>} />
           <Route path="/carrito" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
           <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+          <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/pedidos" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         </Routes>
       </main>
       <Footer />
