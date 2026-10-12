@@ -48,6 +48,21 @@ class ProductViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ["name", "description"]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        store_id = self.request.query_params.get("store")
+        if store_id:
+            queryset = queryset.filter(store_id=store_id)
+
+        is_available = self.request.query_params.get("is_available")
+        if is_available is not None:
+            if is_available.lower() in ("true", "1"):
+                queryset = queryset.filter(is_available=True)
+            elif is_available.lower() in ("false", "0"):
+                queryset = queryset.filter(is_available=False)
+
+        return queryset
+
     def get_permissions(self):
         if self.action in ("create", "update", "partial_update", "destroy"):
             return [IsAdminOrVendedor(), IsResourceOwnerOrReadOnly()]

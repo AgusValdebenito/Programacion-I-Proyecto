@@ -58,6 +58,28 @@ class ProductViewSetTests(APITestCase):
         self.assertEqual(len(response_desc.data), 1)
         self.assertEqual(response_desc.data[0]["name"], "Ensalada Caesar")
 
+    def test_filter_products_by_store(self):
+        user_model = get_user_model()
+        other_owner = user_model.objects.create_user(
+            username="other-store-owner",
+            password="testpass123",
+            email="other-owner@example.com",
+            role="vendedor",
+        )
+        other_store = Store.objects.create(owner=other_owner, name="Segunda Tienda")
+        Product.objects.create(
+            store=other_store,
+            name="Empanada de Carne",
+            price=Decimal("5.00"),
+            stock=10,
+        )
+
+        response = self.client.get(reverse("products-list") + f"?store={self.store.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], self.product.id)
+        self.assertEqual(response.data[0]["store"], self.store.id)
+
 
 class StoreViewSetTests(APITestCase):
     def setUp(self):

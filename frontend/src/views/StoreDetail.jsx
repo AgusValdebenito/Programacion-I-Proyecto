@@ -51,7 +51,10 @@ export default function StoreDetail() {
         setStore(storeRes.data)
 
         if (productsRes.success) {
-          setProducts(productsRes.data || [])
+          const storeProducts = (productsRes.data || []).filter(
+            (p) => String(p.store) === String(id)
+          )
+          setProducts(storeProducts)
         } else {
           setProducts([])
         }
