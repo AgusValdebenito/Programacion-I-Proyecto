@@ -6,6 +6,7 @@ import Home from './views/Home.jsx'
 import Login from './views/Login.jsx'
 import Register from './views/Register.jsx'
 import StoreDetail from './views/StoreDetail.jsx'
+import Stores from './views/Stores.jsx'
 import Cart from './views/Cart.jsx'
 import Checkout from './views/Checkout.jsx'
 import Profile from './views/Profile.jsx'
@@ -20,6 +21,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/tiendas" element={<ProtectedRoute><Stores /></ProtectedRoute>} />
+          <Route path="/explorar" element={<ProtectedRoute><Stores /></ProtectedRoute>} />
           <Route path="/tiendas/:id" element={<ProtectedRoute><StoreDetail /></ProtectedRoute>} />
           <Route path="/carrito" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
           <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
