@@ -151,14 +151,32 @@ Crear la vista `/checkout` para que el cliente ingrese dirección de entrega, m�
 ### Issue [#18](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/18): [Frontend] Vista de Perfil e Historial de Pedidos (`/perfil`)
 **Labels:** `frontend`, `feature`, `role:cliente` | **Milestone:** `M2: Checkout Transaccional y Gestión de Pedidos`  
 **Descripción:**  
-Completar la vista `/perfil` para permitir ver y editar los datos personales del usuario (`GET/PATCH /api/profile/`) y consultar la lista de pedidos realizados con su estado en tiempo real.
+Completar la vista `/perfil` para permitir ver y editar los datos personales del usuario (`GET/PATCH /api/profile/`), gestionar direcciones guardadas (Casa, Hotel, etc.), conectar el selector de ubicación del Navbar y consultar la lista de pedidos realizados con su estado en tiempo real.
 
 **Tareas / Sub-issues:**
-- [ ] Crear componente `ProfileInfo.jsx` con formulario editable (nombre, teléfono).
+- [ ] Crear componente `ProfileInfo.jsx` con formulario editable (nombre, teléfono, direcciones guardadas).
+- [ ] Conectar el pill de ubicación en el Navbar (`fr-location-pill`) para mostrar y alternar entre direcciones guardadas del usuario.
+- [ ] Autocompletar en `/checkout` la dirección y teléfono guardados del perfil, permitiendo editarlos puntualmente antes de confirmar.
 - [ ] Crear componente `OrderHistory.jsx` consumiendo `GET /api/orders/`.
 - [ ] Renderizar tarjeta por pedido con ID, fecha, tienda, total y badge de estado con colores (`pending`, `preparing`, `delivering`, `delivered`, `cancelled`).
 - [ ] Agregar botón *"Cancelar pedido"* habilitado **únicamente** cuando el pedido esté en estado `pending`.
-- [ ] Tests de interacción con Vitest para cancelar pedido y actualizar estado visualmente.
+- [ ] Tests de interacción con Vitest para cancelar pedido, actualizar perfil y verificar autocompletado.
+
+---
+
+### Issue [#38](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/38): [Frontend] Catálogo Completo de Tiendas y Filtro por Categorías (`/tiendas` y `/explorar`)
+**Labels:** `frontend`, `feature`, `role:cliente` | **Milestone:** `M2: Checkout Transaccional y Gestión de Pedidos`  
+**Descripción:**  
+Desarrollar la vista de catálogo completo de comercios (`/tiendas` y `/explorar`), conectando las tarjetas de categoría de la Home y los accesos del Navbar/BottomNav para que el usuario pueda navegar y filtrar tiendas por rubro (Restaurantes, Súper y Kioscos, Cafeterías, Helados, Farmacia).
+
+**Tareas / Sub-issues:**
+- [ ] Crear la vista `Stores.jsx` accesible en `/tiendas` y `/explorar` (ruta protegida).
+- [ ] Conectar los enlaces *"Explorar"* y *"Tiendas"* en `Navbar.jsx` y `BottomNav.jsx` a la ruta `/tiendas`.
+- [ ] Hacer clickeables las tarjetas de categoría en la Home (`CategoryCard.jsx`), redirigiendo a `/tiendas?categoria=:id` con el filtro pre-seleccionado.
+- [ ] Implementar barra de filtros interactiva por categorías en la vista de tiendas con badges/chips para alternar entre categorías ("Todos", "Restaurantes", "Súper y Kioscos", "Cafeterías", "Helados", "Farmacia").
+- [ ] Buscador de tiendas en tiempo real por nombre y descripción.
+- [ ] Renderizar tarjetas de comercio con logo, nombre, descripción, etiquetas y enlace directo a su carta (`/tiendas/:id`).
+- [ ] Suite de pruebas con Vitest para filtrado por categoría, búsqueda y navegación.
 
 ---
 
