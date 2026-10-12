@@ -60,22 +60,29 @@ class CartSerializer(serializers.ModelSerializer):
         read_only_fields = ["user", "created_at"]
 
 
+class OrderItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name", read_only=True)
+
+    class Meta:
+        model = OrderItem
+        fields = ["id", "order", "product", "product_name", "quantity", "unit_price"]
+        read_only_fields = ["unit_price"]
+
+
 class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+    store_name = serializers.CharField(source="store.name", read_only=True)
+
     class Meta:
         model = Order
         fields = [
             "id",
             "user",
             "store",
+            "store_name",
+            "items",
             "total",
             "status",
             "created_at",
         ]
         read_only_fields = ["user", "created_at"]
-
-
-class OrderItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderItem
-        fields = ["id", "order", "product", "quantity", "unit_price"]
-        read_only_fields = ["unit_price"]

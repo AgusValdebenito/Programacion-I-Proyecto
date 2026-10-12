@@ -162,4 +162,27 @@ describe('cartService (TP9 Service Layer & TDD)', () => {
     )
     expect(result.success).toBe(true)
   })
+
+  it('checkout sends POST to /carts/checkout/', async () => {
+    const mockOrder = { id: 50, total: '3000.00', status: 'pending' }
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockOrder,
+    })
+
+    const result = await cartService.checkout('mock-token')
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/carts/checkout/'),
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer mock-token',
+          'Content-Type': 'application/json',
+        }),
+      })
+    )
+    expect(result.success).toBe(true)
+    expect(result.data).toEqual(mockOrder)
+  })
 })

@@ -96,6 +96,13 @@ class CartViewSet(viewsets.ModelViewSet):
         cart.items.all().delete()
         return Response({"detail": "Carrito vaciado exitosamente."}, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=["post"], url_path="checkout", url_name="checkout")
+    def checkout(self, request):
+        """Convierte atómicamente el carrito activo en un nuevo pedido."""
+        order = OrderService.checkout_cart(user=request.user)
+        serializer = OrderSerializer(order)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class CartItemViewSet(viewsets.ModelViewSet):
     queryset = CartItem.objects.all().order_by("id")

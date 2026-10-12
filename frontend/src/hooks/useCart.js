@@ -16,6 +16,7 @@ export function useCart() {
       updateQuantity: async () => ({ success: false }),
       removeItem: async () => ({ success: false }),
       clearCart: async () => ({ success: false }),
+      checkout: async () => ({ success: false }),
       refreshCart: async () => {},
     }
   }

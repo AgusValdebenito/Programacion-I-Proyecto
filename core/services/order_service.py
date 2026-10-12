@@ -80,3 +80,71 @@ class OrderService:
 
         # Retornar el precio unitario del producto para congelarlo en el item
         return product.price
+
+    @classmethod
+    def checkout_cart(cls, user):
+        """Convierte atómicamente el carrito activo en un pedido, congelando precios y descontando stock."""
+        from decimal import Decimal
+        from django.db import transaction
+        from core.models import Cart, OrderItem, Product
+
+        cart, _ = Cart.objects.get_or_create(user=user)
+        cart_items = list(cart.items.select_related("product__store").all())
+
+        if not cart_items:
+            raise ValidationError({"detail": "No podés realizar el checkout con un carrito vacío."})
+
+        # Regla mono-tienda: todos los productos deben pertenecer al mismo local
+        store = cart_items[0].product.store
+        for item in cart_items:
+            if item.product.store != store:
+                raise ValidationError({
+                    "detail": "El carrito contiene productos de diferentes comercios."
+                })
+
+        with transaction.atomic():
+            # Bloquear productos para evitar condiciones de carrera (overselling)
+            product_ids = [item.product.id for item in cart_items]
+            locked_products = {
+                p.id: p for p in Product.objects.select_for_update().filter(id__in=product_ids)
+            }
+
+            # Validar disponibilidad y stock sobre las filas bloqueadas
+            total = Decimal("0.00")
+            for item in cart_items:
+                product = locked_products.get(item.product.id)
+                if not product or not product.is_available:
+                    raise ValidationError({
+                        "detail": f"El producto '{item.product.name}' ya no se encuentra disponible."
+                    })
+                if product.stock < item.quantity:
+                    raise ValidationError({
+                        "detail": f"Stock insuficiente para '{product.name}'. Stock disponible: {product.stock}."
+                    })
+                total += product.price * item.quantity
+
+            # Crear la orden
+            order = Order.objects.create(
+                user=user,
+                store=store,
+                total=total,
+                status=Order.StatusChoices.PENDING,
+            )
+
+            # Crear OrderItems con precio congelado y descontar stock
+            for item in cart_items:
+                product = locked_products[item.product.id]
+                product.stock -= item.quantity
+                product.save(update_fields=["stock"])
+
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    quantity=item.quantity,
+                    unit_price=product.price,
+                )
+
+            # Vaciar el carrito
+            cart.items.all().delete()
+
+            return order

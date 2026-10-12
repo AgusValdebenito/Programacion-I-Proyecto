@@ -203,6 +203,21 @@ export function CartProvider({ children }) {
     return { success: false, error: res.error }
   }
 
+  /**
+   * Realiza el checkout convirtiendo el carrito en una orden.
+   */
+  const checkout = async () => {
+    const token = await getValidToken()
+    if (!token) return { success: false, error: 'No autenticado' }
+
+    const res = await cartService.checkout(token)
+    if (res.success) {
+      await refreshCart()
+      return { success: true, data: res.data }
+    }
+    return { success: false, error: res.error }
+  }
+
   return (
     <CartContext.Provider
       value={{
@@ -217,6 +232,7 @@ export function CartProvider({ children }) {
         updateQuantity,
         removeItem,
         clearCart,
+        checkout,
         refreshCart,
       }}
     >

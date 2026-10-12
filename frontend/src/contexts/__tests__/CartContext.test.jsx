@@ -13,6 +13,7 @@ vi.mock('../../services/cartService', () => ({
     updateItemQuantity: vi.fn(),
     removeItemFromCart: vi.fn(),
     clearCart: vi.fn(),
+    checkout: vi.fn(),
   },
 }))
 
@@ -210,5 +211,34 @@ describe('CartContext & Provider (TP9 TDD)', () => {
     expect(cartService.clearCart).toHaveBeenCalledWith(mockToken)
     expect(result.current.items).toHaveLength(0)
     expect(result.current.currentStoreId).toBeNull()
+  })
+
+  it('checkout calls cartService.checkout and refreshes cart', async () => {
+    const mockOrder = { id: 77, total: '8000.00', status: 'pending' }
+    cartService.getActiveCart.mockResolvedValueOnce({
+      success: true,
+      data: mockInitialCart,
+    })
+    cartService.checkout.mockResolvedValueOnce({ success: true, data: mockOrder })
+    cartService.getActiveCart.mockResolvedValueOnce({
+      success: true,
+      data: { id: 10, user: 1, items: [] },
+    })
+
+    const { result } = renderHook(() => useTestCart(), {
+      wrapper: ({ children }) => <CartProvider>{children}</CartProvider>,
+    })
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    let checkoutResult
+    await act(async () => {
+      checkoutResult = await result.current.checkout()
+    })
+
+    expect(cartService.checkout).toHaveBeenCalledWith(mockToken)
+    expect(checkoutResult.success).toBe(true)
+    expect(checkoutResult.data).toEqual(mockOrder)
+    expect(result.current.items).toHaveLength(0)
   })
 })

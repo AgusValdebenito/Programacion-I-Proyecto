@@ -235,6 +235,72 @@ class CartItemViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(CartItem.objects.filter(cart=self.cart).count(), 0)
 
+    def test_checkout_fails_with_empty_cart(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(reverse("carts-checkout"), {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("detail", response.data)
+
+    def test_checkout_atomic_success_creates_order_deducts_stock_and_clears_cart(self):
+        CartItem.objects.create(cart=self.cart, product=self.product, quantity=2)
+        self.client.force_authenticate(user=self.user)
+
+        initial_stock = self.product.stock  # 10
+        response = self.client.post(reverse("carts-checkout"), {}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn("id", response.data)
+        self.assertEqual(Decimal(str(response.data["total"])), Decimal("30.00"))
+        self.assertEqual(response.data["status"], "pending")
+
+        # Verifica que el producto haya descontado su stock
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.stock, initial_stock - 2)
+
+        # Verifica que los items del carrito se hayan vaciado
+        self.assertEqual(CartItem.objects.filter(cart=self.cart).count(), 0)
+
+        # Verifica la orden y sus OrderItems en la BD
+        order = Order.objects.get(id=response.data["id"])
+        self.assertEqual(order.user, self.user)
+        self.assertEqual(order.store, self.store)
+        self.assertEqual(order.items.count(), 1)
+        order_item = order.items.first()
+        self.assertEqual(order_item.product, self.product)
+        self.assertEqual(order_item.quantity, 2)
+        self.assertEqual(order_item.unit_price, Decimal("15.00"))
+
+    def test_checkout_fails_when_product_stock_is_insufficient(self):
+        # Solicitamos 15 cuando el stock es 10
+        CartItem.objects.create(cart=self.cart, product=self.product, quantity=15)
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(reverse("carts-checkout"), {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("detail", response.data)
+
+        # Ninguna orden debe crearse
+        self.assertEqual(Order.objects.filter(user=self.user).count(), 0)
+        # El carrito no debe borrarse
+        self.assertEqual(CartItem.objects.filter(cart=self.cart).count(), 1)
+        # El stock no debe alterarse
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.stock, 10)
+
+    def test_checkout_fails_when_product_is_unavailable(self):
+        self.product.is_available = False
+        self.product.save(update_fields=["is_available"])
+        CartItem.objects.create(cart=self.cart, product=self.product, quantity=1)
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(reverse("carts-checkout"), {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("detail", response.data)
+
+        # Ninguna orden creada y stock inalterado
+        self.assertEqual(Order.objects.filter(user=self.user).count(), 0)
+        self.assertEqual(CartItem.objects.filter(cart=self.cart).count(), 1)
+
 
 class OrderViewSetTests(APITestCase):
     def setUp(self):

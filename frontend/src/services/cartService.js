@@ -167,4 +167,30 @@ export const cartService = {
       return { success: false, error: 'Error de conexión al vaciar el carrito' }
     }
   },
+
+  /**
+   * Realiza el checkout atómico del carrito activo, convirtiéndolo en un pedido.
+   *
+   * @param {string} token
+   * @returns {Promise<{ success: boolean, data?: any, error?: string }>}
+   */
+  async checkout(token) {
+    try {
+      const response = await fetch(`${API_URL}/carts/checkout/`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        return { success: false, error: data.detail || 'Error al procesar el checkout' }
+      }
+      return { success: true, data }
+    } catch {
+      return { success: false, error: 'Error de conexión al procesar el checkout' }
+    }
+  },
 }
