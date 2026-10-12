@@ -7,6 +7,7 @@ import Login from './views/Login.jsx'
 import Register from './views/Register.jsx'
 import StoreDetail from './views/StoreDetail.jsx'
 import Cart from './views/Cart.jsx'
+import Checkout from './views/Checkout.jsx'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
           <Route path="/tiendas/:id" element={<ProtectedRoute><StoreDetail /></ProtectedRoute>} />
           <Route path="/carrito" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+          <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
         </Routes>
       </main>
       <Footer />
