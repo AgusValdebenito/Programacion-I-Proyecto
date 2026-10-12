@@ -354,10 +354,22 @@ El frontend vive en `frontend/` (hermano del backend, mismo repositorio) y se si
 cd frontend
 npm install        # primera vez
 npm run dev        # http://localhost:3000
-npm run lint       # ESLint
+npm run lint       # ESLint (0 errores, 0 warnings)
+npm test           # Tests con Vitest (129 tests pasando)
+npm run build      # Build para producción
 ```
 
-El bosquejo de diseno (componentes y flujo) esta en `docs/diagrama.md`.
+Rutas client-side principales:
+* `/`: Home con categorías, tiendas destacadas y selector de dirección.
+* `/tiendas` o `/explorar`: Catálogo completo con buscador y filtros por categoría gastronómica.
+* `/tiendas/:id`: Carta del comercio y modal de producto.
+* `/carrito`: Carrito reactivo mono-tienda con control de cantidades.
+* `/checkout`: Confirmación de pedido, dirección prellenada y simulación de pago.
+* `/perfil`: Edición de datos personales y gestión de direcciones guardadas.
+* `/pedidos`: Historial cronológico de órdenes y seguimiento de estado.
+* `/login` / `/register`: Autenticación y registro con JWT.
+
+El bosquejo de diseno y arquitectura de componentes esta en `docs/diagrama.md`.
 
 ---
 
@@ -486,7 +498,8 @@ Principales ventajas que llevaron a elegir JWT en este proyecto:
 * TP5: frontend React con Vite (`frontend/`, puerto 3000) mergeado a `main` (PR #6)
 * TP6: maquetado de la Home con Bootstrap mergeado a `main` (PR #8)
 * TP7: autenticación y rutas con React Router y mock data mergeado a `main` (PR #9)
-* TP8: conexión de frontend React con backend Django REST (JWT, login, registro, logout y perfil) en rama `TP8` (PR abierto)
+* TP8: conexión de frontend React con backend Django REST (JWT, login, registro, logout y perfil) completado y mergeado a `main` (PR #11)
+* TP9: Vistas Completas y Funcionalidad Full-Stack en desarrollo activo en rama `TP9` (PR #37). Milestone 1 (Catálogo Real y Carrito) y Milestone 2 (Checkout Transaccional y Gestión de Pedidos) 100% completados con TDD y cerrados en GitHub. 129 tests frontend y 57 tests backend pasando al 100%.
 
 ---
 
