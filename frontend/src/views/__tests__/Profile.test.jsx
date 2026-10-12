@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import Profile from '../Profile'
 import * as AuthHook from '../../hooks/useAuth'
 import * as AddressHook from '../../hooks/useAddress'
@@ -217,5 +217,45 @@ describe('Profile View & Components (TP9 TDD - Issue #18)', () => {
     // Only order #101 has the cancel button because order #102 is delivered
     const cancelButtons = screen.getAllByRole('button', { name: /cancelar pedido/i })
     expect(cancelButtons).toHaveLength(1)
+  })
+
+  it('directly shows orders tab when navigating to /pedidos', async () => {
+    render(
+      <MemoryRouter initialEntries={['/pedidos']}>
+        <Profile />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText(/pedido #101/i)).toBeInTheDocument()
+      expect(screen.queryByLabelText(/nombre completo/i)).not.toBeInTheDocument()
+    })
+  })
+
+  it('switches between profile info and orders seamlessly when clicking tab buttons', async () => {
+    render(
+      <MemoryRouter initialEntries={['/perfil']}>
+        <Routes>
+          <Route path="/perfil" element={<Profile />} />
+          <Route path="/pedidos" element={<Profile />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    expect(screen.getByDisplayValue('Juan Perez')).toBeInTheDocument()
+
+    const ordersTab = screen.getByRole('tab', { name: /mis pedidos/i })
+    fireEvent.click(ordersTab)
+
+    await waitFor(() => {
+      expect(screen.getByText(/pedido #101/i)).toBeInTheDocument()
+    })
+
+    const infoTab = screen.getByRole('tab', { name: /datos y direcciones/i })
+    fireEvent.click(infoTab)
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Juan Perez')).toBeInTheDocument()
+    })
   })
 })
