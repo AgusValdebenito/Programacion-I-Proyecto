@@ -123,7 +123,7 @@ export default function Checkout() {
           </div>
 
           <div className="d-flex flex-column flex-sm-row justify-content-center gap-2">
-            <Link to="/perfil" className="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
+            <Link to="/pedidos" className="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
               <i className="bi bi-receipt me-2" />
               Ver mis pedidos
             </Link>
