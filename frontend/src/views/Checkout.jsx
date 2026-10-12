@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
 import { useAuth } from '../hooks/useAuth'
 import { useAddress } from '../hooks/useAddress'
+import { getImageUrl } from '../utils/imageUrl'
 
 /**
  * Formatea valores numéricos en moneda argentina.
@@ -328,6 +329,14 @@ export default function Checkout() {
                   return (
                     <div key={item.id} className="d-flex align-items-center justify-content-between small py-2 border-bottom">
                       <div className="d-flex align-items-center gap-2 flex-grow-1 min-w-0">
+                        {product.image && (
+                          <img
+                            src={getImageUrl(product.image)}
+                            alt={product.name || 'Producto'}
+                            className="rounded-2 object-fit-cover flex-shrink-0"
+                            style={{ width: '38px', height: '38px' }}
+                          />
+                        )}
                         <span className="badge bg-light text-dark border px-2 py-1 rounded-pill flex-shrink-0">
                           {item.quantity}x
                         </span>

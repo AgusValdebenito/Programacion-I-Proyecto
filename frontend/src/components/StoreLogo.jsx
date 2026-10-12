@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { getImageUrl } from '../utils/imageUrl'
 
 /**
  * Obtiene las iniciales en mayúsculas a partir del nombre del comercio.
@@ -15,15 +17,22 @@ function getInitials(name) {
 const GRADIENTS = ['fr-grad-1', 'fr-grad-2', 'fr-grad-3', 'fr-grad-4', 'fr-grad-5']
 
 export default function StoreLogo({ store }) {
+  const [imgError, setImgError] = useState(false)
   const gradientClass = store.gradient || GRADIENTS[(store.id || 0) % GRADIENTS.length] || 'fr-grad-1'
   const initials = store.initials || getInitials(store.name)
   const tagline = store.tagline || store.description || ''
+  const resolvedImg = !imgError && store.image ? getImageUrl(store.image) : null
 
   const content = (
     <div className="text-center">
-      <div className={`fr-store-logo mx-auto ${gradientClass}`}>
-        {store.image ? (
-          <img className="fr-store-logo-img" src={store.image} alt={store.name} />
+      <div className={`fr-store-logo mx-auto ${gradientClass} overflow-hidden shadow-sm`}>
+        {resolvedImg ? (
+          <img
+            className="fr-store-logo-img w-100 h-100 object-fit-cover"
+            src={resolvedImg}
+            alt={store.name}
+            onError={() => setImgError(true)}
+          />
         ) : (
           initials
         )}

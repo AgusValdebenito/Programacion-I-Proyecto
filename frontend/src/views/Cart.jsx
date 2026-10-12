@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
+import { getImageUrl } from '../utils/imageUrl'
 
 /**
  * Formatea valores numéricos en moneda argentina.
@@ -157,7 +158,7 @@ export default function Cart() {
                     <div className="d-flex align-items-center gap-3 flex-grow-1 min-w-0">
                       {product.image ? (
                         <img
-                          src={product.image}
+                          src={getImageUrl(product.image)}
                           alt={product.name || 'Producto'}
                           className="rounded-3 object-fit-cover flex-shrink-0"
                           style={{ width: '64px', height: '64px' }}

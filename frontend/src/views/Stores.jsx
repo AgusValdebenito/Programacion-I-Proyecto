@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { storeService } from '../services/storeService'
 import { categories, getStoreCategory, getCategoryById } from '../utils/categoryUtils'
+import { getImageUrl } from '../utils/imageUrl'
 
 const GRADIENTS = ['fr-grad-1', 'fr-grad-2', 'fr-grad-3', 'fr-grad-4', 'fr-grad-5']
 
@@ -273,9 +274,13 @@ export default function Stores() {
                     <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden transition-hover">
                       {/* Banner / Store Logo */}
                       <div className={`p-4 d-flex align-items-center justify-content-between ${gradientClass}`}>
-                        <div className="fr-store-logo bg-white text-dark shadow-sm">
+                        <div className="fr-store-logo bg-white text-dark shadow-sm overflow-hidden">
                           {store.image ? (
-                            <img className="fr-store-logo-img" src={store.image} alt={store.name} />
+                            <img
+                              className="fr-store-logo-img w-100 h-100 object-fit-cover"
+                              src={getImageUrl(store.image)}
+                              alt={store.name}
+                            />
                           ) : (
                             initials
                           )}

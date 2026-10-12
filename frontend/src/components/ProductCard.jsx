@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { getImageUrl } from '../utils/imageUrl'
+
 /**
  * Componente de tarjeta de producto gastronómico (TP9).
  *
@@ -6,6 +9,7 @@
  * @param {function} [props.onAddToCart] - Callback para agregar el producto al carrito
  */
 export default function ProductCard({ product, onAddToCart }) {
+  const [imgError, setImgError] = useState(false)
   const isOutOfStock = product.stock === 0
   const isUnavailable = !product.is_available
   const isActionDisabled = isOutOfStock || isUnavailable
@@ -24,17 +28,21 @@ export default function ProductCard({ product, onAddToCart }) {
     }
   }
 
+  const resolvedImg = !imgError && product.image ? getImageUrl(product.image) : null
+
   return (
-    <article className="card h-100 shadow-sm border-0 rounded-3 overflow-hidden d-flex flex-column">
+    <article className="card h-100 shadow-sm border-0 rounded-4 overflow-hidden d-flex flex-column">
       <div
-        className="position-relative bg-light d-flex align-items-center justify-content-center"
-        style={{ height: '170px' }}
+        className="position-relative bg-light d-flex align-items-center justify-content-center overflow-hidden"
+        style={{ height: '180px' }}
       >
-        {product.image ? (
+        {resolvedImg ? (
           <img
-            src={product.image}
+            src={resolvedImg}
             alt={product.name}
             className="w-100 h-100 object-fit-cover"
+            loading="lazy"
+            onError={() => setImgError(true)}
           />
         ) : (
           <div className="text-secondary opacity-50 display-4">

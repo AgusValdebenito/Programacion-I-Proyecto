@@ -4,6 +4,7 @@ import { storeService } from '../services/storeService'
 import { productService } from '../services/productService'
 import { useCart } from '../hooks/useCart'
 import ProductCard from '../components/ProductCard'
+import { getImageUrl } from '../utils/imageUrl'
 
 /**
  * Obtiene las iniciales de la tienda si no cuenta con imagen.
@@ -236,11 +237,15 @@ export default function StoreDetail() {
       <header className="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
         <div className="d-flex flex-column flex-sm-row align-items-center gap-4">
           <div
-            className="fr-store-logo fr-grad-1 flex-shrink-0 d-flex align-items-center justify-content-center"
-            style={{ width: '80px', height: '80px', fontSize: '1.75rem' }}
+            className="fr-store-logo fr-grad-1 flex-shrink-0 d-flex align-items-center justify-content-center overflow-hidden shadow-sm"
+            style={{ width: '84px', height: '84px', fontSize: '1.75rem', borderRadius: '1.25rem' }}
           >
             {store.image ? (
-              <img src={store.image} alt={store.name} className="fr-store-logo-img" />
+              <img
+                src={getImageUrl(store.image)}
+                alt={store.name}
+                className="w-100 h-100 object-fit-cover"
+              />
             ) : (
               initials
             )}
