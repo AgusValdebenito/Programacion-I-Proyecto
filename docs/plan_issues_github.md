@@ -117,7 +117,7 @@ Desarrollar la pantalla del carrito `/carrito` conectada a `GET /api/carts/` y `
 
 ---
 
-## 💳 Milestone 2: Checkout Transaccional y Gestión de Pedidos
+## 💳 Milestone 2: Checkout Transaccional y Gestión de Pedidos (✅ COMPLETADO Y CERRADO)
 
 ### Issue [#16](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/16): [Backend] Implementar Checkout Atómico y Creación de Órdenes
 **Labels:** `backend`, `feature`, `role:cliente` | **Milestone:** `M2: Checkout Transaccional y Gestión de Pedidos`  
@@ -125,12 +125,12 @@ Desarrollar la pantalla del carrito `/carrito` conectada a `GET /api/carts/` y `
 Desarrollar un endpoint o acción dedicada en `CartService` / `OrderService` que convierta atómicamente el carrito activo en una `Order` con sus `OrderItem`, descuente el stock correspondiente y vacíe el carrito.
 
 **Tareas / Sub-issues:**
-- [ ] Crear endpoint `POST /api/carts/checkout/` o método transaccional en `OrderService.checkout_cart(user, delivery_address, notes)`.
-- [ ] Usar `transaction.atomic()` para garantizar que la creación de orden y vaciado de carrito ocurran juntos o fallen limpiamente.
-- [ ] Validar que todos los productos continúen con `is_available = True` y stock suficiente en el momento exacto del checkout.
-- [ ] Snapshot inmutable de precios: persistir `unit_price` en cada `OrderItem` con el valor actual del producto.
-- [ ] Vaciar todos los items del carrito (`cart.items.all().delete()`).
-- [ ] Escribir tests unitarios en Django (`test_checkout.py`) con casos exitosos y fallos por falta de stock.
+- [x] Crear endpoint `POST /api/carts/checkout/` o método transaccional en `OrderService.checkout_cart(user, delivery_address, notes)`.
+- [x] Usar `transaction.atomic()` para garantizar que la creación de orden y vaciado de carrito ocurran juntos o fallen limpiamente.
+- [x] Validar que todos los productos continúen con `is_available = True` y stock suficiente en el momento exacto del checkout.
+- [x] Snapshot inmutable de precios: persistir `unit_price` en cada `OrderItem` con el valor actual del producto.
+- [x] Vaciar todos los items del carrito (`cart.items.all().delete()`).
+- [x] Escribir tests unitarios en Django (`test_checkout.py`) con casos exitosos y fallos por falta de stock.
 
 ---
 
@@ -140,11 +140,11 @@ Desarrollar un endpoint o acción dedicada en `CartService` / `OrderService` que
 Crear la vista `/checkout` para que el cliente ingrese dirección de entrega, método de pago simulado, notas para la cocina y confirme la orden.
 
 **Tareas / Sub-issues:**
-- [ ] Formulario con validaciones: dirección de entrega, teléfono de contacto y aclaraciones (e.g. *"timbre 2B"*).
-- [ ] Resumen de pedido con desglose de ítems, subtotal, costo de envío simulado y total final.
-- [ ] Selector de pago simulado (Efectivo al recibir / Tarjeta de débito simulada - con aclaración educativa).
-- [ ] Llamada al endpoint de checkout y redirección a `/pedidos/:id` o `/perfil` tras respuesta exitosa.
-- [ ] Manejo de errores de checkout (e.g. producto agotado en último momento).
+- [x] Formulario con validaciones: dirección de entrega, teléfono de contacto y aclaraciones (e.g. *"timbre 2B"*).
+- [x] Resumen de pedido con desglose de ítems, subtotal, costo de envío simulado y total final.
+- [x] Selector de pago simulado (Efectivo al recibir / Tarjeta de débito simulada - con aclaración educativa).
+- [x] Llamada al endpoint de checkout y redirección a `/pedidos/:id` o `/perfil` tras respuesta exitosa.
+- [x] Manejo de errores de checkout (e.g. producto agotado en último momento).
 
 ---
 
@@ -154,13 +154,13 @@ Crear la vista `/checkout` para que el cliente ingrese dirección de entrega, m�
 Completar la vista `/perfil` para permitir ver y editar los datos personales del usuario (`GET/PATCH /api/profile/`), gestionar direcciones guardadas (Casa, Hotel, etc.), conectar el selector de ubicación del Navbar y consultar la lista de pedidos realizados con su estado en tiempo real.
 
 **Tareas / Sub-issues:**
-- [ ] Crear componente `ProfileInfo.jsx` con formulario editable (nombre, teléfono, direcciones guardadas).
-- [ ] Conectar el pill de ubicación en el Navbar (`fr-location-pill`) para mostrar y alternar entre direcciones guardadas del usuario.
-- [ ] Autocompletar en `/checkout` la dirección y teléfono guardados del perfil, permitiendo editarlos puntualmente antes de confirmar.
-- [ ] Crear componente `OrderHistory.jsx` consumiendo `GET /api/orders/`.
-- [ ] Renderizar tarjeta por pedido con ID, fecha, tienda, total y badge de estado con colores (`pending`, `preparing`, `delivering`, `delivered`, `cancelled`).
-- [ ] Agregar botón *"Cancelar pedido"* habilitado **únicamente** cuando el pedido esté en estado `pending`.
-- [ ] Tests de interacción con Vitest para cancelar pedido, actualizar perfil y verificar autocompletado.
+- [x] Crear componente `ProfileInfo.jsx` con formulario editable (nombre, teléfono, direcciones guardadas).
+- [x] Conectar el pill de ubicación en el Navbar (`fr-location-pill`) para mostrar y alternar entre direcciones guardadas del usuario.
+- [x] Autocompletar en `/checkout` la dirección y teléfono guardados del perfil, permitiendo editarlos puntualmente antes de confirmar.
+- [x] Crear componente `OrderHistory.jsx` consumiendo `GET /api/orders/`.
+- [x] Renderizar tarjeta por pedido con ID, fecha, tienda, total y badge de estado con colores (`pending`, `preparing`, `delivering`, `delivered`, `cancelled`).
+- [x] Agregar botón *"Cancelar pedido"* habilitado **únicamente** cuando el pedido esté en estado `pending`.
+- [x] Tests de interacción con Vitest para cancelar pedido, actualizar perfil y verificar autocompletado.
 
 ---
 
@@ -170,13 +170,13 @@ Completar la vista `/perfil` para permitir ver y editar los datos personales del
 Desarrollar la vista de catálogo completo de comercios (`/tiendas` y `/explorar`), conectando las tarjetas de categoría de la Home y los accesos del Navbar/BottomNav para que el usuario pueda navegar y filtrar tiendas por rubro (Restaurantes, Súper y Kioscos, Cafeterías, Helados, Farmacia).
 
 **Tareas / Sub-issues:**
-- [ ] Crear la vista `Stores.jsx` accesible en `/tiendas` y `/explorar` (ruta protegida).
-- [ ] Conectar los enlaces *"Explorar"* y *"Tiendas"* en `Navbar.jsx` y `BottomNav.jsx` a la ruta `/tiendas`.
-- [ ] Hacer clickeables las tarjetas de categoría en la Home (`CategoryCard.jsx`), redirigiendo a `/tiendas?categoria=:id` con el filtro pre-seleccionado.
-- [ ] Implementar barra de filtros interactiva por categorías en la vista de tiendas con badges/chips para alternar entre categorías ("Todos", "Restaurantes", "Súper y Kioscos", "Cafeterías", "Helados", "Farmacia").
-- [ ] Buscador de tiendas en tiempo real por nombre y descripción.
-- [ ] Renderizar tarjetas de comercio con logo, nombre, descripción, etiquetas y enlace directo a su carta (`/tiendas/:id`).
-- [ ] Suite de pruebas con Vitest para filtrado por categoría, búsqueda y navegación.
+- [x] Crear la vista `Stores.jsx` accesible en `/tiendas` y `/explorar` (ruta protegida).
+- [x] Conectar los enlaces *"Explorar"* y *"Tiendas"* en `Navbar.jsx` y `BottomNav.jsx` a la ruta `/tiendas`.
+- [x] Hacer clickeables las tarjetas de categoría en la Home (`CategoryCard.jsx`), redirigiendo a `/tiendas?categoria=:id` con el filtro pre-seleccionado.
+- [x] Implementar barra de filtros interactiva por categorías en la vista de tiendas con badges/chips para alternar entre categorías ("Todos", "Restaurantes", "Súper y Kioscos", "Cafeterías", "Helados", "Farmacia").
+- [x] Buscador de tiendas en tiempo real por nombre y descripción.
+- [x] Renderizar tarjetas de comercio con logo, nombre, descripción, etiquetas y enlace directo a su carta (`/tiendas/:id`).
+- [x] Suite de pruebas con Vitest para filtrado por categoría, búsqueda y navegación.
 
 ---
 
