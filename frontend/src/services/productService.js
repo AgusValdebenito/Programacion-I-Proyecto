@@ -5,6 +5,21 @@
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
 
+function extractErrorMessage(data, defaultMsg) {
+  if (!data || typeof data !== 'object') return defaultMsg
+  if (typeof data === 'string') return data
+  if (data.detail) return data.detail
+  if (Array.isArray(data.non_field_errors) && data.non_field_errors.length) return data.non_field_errors[0]
+  if (Array.isArray(data.image) && data.image.length) return data.image[0]
+  if (Array.isArray(data.price) && data.price.length) return data.price[0]
+  if (Array.isArray(data.name) && data.name.length) return data.name[0]
+  if (Array.isArray(data.stock) && data.stock.length) return data.stock[0]
+  const firstVal = Object.values(data)[0]
+  if (Array.isArray(firstVal) && firstVal.length) return firstVal[0]
+  if (typeof firstVal === 'string') return firstVal
+  return defaultMsg
+}
+
 export const productService = {
   /**
    * Obtiene la lista de productos con soporte para filtros de búsqueda y tienda.
@@ -79,7 +94,7 @@ export const productService = {
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
-        return { success: false, error: data.detail || 'Error al crear el producto' }
+        return { success: false, error: extractErrorMessage(data, 'Error al crear el producto') }
       }
       return { success: true, data }
     } catch {
@@ -107,7 +122,7 @@ export const productService = {
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
-        return { success: false, error: data.detail || 'Error al actualizar el producto' }
+        return { success: false, error: extractErrorMessage(data, 'Error al actualizar el producto') }
       }
       return { success: true, data }
     } catch {

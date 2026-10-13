@@ -80,6 +80,23 @@ class ProductViewSetTests(APITestCase):
         self.assertEqual(response.data[0]["id"], self.product.id)
         self.assertEqual(response.data[0]["store"], self.store.id)
 
+    def test_update_product_with_image_url_string_succeeds(self):
+        self.client.force_authenticate(user=self.owner)
+        response = self.client.patch(
+            reverse("products-detail", args=[self.product.id]),
+            {
+                "name": "Hamburguesa Modificada",
+                "price": "67.00",
+                "description": "para farmear aura con tus amigos",
+                "image": "http://testserver/media/products/fake.jpg",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.price, Decimal("67.00"))
+        self.assertEqual(self.product.description, "para farmear aura con tus amigos")
+
 
 class StoreViewSetTests(APITestCase):
     def setUp(self):
@@ -333,6 +350,33 @@ class CartItemViewSetTests(APITestCase):
         self.assertEqual(Order.objects.filter(user=self.user).count(), 0)
         self.assertEqual(CartItem.objects.filter(cart=self.cart).count(), 1)
 
+    def test_checkout_forbidden_for_vendor_user(self):
+        vendor_cart = Cart.objects.create(user=self.store_owner)
+        CartItem.objects.create(cart=vendor_cart, product=self.product, quantity=1)
+        self.client.force_authenticate(user=self.store_owner)
+
+        response = self.client.post(reverse("carts-checkout"), {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn("detail", response.data)
+        self.assertEqual(Order.objects.filter(user=self.store_owner).count(), 0)
+
+    def test_checkout_allowed_for_admin_user(self):
+        user_model = get_user_model()
+        admin_user = user_model.objects.create_user(
+            username="admin-cart-user",
+            password="testpass123",
+            email="admin-cart@example.com",
+            role="admin",
+            is_staff=True,
+        )
+        admin_cart = Cart.objects.create(user=admin_user)
+        CartItem.objects.create(cart=admin_cart, product=self.product, quantity=1)
+        self.client.force_authenticate(user=admin_user)
+
+        response = self.client.post(reverse("carts-checkout"), {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Order.objects.filter(user=admin_user).count(), 1)
+
 
 class OrderViewSetTests(APITestCase):
     def setUp(self):
@@ -451,6 +495,36 @@ class OrderViewSetTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("store", response.data)
+
+    def test_order_creation_forbidden_for_vendor(self):
+        self.client.force_authenticate(user=self.vendor_user)
+
+        response = self.client.post(
+            reverse("orders-list"),
+            {"store": self.store.id, "total": "50.00", "status": "pending"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn("detail", response.data)
+
+    def test_order_creation_allowed_for_admin(self):
+        user_model = get_user_model()
+        admin_user = user_model.objects.create_user(
+            username="admin-order-user",
+            password="testpass123",
+            email="admin-order@example.com",
+            role="admin",
+            is_staff=True,
+        )
+        self.client.force_authenticate(user=admin_user)
+
+        response = self.client.post(
+            reverse("orders-list"),
+            {"store": self.store.id, "total": "50.00", "status": "pending"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["user"], admin_user.id)
 
 
 class OrderItemViewSetTests(APITestCase):

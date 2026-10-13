@@ -3,6 +3,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Cart from '../Cart'
 import * as CartHook from '../../hooks/useCart'
+import * as AuthHook from '../../hooks/useAuth'
 
 describe('Cart View Component (TP9 TDD)', () => {
   const mockProduct1 = {
@@ -206,5 +207,57 @@ describe('Cart View Component (TP9 TDD)', () => {
       fireEvent.click(clearBtn)
     })
     expect(mockClearCart).toHaveBeenCalled()
+  })
+
+  it('disables checkout button and shows warning banner when user is a vendor', () => {
+    vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
+      user: { id: 88, email: 'vendedor@test.com', role: 'vendedor' },
+    })
+    vi.spyOn(CartHook, 'useCart').mockReturnValue({
+      items: mockCartItems,
+      itemCount: 3,
+      totalAmount: 10400,
+      loading: false,
+      error: null,
+      updateQuantity: mockUpdateQuantity,
+      removeItem: mockRemoveItem,
+      clearCart: mockClearCart,
+    })
+
+    render(
+      <MemoryRouter>
+        <Cart />
+      </MemoryRouter>
+    )
+
+    expect(
+      screen.getByText(/solo los clientes y administradores pueden realizar pedidos/i)
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /confirmar pedido e ir a pagar/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /pedidos exclusivos para clientes/i })).toBeDisabled()
+  })
+
+  it('allows admin to see active checkout link in cart', () => {
+    vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
+      user: { id: 1, email: 'admin@foodrush.com', role: 'admin', is_staff: true },
+    })
+    vi.spyOn(CartHook, 'useCart').mockReturnValue({
+      items: mockCartItems,
+      itemCount: 3,
+      totalAmount: 10400,
+      loading: false,
+      error: null,
+      updateQuantity: mockUpdateQuantity,
+      removeItem: mockRemoveItem,
+      clearCart: mockClearCart,
+    })
+
+    render(
+      <MemoryRouter>
+        <Cart />
+      </MemoryRouter>
+    )
+
+    expect(screen.getByRole('link', { name: /confirmar pedido e ir a pagar/i })).toBeInTheDocument()
   })
 })

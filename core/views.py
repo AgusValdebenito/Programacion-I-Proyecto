@@ -9,6 +9,7 @@ from users.models import Usuario
 from .models import Cart, CartItem, Order, OrderItem, Product, Store
 from .permissions import (
     IsAdminOrVendedor,
+    IsClienteOrAdmin,
     IsOrderParticipantOrAdmin,
     IsResourceOwnerOrReadOnly,
     is_admin_user,
@@ -93,6 +94,13 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         serializer.save()
 
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        new_store = serializer.validated_data.get("store", instance.store)
+        if new_store != instance.store and not is_admin_user(self.request.user):
+            raise ValidationError({"store": "No podés reasignar un producto a otra tienda."})
+        serializer.save()
+
 
 class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all().order_by("id")
@@ -129,10 +137,27 @@ class CartViewSet(viewsets.ModelViewSet):
         cart.items.all().delete()
         return Response({"detail": "Carrito vaciado exitosamente."}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=["post"], url_path="checkout", url_name="checkout")
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="checkout",
+        url_name="checkout",
+        permission_classes=[permissions.IsAuthenticated, IsClienteOrAdmin],
+    )
     def checkout(self, request):
         """Convierte atómicamente el carrito activo en un nuevo pedido."""
-        order = OrderService.checkout_cart(user=request.user)
+        delivery_address = request.data.get("address") or request.data.get("delivery_address")
+        delivery_phone = request.data.get("phone") or request.data.get("delivery_phone")
+        delivery_notes = request.data.get("notes") or request.data.get("delivery_notes")
+        payment_method = request.data.get("payment_method") or request.data.get("paymentMethod")
+
+        order = OrderService.checkout_cart(
+            user=request.user,
+            delivery_address=delivery_address,
+            delivery_phone=delivery_phone,
+            delivery_notes=delivery_notes,
+            payment_method=payment_method,
+        )
         serializer = OrderSerializer(order)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -170,7 +195,14 @@ class CartItemViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         instance = self.get_object()
+        if "cart" in serializer.validated_data and serializer.validated_data["cart"] != instance.cart:
+            raise ValidationError({"cart": "No podés transferir un ítem a otro carrito."})
+        if "product" in serializer.validated_data and serializer.validated_data["product"] != instance.product:
+            raise ValidationError({"product": "No podés cambiar el producto de un ítem existente."})
+
         new_quantity = serializer.validated_data.get("quantity", instance.quantity)
+        if new_quantity < 1:
+            raise ValidationError({"quantity": "La cantidad debe ser mayor o igual a 1."})
         if new_quantity > CartService.MAX_QUANTITY_PER_ITEM:
             raise ValidationError({
                 "quantity": f"El límite máximo por producto es de {CartService.MAX_QUANTITY_PER_ITEM} unidades."
@@ -201,14 +233,23 @@ class OrderViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        user = self.request.user
+        if not (is_admin_user(user) or getattr(user, "role", None) == Usuario.RoleChoices.CLIENTE):
+            raise PermissionDenied(
+                "Los vendedores no pueden realizar pedidos. Esta acción está reservada para clientes y administradores."
+            )
+        serializer.save(user=user)
 
     def perform_update(self, serializer):
         instance = self.get_object()
+        if "total" in serializer.validated_data:
+            raise ValidationError({"total": "No está permitido modificar el total de un pedido existente."})
+        if "store" in serializer.validated_data:
+            raise ValidationError({"store": "No está permitido modificar la tienda de un pedido existente."})
+
         new_status = serializer.validated_data.get("status", instance.status)
 
         if new_status == instance.status:
-            serializer.save()
             return
 
         order = OrderService.transition_status(
@@ -217,6 +258,9 @@ class OrderViewSet(viewsets.ModelViewSet):
             user=self.request.user,
         )
         serializer.instance = order
+
+    def destroy(self, request, *args, **kwargs):
+        raise ValidationError({"detail": "Los pedidos no pueden ser eliminados. Use la cancelación de pedidos."})
 
 
 class OrderItemViewSet(viewsets.ModelViewSet):
@@ -234,15 +278,34 @@ class OrderItemViewSet(viewsets.ModelViewSet):
         ).distinct()
 
     def perform_create(self, serializer):
+        from django.db import transaction
+
+        user = self.request.user
+        if not (is_admin_user(user) or getattr(user, "role", None) == Usuario.RoleChoices.CLIENTE):
+            raise PermissionDenied(
+                "Los vendedores no pueden realizar pedidos. Esta acción está reservada para clientes y administradores."
+            )
+
         order = serializer.validated_data["order"]
+        if order.status != Order.StatusChoices.PENDING:
+            raise ValidationError({"detail": "Solo se pueden agregar ítems a pedidos en estado 'Pendiente'."})
+
         product = serializer.validated_data["product"]
         quantity = serializer.validated_data["quantity"]
 
-        unit_price = OrderService.validate_and_prepare_item(
-            order=order,
-            product=product,
-            quantity=quantity,
-            user=self.request.user,
-        )
+        with transaction.atomic():
+            unit_price = OrderService.validate_and_prepare_item(
+                order=order,
+                product=product,
+                quantity=quantity,
+                user=self.request.user,
+            )
 
-        serializer.save(unit_price=unit_price)
+            serializer.save(unit_price=unit_price)
+
+            # Recalcular el total del pedido
+            order.total += unit_price * quantity
+            order.save(update_fields=["total"])
+
+    def destroy(self, request, *args, **kwargs):
+        raise ValidationError({"detail": "Los ítems de pedido no pueden ser eliminados individualmente."})

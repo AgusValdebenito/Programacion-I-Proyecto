@@ -1,6 +1,13 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import ProductCard from '../ProductCard'
+
+const renderCard = (props) => render(
+  <MemoryRouter>
+    <ProductCard {...props} />
+  </MemoryRouter>
+)
 
 describe('ProductCard Component (TP9 TDD)', () => {
   const availableProduct = {
@@ -32,7 +39,7 @@ describe('ProductCard Component (TP9 TDD)', () => {
   }
 
   it('renders product name, description and formatted price', () => {
-    render(<ProductCard product={availableProduct} />)
+    renderCard({ product: availableProduct })
 
     expect(screen.getByText('Crazy Burger Simple')).toBeInTheDocument()
     expect(screen.getByText('Medallón 150g, cheddar y lechuga')).toBeInTheDocument()
@@ -40,7 +47,7 @@ describe('ProductCard Component (TP9 TDD)', () => {
   })
 
   it('renders product image when available', () => {
-    render(<ProductCard product={availableProduct} />)
+    renderCard({ product: availableProduct })
 
     const img = screen.getByRole('img', { name: /crazy burger simple/i })
     expect(img).toHaveAttribute('src', '/images/burger.jpg')
@@ -48,7 +55,7 @@ describe('ProductCard Component (TP9 TDD)', () => {
 
   it('calls onAddToCart handler when "Agregar" button is clicked', () => {
     const handleAddToCart = vi.fn()
-    render(<ProductCard product={availableProduct} onAddToCart={handleAddToCart} />)
+    renderCard({ product: availableProduct, onAddToCart: handleAddToCart })
 
     const button = screen.getByRole('button', { name: /agregar/i })
     expect(button).not.toBeDisabled()
@@ -60,7 +67,7 @@ describe('ProductCard Component (TP9 TDD)', () => {
 
   it('disables button and shows "Sin stock" badge when stock is 0', () => {
     const handleAddToCart = vi.fn()
-    render(<ProductCard product={outOfStockProduct} onAddToCart={handleAddToCart} />)
+    renderCard({ product: outOfStockProduct, onAddToCart: handleAddToCart })
 
     expect(screen.getAllByText(/sin stock/i).length).toBeGreaterThanOrEqual(1)
     const button = screen.getByRole('button', { name: /sin stock/i })
@@ -70,7 +77,7 @@ describe('ProductCard Component (TP9 TDD)', () => {
   })
 
   it('disables button and shows "No disponible" badge when is_available is false', () => {
-    render(<ProductCard product={unavailableProduct} />)
+    renderCard({ product: unavailableProduct })
 
     expect(screen.getAllByText(/no disponible/i).length).toBeGreaterThanOrEqual(1)
     const button = screen.getByRole('button', { name: /no disponible/i })

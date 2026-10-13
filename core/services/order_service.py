@@ -2,6 +2,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from core.models import Order
 from core.permissions import is_admin_user
+from users.models import Usuario
 
 
 class OrderService:
@@ -82,27 +83,43 @@ class OrderService:
         return product.price
 
     @classmethod
-    def checkout_cart(cls, user):
+    def checkout_cart(
+        cls,
+        user,
+        delivery_address=None,
+        delivery_phone=None,
+        delivery_notes=None,
+        payment_method=None,
+    ):
         """Convierte atómicamente el carrito activo en un pedido, congelando precios y descontando stock."""
+        if not (is_admin_user(user) or getattr(user, "role", None) == Usuario.RoleChoices.CLIENTE):
+            raise PermissionDenied(
+                "Los vendedores no pueden realizar pedidos. Esta acción está reservada para clientes y administradores."
+            )
+
         from decimal import Decimal
         from django.db import transaction
-        from core.models import Cart, OrderItem, Product
-
-        cart, _ = Cart.objects.get_or_create(user=user)
-        cart_items = list(cart.items.select_related("product__store").all())
-
-        if not cart_items:
-            raise ValidationError({"detail": "No podés realizar el checkout con un carrito vacío."})
-
-        # Regla mono-tienda: todos los productos deben pertenecer al mismo local
-        store = cart_items[0].product.store
-        for item in cart_items:
-            if item.product.store != store:
-                raise ValidationError({
-                    "detail": "El carrito contiene productos de diferentes comercios."
-                })
+        from core.models import Cart, Order, OrderItem, Product
 
         with transaction.atomic():
+            # Bloquear el carrito para evitar checkouts concurrentes simultáneos (doble orden)
+            cart = Cart.objects.select_for_update().filter(user=user).first()
+            if not cart:
+                cart, _ = Cart.objects.get_or_create(user=user)
+
+            cart_items = list(cart.items.select_related("product__store").all())
+
+            if not cart_items:
+                raise ValidationError({"detail": "No podés realizar el checkout con un carrito vacío."})
+
+            # Regla mono-tienda: todos los productos deben pertenecer al mismo local
+            store = cart_items[0].product.store
+            for item in cart_items:
+                if item.product.store != store:
+                    raise ValidationError({
+                        "detail": "El carrito contiene productos de diferentes comercios."
+                    })
+
             # Bloquear productos para evitar condiciones de carrera (overselling)
             product_ids = [item.product.id for item in cart_items]
             locked_products = {
@@ -123,12 +140,16 @@ class OrderService:
                     })
                 total += product.price * item.quantity
 
-            # Crear la orden
+            # Crear la orden con datos de entrega
             order = Order.objects.create(
                 user=user,
                 store=store,
                 total=total,
                 status=Order.StatusChoices.PENDING,
+                delivery_address=delivery_address,
+                delivery_phone=delivery_phone,
+                delivery_notes=delivery_notes,
+                payment_method=payment_method,
             )
 
             # Crear OrderItems con precio congelado y descontar stock

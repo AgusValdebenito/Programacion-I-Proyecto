@@ -20,7 +20,7 @@ function formatCurrency(value) {
 }
 
 export default function Checkout() {
-  const { items, itemCount, totalAmount, checkout } = useCart()
+  const { items, itemCount, totalAmount, checkout, loading } = useCart()
   const { user } = useAuth()
   const { activeAddress } = useAddress()
 
@@ -59,9 +59,19 @@ export default function Checkout() {
     return Object.keys(errors).length === 0
   }
 
+  const isVendor = user?.role === 'vendedor'
+  const isAdmin = user?.role === 'admin' || Boolean(user?.is_staff) || Boolean(user?.is_superuser)
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setCheckoutError(null)
+
+    if (isVendor && !isAdmin) {
+      setCheckoutError(
+        'Los vendedores no pueden realizar pedidos. Esta acción está reservada para clientes y administradores.'
+      )
+      return
+    }
 
     if (!validate()) {
       return
@@ -69,7 +79,12 @@ export default function Checkout() {
 
     setSubmitting(true)
     try {
-      const res = await checkout()
+      const res = await checkout({
+        address: address.trim(),
+        phone: phone.trim(),
+        notes: notes.trim(),
+        payment_method: paymentMethod,
+      })
       if (res && res.success) {
         setCompletedOrder(res.data)
       } else {
@@ -137,6 +152,20 @@ export default function Checkout() {
     )
   }
 
+  // Carga inicial
+  if (loading && items.length === 0) {
+    return (
+      <div className="container py-5 text-center" style={{ minHeight: '60vh' }}>
+        <div className="d-flex flex-column align-items-center justify-content-center py-5">
+          <div className="spinner-border text-primary mb-3" role="status">
+            <span className="visually-hidden">Cargando pedido...</span>
+          </div>
+          <p className="text-secondary fw-semibold">Cargando resumen de tu pedido...</p>
+        </div>
+      </div>
+    )
+  }
+
   // Carrito vacío
   if (items.length === 0) {
     return (
@@ -153,6 +182,32 @@ export default function Checkout() {
             <i className="bi bi-shop me-2" />
             Ir a la tienda
           </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // Restricción para rol vendedor
+  if (isVendor && !isAdmin) {
+    return (
+      <div className="container py-5 text-center" style={{ minHeight: '60vh' }}>
+        <div className="card border-0 shadow-sm rounded-4 p-5 max-w-600 mx-auto bg-white">
+          <div className="text-warning display-1 mb-3">
+            <i className="bi bi-shield-lock" />
+          </div>
+          <h1 className="h4 fw-bold text-dark mb-2">Acceso restringido para vendedores</h1>
+          <p className="text-muted mb-4">
+            Tu cuenta posee perfil de <strong>Vendedor</strong>. Las cuentas comerciales están destinadas a la gestión de tiendas y no tienen permitido realizar pedidos. Si deseás hacer un pedido, podés iniciar sesión con una cuenta de cliente.
+          </p>
+          <div className="d-flex flex-column flex-sm-row justify-content-center gap-2">
+            <Link to="/panel-tienda" className="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
+              <i className="bi bi-shop me-2" />
+              Ir a mi Panel de Tienda
+            </Link>
+            <Link to="/tiendas" className="btn btn-outline-secondary px-4 py-2 rounded-pill">
+              Explorar comercios
+            </Link>
+          </div>
         </div>
       </div>
     )

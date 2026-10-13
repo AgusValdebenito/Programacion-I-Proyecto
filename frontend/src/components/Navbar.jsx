@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useCart } from '../hooks/useCart'
 import { useAddress } from '../hooks/useAddress'
@@ -12,6 +12,17 @@ export default function Navbar() {
   const [showLocationMenu, setShowLocationMenu] = useState(false)
   const locationMenuRef = useRef(null)
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const isExcludedPath =
+    ['/login', '/register'].includes(location.pathname) ||
+    location.pathname.startsWith('/panel-tienda')
+
+  const isVendorOnly =
+    user?.role === 'vendedor' &&
+    !(user?.role === 'admin' || Boolean(user?.is_staff) || Boolean(user?.is_superuser))
+
+  const showDeliveryLocation = !isExcludedPath && !isVendorOnly
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -104,81 +115,83 @@ export default function Navbar() {
           </div>
         </div>
 
-        <div className="pt-3 pb-1 d-flex justify-content-center justify-content-md-start position-relative" ref={locationMenuRef}>
-          <button
-            type="button"
-            className="fr-location-pill border-0 text-start d-inline-flex align-items-center cursor-pointer"
-            onClick={() => setShowLocationMenu((prev) => !prev)}
-            aria-expanded={showLocationMenu}
-            aria-label="Seleccionar dirección de entrega"
-          >
-            <i className="bi bi-geo-alt-fill" />
-            <span className="fw-semibold">{activeAddress?.label || 'Casa'}</span>
-            <span className="opacity-75 d-none d-sm-inline text-truncate ms-1" style={{ maxWidth: '200px', fontSize: '0.85rem' }}>
-              · {activeAddress?.address}
-            </span>
-            <i className="bi bi-chevron-down ms-1" style={{ fontSize: '0.75rem' }} />
-          </button>
-
-          {showLocationMenu && (
-            <div
-              className="card border-0 shadow-lg rounded-4 p-3 position-absolute top-100 start-0 mt-2 z-3 bg-white text-dark"
-              style={{ width: '320px', maxWidth: '90vw' }}
+        {showDeliveryLocation && (
+          <div className="pt-3 pb-1 d-flex justify-content-center justify-content-md-start position-relative" ref={locationMenuRef}>
+            <button
+              type="button"
+              className="fr-location-pill border-0 text-start d-inline-flex align-items-center cursor-pointer"
+              onClick={() => setShowLocationMenu((prev) => !prev)}
+              aria-expanded={showLocationMenu}
+              aria-label="Seleccionar dirección de entrega"
             >
-              <div className="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
-                <span className="small fw-bold text-secondary text-uppercase tracking-wide">
-                  <i className="bi bi-geo-alt me-1 text-primary" />
-                  Entregar en:
-                </span>
-                <Link
-                  to="/perfil"
-                  className="small text-primary text-decoration-none fw-semibold"
-                  onClick={() => setShowLocationMenu(false)}
-                >
-                  Editar
-                </Link>
-              </div>
+              <i className="bi bi-geo-alt-fill" />
+              <span className="fw-semibold">{activeAddress?.label || 'Casa'}</span>
+              <span className="opacity-75 d-none d-sm-inline text-truncate ms-1" style={{ maxWidth: '200px', fontSize: '0.85rem' }}>
+                · {activeAddress?.address}
+              </span>
+              <i className="bi bi-chevron-down ms-1" style={{ fontSize: '0.75rem' }} />
+            </button>
 
-              <div className="d-flex flex-column gap-2 mb-2 max-h-200 overflow-auto">
-                {addresses.map((item) => {
-                  const isSelected = activeAddress?.id === item.id
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className={`btn text-start p-2 rounded-3 d-flex align-items-center justify-content-between ${
-                        isSelected ? 'btn-primary-subtle border-primary text-primary fw-semibold' : 'btn-light text-dark'
-                      }`}
-                      onClick={() => {
-                        selectAddress(item.id)
-                        setShowLocationMenu(false)
-                      }}
-                    >
-                      <div className="min-w-0 me-2">
-                        <span className="d-block small fw-bold">{item.label}</span>
-                        <small className="text-secondary d-block text-truncate" style={{ maxWidth: '240px' }}>
-                          {item.address}
-                        </small>
-                      </div>
-                      {isSelected && <i className="bi bi-check2 text-primary fs-5 flex-shrink-0" />}
-                    </button>
-                  )
-                })}
-              </div>
+            {showLocationMenu && (
+              <div
+                className="card border-0 shadow-lg rounded-4 p-3 position-absolute top-100 start-0 mt-2 z-3 bg-white text-dark"
+                style={{ width: '320px', maxWidth: '90vw' }}
+              >
+                <div className="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
+                  <span className="small fw-bold text-secondary text-uppercase tracking-wide">
+                    <i className="bi bi-geo-alt me-1 text-primary" />
+                    Entregar en:
+                  </span>
+                  <Link
+                    to="/perfil"
+                    className="small text-primary text-decoration-none fw-semibold"
+                    onClick={() => setShowLocationMenu(false)}
+                  >
+                    Editar
+                  </Link>
+                </div>
 
-              <div className="pt-2 border-top">
-                <Link
-                  to="/perfil"
-                  className="btn btn-outline-primary btn-sm w-100 rounded-pill"
-                  onClick={() => setShowLocationMenu(false)}
-                >
-                  <i className="bi bi-plus-circle me-1" />
-                  Administrar direcciones
-                </Link>
+                <div className="d-flex flex-column gap-2 mb-2 max-h-200 overflow-auto">
+                  {addresses.map((item) => {
+                    const isSelected = activeAddress?.id === item.id
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={`btn text-start p-2 rounded-3 d-flex align-items-center justify-content-between ${
+                          isSelected ? 'btn-primary-subtle border-primary text-primary fw-semibold' : 'btn-light text-dark'
+                        }`}
+                        onClick={() => {
+                          selectAddress(item.id)
+                          setShowLocationMenu(false)
+                        }}
+                      >
+                        <div className="min-w-0 me-2">
+                          <span className="d-block small fw-bold">{item.label}</span>
+                          <small className="text-secondary d-block text-truncate" style={{ maxWidth: '240px' }}>
+                            {item.address}
+                          </small>
+                        </div>
+                        {isSelected && <i className="bi bi-check2 text-primary fs-5 flex-shrink-0" />}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <div className="pt-2 border-top">
+                  <Link
+                    to="/perfil"
+                    className="btn btn-outline-primary btn-sm w-100 rounded-pill"
+                    onClick={() => setShowLocationMenu(false)}
+                  >
+                    <i className="bi bi-plus-circle me-1" />
+                    Administrar direcciones
+                  </Link>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
     </header>
   )

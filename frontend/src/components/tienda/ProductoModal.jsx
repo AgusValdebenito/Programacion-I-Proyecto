@@ -42,7 +42,10 @@ export default function ProductoModal({ product, onClose, onSave }) {
       price: numPrice.toFixed(2),
       stock: numStock,
       is_available: isAvailable,
-      image: image.trim() || undefined,
+    }
+
+    if (image && image.trim() && image.trim() !== product?.image) {
+      payload.image = image.trim()
     }
 
     const result = await onSave(payload, product?.id)

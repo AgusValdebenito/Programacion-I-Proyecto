@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
+import { useAuth } from '../hooks/useAuth'
 import { getImageUrl } from '../utils/imageUrl'
 
 /**
@@ -33,6 +34,10 @@ export default function Cart() {
   const [clearing, setClearing] = useState(false)
   const [itemError, setItemError] = useState(null)
 
+  const { user } = useAuth()
+  const isVendor = user?.role === 'vendedor'
+  const isAdmin = user?.role === 'admin' || Boolean(user?.is_staff) || Boolean(user?.is_superuser)
+
   const handleUpdate = async (itemId, quantity) => {
     setProcessingId(itemId)
     setItemError(null)
@@ -48,8 +53,12 @@ export default function Cart() {
 
   const handleRemove = async (itemId) => {
     setProcessingId(itemId)
+    setItemError(null)
     try {
-      await removeItem(itemId)
+      const res = await removeItem(itemId)
+      if (res && !res.success && res.error) {
+        setItemError(res.error)
+      }
     } finally {
       setProcessingId(null)
     }
@@ -57,8 +66,12 @@ export default function Cart() {
 
   const handleClear = async () => {
     setClearing(true)
+    setItemError(null)
     try {
-      await clearCart()
+      const res = await clearCart()
+      if (res && !res.success && res.error) {
+        setItemError(res.error)
+      }
     } finally {
       setClearing(false)
     }
@@ -254,13 +267,34 @@ export default function Cart() {
               <span className="fs-4 fw-bold text-primary">{formatCurrency(totalAmount)}</span>
             </div>
 
-            <Link
-              to="/checkout"
-              className="btn btn-primary w-100 py-2 rounded-pill fw-semibold shadow-sm mb-3"
-            >
-              Confirmar pedido e ir a pagar
-              <i className="bi bi-arrow-right ms-2" />
-            </Link>
+            {isVendor && !isAdmin && (
+              <div className="alert alert-warning py-2 px-3 small rounded-3 mb-3 d-flex align-items-center">
+                <i className="bi bi-info-circle-fill me-2 flex-shrink-0" />
+                <span>
+                  Tu cuenta es de tipo <strong>Vendedor</strong>. Solo los clientes y administradores pueden realizar pedidos.
+                </span>
+              </div>
+            )}
+
+            {isVendor && !isAdmin ? (
+              <button
+                type="button"
+                disabled
+                className="btn btn-secondary w-100 py-2 rounded-pill fw-semibold mb-3 opacity-75"
+                title="Los vendedores no pueden realizar pedidos"
+              >
+                <i className="bi bi-lock me-1" />
+                Pedidos exclusivos para clientes
+              </button>
+            ) : (
+              <Link
+                to="/checkout"
+                className="btn btn-primary w-100 py-2 rounded-pill fw-semibold shadow-sm mb-3"
+              >
+                Confirmar pedido e ir a pagar
+                <i className="bi bi-arrow-right ms-2" />
+              </Link>
+            )}
 
             <Link
               to="/"

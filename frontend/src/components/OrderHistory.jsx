@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { orderService } from '../services/orderService'
@@ -43,48 +43,28 @@ export default function OrderHistory() {
   const [error, setError] = useState(null)
   const [cancellingId, setCancellingId] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)
+  const [reloadKey, setReloadKey] = useState(0)
 
-  const fetchOrders = useCallback(async () => {
+  const reloadOrders = () => {
     setLoading(true)
     setError(null)
-    try {
-      const token = await getValidToken()
-      if (!token) {
-        setError('Debes iniciar sesión para consultar tus pedidos.')
-        return
-      }
-
-      const res = await orderService.getOrders(token)
-      if (res.success && Array.isArray(res.data)) {
-        const sorted = [...res.data].sort((a, b) => (b.id || 0) - (a.id || 0))
-        setOrders(sorted)
-      } else {
-        setError(res.error || 'No se pudieron cargar los pedidos.')
-      }
-    } catch {
-      setError('Error de conexión al cargar el historial.')
-    } finally {
-      setLoading(false)
-    }
-  }, [getValidToken])
+    setReloadKey((k) => k + 1)
+  }
 
   useEffect(() => {
     let isMounted = true
 
-    const initOrders = async () => {
+    const loadOrders = async () => {
       try {
         const token = await getValidToken()
+        if (!isMounted) return
         if (!token) {
-          if (isMounted) {
-            setError('Debes iniciar sesión para consultar tus pedidos.')
-            setLoading(false)
-          }
+          setError('Debes iniciar sesión para consultar tus pedidos.')
           return
         }
 
         const res = await orderService.getOrders(token)
         if (!isMounted) return
-
         if (res.success && Array.isArray(res.data)) {
           const sorted = [...res.data].sort((a, b) => (b.id || 0) - (a.id || 0))
           setOrders(sorted)
@@ -92,18 +72,22 @@ export default function OrderHistory() {
           setError(res.error || 'No se pudieron cargar los pedidos.')
         }
       } catch {
-        if (isMounted) setError('Error de conexión al cargar el historial.')
+        if (isMounted) {
+          setError('Error de conexión al cargar el historial.')
+        }
       } finally {
-        if (isMounted) setLoading(false)
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
 
-    initOrders()
+    loadOrders()
 
     return () => {
       isMounted = false
     }
-  }, [getValidToken])
+  }, [getValidToken, reloadKey])
 
   const handleCancelOrder = async (orderId) => {
     setCancellingId(orderId)
@@ -149,7 +133,7 @@ export default function OrderHistory() {
           {error}
         </div>
         <div>
-          <button type="button" className="btn btn-outline-primary btn-sm rounded-pill px-3" onClick={fetchOrders}>
+          <button type="button" className="btn btn-outline-primary btn-sm rounded-pill px-3" onClick={reloadOrders}>
             <i className="bi bi-arrow-clockwise me-1" />
             Reintentar
           </button>
@@ -212,10 +196,21 @@ export default function OrderHistory() {
                     {statusConfig.label}
                   </span>
                 </div>
-                <small className="text-muted">
+                <small className="text-muted d-block">
                   {order.store_name && <strong className="text-dark me-2">{order.store_name}</strong>}
                   {formatDate(order.created_at)}
                 </small>
+                {order.delivery_address && (
+                  <div className="small text-secondary mt-1">
+                    <i className="bi bi-geo-alt-fill text-primary me-1" />
+                    <span>{order.delivery_address}</span>
+                    {order.payment_method && (
+                      <span className="ms-2 badge bg-light text-dark border">
+                        {order.payment_method === 'cash' ? 'Efectivo' : 'Tarjeta'}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="text-sm-end">

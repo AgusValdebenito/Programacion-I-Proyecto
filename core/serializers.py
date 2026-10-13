@@ -16,6 +16,18 @@ class StoreSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["owner", "created_at"]
 
+    def to_internal_value(self, data):
+        if isinstance(data, dict) and "image" in data:
+            image_val = data.get("image")
+            if isinstance(image_val, str):
+                mutable_data = data.copy()
+                if self.instance and (not image_val or image_val.startswith("http") or image_val.startswith("/")):
+                    mutable_data.pop("image")
+                elif not image_val:
+                    mutable_data["image"] = None
+                data = mutable_data
+        return super().to_internal_value(data)
+
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,6 +44,18 @@ class ProductSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = ["created_at"]
+
+    def to_internal_value(self, data):
+        if isinstance(data, dict) and "image" in data:
+            image_val = data.get("image")
+            if isinstance(image_val, str):
+                mutable_data = data.copy()
+                if self.instance and (not image_val or image_val.startswith("http") or image_val.startswith("/")):
+                    mutable_data.pop("image")
+                elif not image_val:
+                    mutable_data["image"] = None
+                data = mutable_data
+        return super().to_internal_value(data)
 
 
 class CartItemSerializer(serializers.ModelSerializer):
@@ -83,6 +107,10 @@ class OrderSerializer(serializers.ModelSerializer):
             "items",
             "total",
             "status",
+            "delivery_address",
+            "delivery_phone",
+            "delivery_notes",
+            "payment_method",
             "created_at",
         ]
         read_only_fields = ["user", "created_at"]

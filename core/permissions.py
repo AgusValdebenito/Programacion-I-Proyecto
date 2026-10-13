@@ -34,6 +34,21 @@ class IsCliente(permissions.BasePermission):
         return request.user.is_authenticated and request.user.role == Usuario.RoleChoices.CLIENTE
 
 
+class IsClienteOrAdmin(permissions.BasePermission):
+    """
+    Permite realizar pedidos solo a usuarios con rol 'cliente' o administradores.
+    Los vendedores tienen prohibido realizar pedidos.
+    """
+    message = "Los vendedores no pueden realizar pedidos. Esta acción está reservada para clientes y administradores."
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        if is_admin_user(request.user):
+            return True
+        return request.user.role == Usuario.RoleChoices.CLIENTE
+
+
 class IsOrderParticipantOrAdmin(permissions.BasePermission):
     """
     Permite acceso al creador del pedido (cliente), al dueño de la tienda receptora (vendedor) o admin.

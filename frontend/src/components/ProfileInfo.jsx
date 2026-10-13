@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useAddress } from '../hooks/useAddress'
 import { authService } from '../services/authService'
-import { setStoredTokens } from '../utils/token'
+import { setStoredTokens, getStoredUser } from '../utils/token'
 
 export default function ProfileInfo() {
   const { user, setUser, getValidToken } = useAuth()
@@ -14,6 +14,15 @@ export default function ProfileInfo() {
   const [savingProfile, setSavingProfile] = useState(false)
   const [profileSuccess, setProfileSuccess] = useState(null)
   const [profileError, setProfileError] = useState(null)
+  const successTimeoutRef = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current)
+      }
+    }
+  }, [])
 
   // Formulario para nueva dirección
   const [newLabel, setNewLabel] = useState('')
@@ -35,10 +44,12 @@ export default function ProfileInfo() {
 
       const res = await authService.updateProfile({ name, phone }, token)
       if (res.success && res.data) {
-        setUser((prev) => ({ ...prev, ...res.data }))
-        setStoredTokens({ user: res.data })
+        const mergedUser = { ...(getStoredUser() || {}), ...user, ...res.data }
+        setUser(mergedUser)
+        setStoredTokens({ user: mergedUser })
         setProfileSuccess('¡Perfil actualizado con éxito!')
-        setTimeout(() => setProfileSuccess(null), 3000)
+        if (successTimeoutRef.current) clearTimeout(successTimeoutRef.current)
+        successTimeoutRef.current = setTimeout(() => setProfileSuccess(null), 3000)
       } else {
         setProfileError(res.error || 'No se pudo actualizar el perfil.')
       }

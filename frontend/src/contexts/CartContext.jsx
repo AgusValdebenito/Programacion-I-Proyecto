@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useCallback, useMemo } from 'react'
+import { createContext, useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { cartService } from '../services/cartService'
 
@@ -11,6 +11,7 @@ export function CartProvider({ children }) {
   const [loading, setLoading] = useState(() => Boolean(user))
   const [error, setError] = useState(null)
   const [prevUser, setPrevUser] = useState(user)
+  const refreshReqIdRef = useRef(0)
 
   if (user !== prevUser) {
     setPrevUser(user)
@@ -35,15 +36,18 @@ export function CartProvider({ children }) {
       return
     }
 
+    const reqId = ++refreshReqIdRef.current
     setLoading(true)
     setError(null)
     try {
       const res = await cartService.getActiveCart(token)
+      if (reqId !== refreshReqIdRef.current) return
       if (res.success && res.data) {
         setCart(res.data)
       } else {
         // Fallback: intentar inicializarlo si no existiera
         const initRes = await cartService.getOrCreateCart(token)
+        if (reqId !== refreshReqIdRef.current) return
         if (initRes.success && initRes.data) {
           setCart(initRes.data)
         } else {
@@ -51,9 +55,13 @@ export function CartProvider({ children }) {
         }
       }
     } catch {
-      setError('Error de conexión al cargar el carrito')
+      if (reqId === refreshReqIdRef.current) {
+        setError('Error de conexión al cargar el carrito')
+      }
     } finally {
-      setLoading(false)
+      if (reqId === refreshReqIdRef.current) {
+        setLoading(false)
+      }
     }
   }, [user, getValidToken])
 
@@ -224,12 +232,15 @@ export function CartProvider({ children }) {
 
   /**
    * Realiza el checkout convirtiendo el carrito en una orden.
+   * @param {Object} [deliveryData]
    */
-  const checkout = async () => {
+  const checkout = async (deliveryData) => {
     const token = await getValidToken()
     if (!token) return { success: false, error: 'No autenticado' }
 
-    const res = await cartService.checkout(token)
+    const res = deliveryData !== undefined
+      ? await cartService.checkout(token, deliveryData)
+      : await cartService.checkout(token)
     if (res.success) {
       await refreshCart()
       return { success: true, data: res.data }

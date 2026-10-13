@@ -14,6 +14,8 @@ export default function PanelTienda() {
   const { getToken, updateUser } = useAuth()
   const [store, setStore] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [storeError, setStoreError] = useState(null)
+  const [actionError, setActionError] = useState(null)
   const [activeTab, setActiveTab] = useState('resumen') // 'resumen' | 'menu' | 'pedidos'
 
   // Onboarding para crear tienda
@@ -69,6 +71,7 @@ export default function PanelTienda() {
 
     const loadInitialData = async () => {
       setLoading(true)
+      setStoreError(null)
       const token = getToken()
       const result = await storeService.getMyStore(token)
       if (!isMounted) return
@@ -86,6 +89,12 @@ export default function PanelTienda() {
         if (ordRes.success && Array.isArray(ordRes.data)) {
           setOrders(ordRes.data)
         }
+      } else if (
+        !result.success &&
+        result.error &&
+        result.error.toLowerCase().includes('conexión')
+      ) {
+        setStoreError(result.error)
       } else {
         setStore(null)
       }
@@ -182,17 +191,24 @@ export default function PanelTienda() {
   // Eliminar producto
   const handleDeleteProduct = async (productId) => {
     const token = getToken()
+    setActionError(null)
     setDeletingProductId(productId)
     const result = await productService.deleteProduct(productId, token)
     setDeletingProductId(null)
     if (result.success) {
       setProducts((prev) => prev.filter((p) => p.id !== productId))
+    } else {
+      setActionError(
+        result.error ||
+          'No se pudo eliminar el producto. Si ya tuvo pedidos asociados, podés desactivarlo con el botón de disponibilidad.'
+      )
     }
   }
 
   // Transición de estado de pedido (Cocina)
   const handleTransitionOrder = async (orderId, newStatus) => {
     const token = getToken()
+    setActionError(null)
     setUpdatingOrderId(orderId)
     const result = await orderService.updateOrderStatus(orderId, newStatus, token)
     setUpdatingOrderId(null)
@@ -200,6 +216,8 @@ export default function PanelTienda() {
       setOrders((prev) =>
         prev.map((ord) => (ord.id === orderId ? { ...ord, status: newStatus } : ord))
       )
+    } else {
+      setActionError(result.error || 'No se pudo actualizar el estado del pedido.')
     }
   }
 
@@ -242,6 +260,38 @@ export default function PanelTienda() {
           <span className="visually-hidden">Cargando panel de tienda...</span>
         </div>
         <p className="text-secondary mt-3">Cargando datos del comercio...</p>
+      </div>
+    )
+  }
+
+  // Error al cargar tienda
+  if (storeError) {
+    return (
+      <div className="container py-5 text-center" style={{ minHeight: '60vh' }}>
+        <div className="alert alert-danger p-4 rounded-4 max-w-600 mx-auto" role="alert">
+          <i className="bi bi-exclamation-triangle-fill fs-1 text-danger d-block mb-3" />
+          <h2 className="h5 fw-bold mb-2">Error al cargar el panel de tienda</h2>
+          <p className="text-secondary small mb-4">{storeError}</p>
+          <button
+            type="button"
+            className="btn btn-outline-danger rounded-pill px-4"
+            onClick={() => {
+              setLoading(true)
+              setStoreError(null)
+              storeService.getMyStore(getToken()).then((res) => {
+                if (res.success) {
+                  setStore(res.data)
+                } else {
+                  setStoreError(res.error || 'Error al conectar con el servidor')
+                }
+                setLoading(false)
+              })
+            }}
+          >
+            <i className="bi bi-arrow-clockwise me-1" />
+            Reintentar
+          </button>
+        </div>
       </div>
     )
   }
@@ -371,6 +421,21 @@ export default function PanelTienda() {
           </button>
         </div>
       </div>
+
+      {actionError && (
+        <div className="alert alert-danger alert-dismissible fade show rounded-3 mb-4 d-flex align-items-center justify-content-between" role="alert">
+          <div>
+            <i className="bi bi-exclamation-triangle-fill me-2" />
+            {actionError}
+          </div>
+          <button
+            type="button"
+            className="btn-close position-static p-2"
+            onClick={() => setActionError(null)}
+            aria-label="Cerrar alerta"
+          />
+        </div>
+      )}
 
       {/* Navegación por pestañas */}
       <ul className="nav nav-pills gap-2 mb-4 p-1 bg-white rounded-pill shadow-sm border d-inline-flex" role="tablist">

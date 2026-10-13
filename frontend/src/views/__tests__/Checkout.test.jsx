@@ -218,4 +218,49 @@ describe('Checkout View Component (TP9 TDD - Issue #17)', () => {
       ).toBeInTheDocument()
     })
   })
+
+  it('shows restricted access screen when vendor tries to access checkout', () => {
+    vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
+      user: { id: 99, email: 'vendedor@test.com', role: 'vendedor' },
+    })
+    vi.spyOn(CartHook, 'useCart').mockReturnValue({
+      items: mockCartItems,
+      itemCount: 2,
+      totalAmount: 8400,
+      loading: false,
+      checkout: mockCheckout,
+    })
+
+    render(
+      <MemoryRouter>
+        <Checkout />
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText(/acceso restringido para vendedores/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /ir a mi panel de tienda/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /confirmar y realizar pedido/i })).not.toBeInTheDocument()
+  })
+
+  it('allows admin user to proceed with checkout form', () => {
+    vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
+      user: { id: 1, email: 'admin@foodrush.com', role: 'admin', is_staff: true },
+    })
+    vi.spyOn(CartHook, 'useCart').mockReturnValue({
+      items: mockCartItems,
+      itemCount: 2,
+      totalAmount: 8400,
+      loading: false,
+      checkout: mockCheckout,
+    })
+
+    render(
+      <MemoryRouter>
+        <Checkout />
+      </MemoryRouter>
+    )
+
+    expect(screen.getByRole('heading', { name: /finalizar compra/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /confirmar y realizar pedido/i })).toBeInTheDocument()
+  })
 })

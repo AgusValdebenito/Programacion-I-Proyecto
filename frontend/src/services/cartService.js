@@ -4,6 +4,20 @@
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
 
+function extractErrorMessage(data, defaultMsg) {
+  if (!data || typeof data !== 'object') return defaultMsg
+  if (typeof data === 'string') return data
+  if (data.detail) return data.detail
+  if (Array.isArray(data.non_field_errors) && data.non_field_errors.length) return data.non_field_errors[0]
+  if (Array.isArray(data.quantity) && data.quantity.length) return data.quantity[0]
+  if (Array.isArray(data.product) && data.product.length) return data.product[0]
+  if (Array.isArray(data.store) && data.store.length) return data.store[0]
+  const firstVal = Object.values(data)[0]
+  if (Array.isArray(firstVal) && firstVal.length) return firstVal[0]
+  if (typeof firstVal === 'string') return firstVal
+  return defaultMsg
+}
+
 export const cartService = {
   /**
    * Obtiene o inicializa el carrito activo del usuario autenticado.
@@ -58,7 +72,7 @@ export const cartService = {
       if (!response.ok) {
         return {
           success: false,
-          error: data.detail || (Array.isArray(data.non_field_errors) ? data.non_field_errors[0] : 'Error al agregar producto al carrito'),
+          error: extractErrorMessage(data, 'Error al agregar producto al carrito'),
         }
       }
       return { success: true, data }
@@ -87,7 +101,7 @@ export const cartService = {
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
-        return { success: false, error: data.detail || 'Error al actualizar cantidad' }
+        return { success: false, error: extractErrorMessage(data, 'Error al actualizar cantidad') }
       }
       return { success: true, data }
     } catch {
@@ -112,7 +126,7 @@ export const cartService = {
       })
       if (!response.ok) {
         const data = await response.json().catch(() => ({}))
-        return { success: false, error: data.detail || 'Error al eliminar el ítem' }
+        return { success: false, error: extractErrorMessage(data, 'Error al eliminar el ítem') }
       }
       return { success: true }
     } catch {
@@ -136,7 +150,7 @@ export const cartService = {
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
-        return { success: false, error: data.detail || 'Error al obtener el carrito activo' }
+        return { success: false, error: extractErrorMessage(data, 'Error al obtener el carrito activo') }
       }
       return { success: true, data }
     } catch {
@@ -160,7 +174,7 @@ export const cartService = {
       })
       if (!response.ok) {
         const data = await response.json().catch(() => ({}))
-        return { success: false, error: data.detail || 'Error al vaciar el carrito' }
+        return { success: false, error: extractErrorMessage(data, 'Error al vaciar el carrito') }
       }
       return { success: true }
     } catch {
@@ -172,9 +186,10 @@ export const cartService = {
    * Realiza el checkout atómico del carrito activo, convirtiéndolo en un pedido.
    *
    * @param {string} token
+   * @param {Object} [deliveryData={}]
    * @returns {Promise<{ success: boolean, data?: any, error?: string }>}
    */
-  async checkout(token) {
+  async checkout(token, deliveryData = {}) {
     try {
       const response = await fetch(`${API_URL}/carts/checkout/`, {
         method: 'POST',
@@ -182,11 +197,11 @@ export const cartService = {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify(deliveryData),
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
-        return { success: false, error: data.detail || 'Error al procesar el checkout' }
+        return { success: false, error: extractErrorMessage(data, 'Error al procesar el checkout') }
       }
       return { success: true, data }
     } catch {

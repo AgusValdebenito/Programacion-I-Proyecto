@@ -77,6 +77,9 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         password = validated_data.pop("password", None)
+        request = self.context.get("request")
+        if request and not request.user.is_staff:
+            validated_data.pop("role", None)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)

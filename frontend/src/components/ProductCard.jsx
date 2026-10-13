@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { getImageUrl } from '../utils/imageUrl'
 
 /**
@@ -36,22 +37,28 @@ export default function ProductCard({ product, onAddToCart }) {
         className="position-relative bg-light d-flex align-items-center justify-content-center overflow-hidden"
         style={{ height: '180px' }}
       >
-        {resolvedImg ? (
-          <img
-            src={resolvedImg}
-            alt={product.name}
-            className="w-100 h-100 object-fit-cover"
-            loading="lazy"
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="text-secondary opacity-50 display-4">
-            <i className="bi bi-egg-fried" />
-          </div>
-        )}
+        <Link
+          to={`/productos/${product.id}`}
+          className="w-100 h-100 d-block"
+          aria-label={`Ver detalle de ${product.name}`}
+        >
+          {resolvedImg ? (
+            <img
+              src={resolvedImg}
+              alt={product.name}
+              className="w-100 h-100 object-fit-cover"
+              loading="lazy"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="text-secondary opacity-50 display-4 d-flex align-items-center justify-content-center h-100">
+              <i className="bi bi-egg-fried" />
+            </div>
+          )}
+        </Link>
 
         {/* Badges de disponibilidad y stock */}
-        <div className="position-absolute top-0 end-0 p-2 d-flex flex-column gap-1 align-items-end">
+        <div className="position-absolute top-0 end-0 p-2 d-flex flex-column gap-1 align-items-end" style={{ pointerEvents: 'none' }}>
           {isUnavailable ? (
             <span className="badge bg-secondary shadow-sm">No disponible</span>
           ) : isOutOfStock ? (
@@ -64,7 +71,9 @@ export default function ProductCard({ product, onAddToCart }) {
 
       <div className="card-body d-flex flex-column p-3">
         <h3 className="h6 fw-bold mb-1 text-dark text-truncate" title={product.name}>
-          {product.name}
+          <Link to={`/productos/${product.id}`} className="text-decoration-none text-dark">
+            {product.name}
+          </Link>
         </h3>
 
         <p
