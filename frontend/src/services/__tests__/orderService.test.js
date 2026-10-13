@@ -95,4 +95,24 @@ describe('orderService (TP9 Service Layer & TDD)', () => {
     expect(result.success).toBe(false)
     expect(result.error).toBe('Transición de estado inválida')
   })
+
+  it('getStoreOrders fetches store orders with ?store= query param', async () => {
+    const mockStoreOrders = [{ id: 101, store: 5, total: '4200.00', status: 'pending' }]
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockStoreOrders,
+    })
+
+    const result = await orderService.getStoreOrders(5, 'mock-token')
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/orders/?store=5'),
+      expect.objectContaining({
+        method: 'GET',
+        headers: expect.objectContaining({ Authorization: 'Bearer mock-token' }),
+      })
+    )
+    expect(result.success).toBe(true)
+    expect(result.data).toEqual(mockStoreOrders)
+  })
 })

@@ -18,8 +18,7 @@ Este documento define la arquitectura y el mapeo integral entre los endpoints RE
 | **Autenticada** | `Checkout` | `/checkout` | Autenticado (`cliente`, `vendedor`, `admin`) | `GET /api/carts/`<br>`POST /api/orders/` | Formulario con dirección y teléfono prellenados, pago simulado y confirmación transaccional. | ✅ Implementada & Testeada (M2 / #16, #17) |
 | **Autenticada** | `Orders` | `/pedidos` | Autenticado (`cliente`, `vendedor`, `admin`) | `GET /api/orders/`<br>`PATCH /api/orders/:id/` | Historial cronológico de pedidos del usuario, estado de preparación y desglose de items. | ✅ Implementada & Testeada (M2 / #18) |
 | **Autenticada** | `Profile` | `/perfil` | Autenticado (`cliente`, `vendedor`, `admin`) | `GET /api/profile/`<br>`PATCH /api/profile/` | Información de cuenta, actualización de nombre/teléfono y gestión de direcciones múltiples guardadas. | ✅ Implementada & Testeada (M2 / #18) |
-| **Admin / Vendedor** | `AdminProducts` | `/admin/productos` | Roles: `vendedor`, `admin` | `GET, POST, PUT, DELETE /api/products/`<br>`GET /api/stores/` | Dashboard de gestión de catálogo: alta de producto, edición de precio/stock, borrado y estado `is_available`. | ⏳ Planificada (Milestone 3 / #19, #20) |
-| **Admin / Vendedor** | `AdminOrders` | `/admin/pedidos` | Roles: `vendedor`, `admin` | `GET /api/orders/`<br>`PATCH /api/orders/:id/` | Monitor de cocina / despacho: avanzar pedidos de `pending` -> `preparing` -> `delivering` -> `delivered`. | ⏳ Planificada (Milestone 3 / #21) |
+| **Vendedor / Admin** | `PanelTienda` | `/panel-tienda` | Roles: `vendedor`, `admin`, `cliente` (con onboarding) | `GET, POST, PATCH /api/stores/`<br>`GET, POST, PATCH, DELETE /api/products/`<br>`GET, PATCH /api/orders/?store=:id` | Panel integral del vendedor: Onboarding de comercio, edición de datos de tienda, CRUD de productos con toggle de disponibilidad (`is_available`) y monitor de comandas en cocina. | ✅ Implementada & Testeada (M3 / #19, #20, #21) |
 | **Admin** | `AdminUsers` | `/admin/usuarios` | Rol exclusivo: `admin` | `GET, PATCH /api/users/` | Panel de moderación de usuarios, cambio de roles y control de acceso. | ⏳ Planificada (Milestone 5 / #25) |
 
 ---
@@ -28,9 +27,10 @@ Este documento define la arquitectura y el mapeo integral entre los endpoints RE
 
 1. **Rutas Públicas:** Accesibles para cualquier visitante anónimo. Si el usuario está autenticado, se visualiza su información en el Navbar y tiene acceso directo a acciones de compra.
 2. **Rutas Autenticadas Generales:** Protegidas mediante `<ProtectedRoute>`. Si no existe sesión válida o el JWT expiró, se redirige a `/login` preservando la ruta previa en el estado de navegación (`location.state.from`).
-3. **Rutas Administrativas con RBAC (Role-Based Access Control):** Protegidas mediante `<ProtectedRoute allowedRoles={['admin', 'vendedor']}>`.
-   - Si un usuario con rol `cliente` intenta acceder directamente a `/admin/productos` o `/admin/pedidos`, el componente bloquea el acceso y redirige a `/` con un estado de error o renderiza una pantalla de "Acceso No Autorizado (403)".
-   - Si no está autenticado, redirige a `/login`.
+3. **Rutas Administrativas y de Vendedor:** Protegidas mediante `<ProtectedRoute allowedRoles={['admin', 'vendedor', 'cliente']}>`.
+   - Si un usuario no registrado intenta ingresar a `/panel-tienda`, es redirigido a `/login`.
+   - Si un usuario `cliente` ingresa a `/panel-tienda`, se le presenta el flujo de Onboarding de Tienda para registrar su comercio y auto-promoverse a `vendedor`.
+   - Las mutaciones de estado de pedidos y catálogo están estrictamente protegidas a nivel backend verificando que el usuario autenticado sea el `owner` de la tienda.
 
 ---
 
@@ -44,9 +44,9 @@ Para cumplir los criterios de aprobación de TP9, cada vista debe implementar:
 
 ---
 
-## 🧪 Métricas de Verificación de TP9 (Milestones 1 & 2)
+## 🧪 Métricas de Verificación de TP9 (Milestones 1, 2 y 3)
 
-* **Tests Frontend:** 129 tests unitarios e integrados pasando al 100% en Vitest (23 suites de pruebas).
-* **Tests Backend:** 57 tests automatizados pasando al 100% en Django REST Framework.
+* **Tests Frontend:** 139 tests unitarios e integrados pasando al 100% en Vitest (24 suites de pruebas).
+* **Tests Backend:** 60 tests automatizados pasando al 100% en Django REST Framework.
 * **ESLint:** 0 errores y 0 warnings en todo el código fuente de `frontend/`.
-* **Milestones Cerrados:** Milestone 1 y Milestone 2 cerrados formalmente en GitHub con todos sus issues y criterios de aceptación cumplidos.
+* **Milestones Cerrados:** Milestones 1, 2 y 3 cerrados formalmente en GitHub con todos sus issues y criterios de aceptación cumplidos.

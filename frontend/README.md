@@ -26,7 +26,7 @@ npm run dev      # dev server en http://localhost:3000
 
 ### Scripts de prueba y construcción
 
-* `npm test` - ejecuta la suite completa de 129 tests unitarios e integrados con Vitest
+* `npm test` - ejecuta la suite completa de 139 tests unitarios e integrados con Vitest (24 suites)
 * `npm run lint` - valida reglas de Clean Code con ESLint (0 errores, 0 warnings)
 * `npm run build` - compila el bundle optimizado para producción
 * `npm run preview` - previsualiza localmente el build compilado
@@ -54,6 +54,7 @@ El detalle exhaustivo y diagramas de arquitectura se encuentran en:
 | `/checkout` | `Checkout.jsx` | Autenticado | Formulario transaccional con dirección y teléfono prellenados, pago simulado y confirmación. |
 | `/perfil` | `Profile.jsx` (tab perfil) | Autenticado | Edición de datos personales y gestión de direcciones múltiples guardadas. |
 | `/pedidos` | `Profile.jsx` (tab pedidos) | Autenticado | Historial cronológico de órdenes, desglose de items y seguimiento de estado. |
+| `/panel-tienda` | `PanelTienda.jsx` | Autenticado (`vendedor`, `admin`, `cliente`) | Portal del vendedor: onboarding de comercio, edición de perfil de tienda, catálogo de menú y monitor de cocina. |
 | `/login` | `Login.jsx` | Invitados | Autenticación JWT por email y contraseña. |
 | `/register` | `Register.jsx` | Invitados | Registro público de usuario cliente. |
 
@@ -62,6 +63,7 @@ El detalle exhaustivo y diagramas de arquitectura se encuentran en:
 1. **`AuthContext.jsx`:**
    - Manejo de sesión con JWT (`access_token`, `refresh_token`, datos del usuario).
    - Silent refresh automático de tokens antes del vencimiento.
+   - Sincronización reactiva del rol de usuario (`updateUser`) para onboarding en caliente de vendedores.
    - Rutas protegidas mediante `<ProtectedRoute>`.
 2. **`CartContext.jsx`:**
    - Estado del carrito mono-tienda sincronizado con backend (`GET /api/carts/`, `POST/PATCH/DELETE /api/cart-items/`).
@@ -73,11 +75,16 @@ El detalle exhaustivo y diagramas de arquitectura se encuentran en:
 ## Servicios Desacoplados (`src/services/`)
 
 * `authService.js`: login, registro, logout con blacklist, refresh de token.
-* `storeService.js`: consulta de tiendas y categorías gastronómicas.
-* `productService.js`: búsqueda y consulta de productos por comercio.
+* `storeService.js`: consulta de tiendas, categorías gastronómicas, creación y actualización de comercios, y consulta de tienda propia (`getMyStore`).
+* `productService.js`: búsqueda y consulta de productos por comercio, creación, edición, actualización de disponibilidad y eliminación.
 * `cartService.js`: mutaciones del carrito mono-tienda.
-* `orderService.js`: creación transaccional de órdenes e historial de pedidos.
+* `orderService.js`: creación transaccional de órdenes, historial de pedidos de cliente, monitor de pedidos de tienda (`getStoreOrders`) y actualización de estado de despacho (`updateOrderStatus`).
 * `profileService.js`: lectura y actualización de datos de usuario.
+
+## Componentes de Tienda (`src/components/tienda/`)
+
+* `EditarTiendaModal.jsx`: Modal accesible para actualizar datos, descripción y logo de la tienda.
+* `ProductoModal.jsx`: Modal para creación y edición de productos (nombre, precio, stock, descripción, disponibilidad e imagen).
 
 ## Manejo de Imágenes y Multimedia
 

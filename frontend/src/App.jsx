@@ -10,6 +10,7 @@ import Stores from './views/Stores.jsx'
 import Cart from './views/Cart.jsx'
 import Checkout from './views/Checkout.jsx'
 import Profile from './views/Profile.jsx'
+import PanelTienda from './views/PanelTienda.jsx'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
           <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
           <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/pedidos" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/panel-tienda" element={<ProtectedRoute allowedRoles={['vendedor', 'admin', 'cliente']}><PanelTienda /></ProtectedRoute>} />
         </Routes>
       </main>
       <Footer />

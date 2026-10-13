@@ -12,7 +12,7 @@ El TP4 esta completo en rama `TP4/refactor/business-logic`.
 El TP5 (frontend React con Vite) esta COMPLETO y mergeado a `main` (PR #6).
 El TP6 (maquetado de la Home con Bootstrap) esta COMPLETO y mergeado a `main` (PR #8).
 El TP8 (Conexión Frontend con Backend) esta COMPLETO en la rama `TP8/feat-connect-frontend-backend`.
-El TP9 (Vistas Completas y Funcionalidad Full-Stack) se encuentra en desarrollo activo en la rama `TP9` (PR #37), con el **Milestone 1** (Catálogo Real y Carrito) y el **Milestone 2** (Checkout Transaccional y Gestión de Pedidos) 100% completados, probados bajo estricto TDD y cerrados en GitHub.
+El TP9 (Vistas Completas y Funcionalidad Full-Stack) se encuentra en desarrollo activo en la rama `TP9` (PR #37), con el **Milestone 1** (Catálogo Real y Carrito), el **Milestone 2** (Checkout Transaccional y Gestión de Pedidos) y el **Milestone 3** (Panel de Vendedor, Menú y Cocina) 100% completados, probados bajo estricto TDD y formalmente cerrados en GitHub.
 
 ## Estado actual
 
@@ -42,9 +42,9 @@ El TP9 (Vistas Completas y Funcionalidad Full-Stack) se encuentra en desarrollo 
 * Manejo de multimedia y estáticos configurado en Django (`MEDIA_URL = '/media/'`, `MEDIA_ROOT = BASE_DIR / 'media'`)
 * Catálogo visual completo: imágenes reales para las 6 tiendas y 29 productos descargadas y vinculadas
 * Helper `imageUrl.js` en frontend con resolución dinámica de URLs de backend y fallbacks ante error (`onError`)
-* 129 tests unitarios e integrados pasando en frontend con Vitest y React Testing Library (0 errores ESLint)
-* 57 tests automatizados pasando en backend con Django REST Framework y PostgreSQL/SQLite de testing
-* Milestones 1 y 2 formalmente completados y cerrados en GitHub (#13 al #18, #38)
+* 139 tests unitarios e integrados pasando en frontend con Vitest y React Testing Library (0 errores ESLint)
+* 60 tests automatizados pasando en backend con Django REST Framework y PostgreSQL/SQLite de testing
+* Milestones 1, 2 y 3 formalmente completados y cerrados en GitHub (#13 al #21, #38)
 
 ## Modelos implementados
 
@@ -80,7 +80,7 @@ Todas las tareas y funcionalidades se encuentran organizadas y registradas como 
 
 * **M1: Catálogo Real y Carrito en Frontend:** [COMPLETADO Y CERRADO] Issues [#13](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/13), [#14](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/14) y [#15](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/15).
 * **M2: Checkout Transaccional y Gestión de Pedidos:** [COMPLETADO Y CERRADO] Issues [#16](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/16), [#17](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/17), [#18](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/18) y [#38](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/38).
-* **M3: Panel de Vendedor y Gestión de Tienda:** Issues [#19](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/19), [#20](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/20) y [#21](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/21).
+* **M3: Panel de Vendedor y Gestión de Tienda:** [COMPLETADO Y CERRADO] Issues [#19](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/19), [#20](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/20) y [#21](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/21).
 * **M4: Reglas Gastronómicas y Stock Híbrido:** Issues [#22](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/22) y [#23](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/23) (especificado en `docs/propuesta_disponibilidad_gastronomica.md`).
 * **M5: Calidad, Moderación y DevOps:** Issues [#24](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/24), [#25](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/25) y [#26](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/26).
 
@@ -111,11 +111,11 @@ Para dejar el repositorio mas prolijo:
 * TP6: implementado y mergeado a `main` (PR #8) (Suites de tests unitarios de componentes UI: CategoryCard, StoreLogo, Hero, BottomNav)
 * TP7: autenticación y rutas con React Router y mock data mergeado a `main` (PR #9) (Módulo puro `token.js` con tests unitarios y ProtectedRoute testeado)
 * TP8: implementado completamente y desacoplado (capa `authService.js`, `Home.jsx` refactorizado, 38 tests frontend y 49 tests backend pasando al 100%)
-* TP9: implementado y activo en rama `TP9` (PR #37). Milestone 1 y Milestone 2 completados al 100% bajo TDD estricto. Vistas completas de catálogo, detalle de tienda, carrito mono-tienda, checkout transaccional, historial de pedidos y perfil con direcciones guardadas. 129 tests frontend y 57 tests backend pasando al 100%.
+* TP9: implementado y activo en rama `TP9` (PR #37). Milestones 1, 2 y 3 completados al 100% bajo TDD estricto. Vistas completas de catálogo, detalle de tienda, carrito mono-tienda, checkout transaccional, historial de pedidos, perfil con direcciones guardadas y panel de administración del vendedor (onboarding de tienda, gestión de catálogo y monitor de cocina/despacho). 139 tests frontend y 60 tests backend pasando al 100%.
 
 ### Métricas de Calidad y Tests del Proyecto
-* **Backend:** 57 tests automatizados pasando en verde (`python manage.py test`). Thin controllers (Service Layer desacoplado con `CartService` y `OrderService`), permisos centralizados, señales blindadas y configuración limpia.
-* **Frontend:** 129 tests unitarios e integrados pasando en verde (`npm test` con Vitest en 23 suites). 0 errores de ESLint (`npm run lint`), build de producción optimizado (`npm run build`). Contextos desacoplados (`AuthContext`, `CartContext`, `AddressContext`) y utilidades puras (`token.js`, `imageUrl.js`).
+* **Backend:** 60 tests automatizados pasando en verde (`python manage.py test`). Thin controllers (Service Layer desacoplado con `CartService` y `OrderService`), permisos centralizados, señales blindadas y configuración limpia.
+* **Frontend:** 139 tests unitarios e integrados pasando en verde (`npm test` con Vitest en 24 suites). 0 errores de ESLint (`npm run lint`), build de producción optimizado (`npm run build`). Contextos desacoplados (`AuthContext`, `CartContext`, `AddressContext`) y utilidades puras (`token.js`, `imageUrl.js`).
 * **Documentación:** Propuesta arquitectónica de disponibilidad gastronómica documentada en `docs/propuesta_disponibilidad_gastronomica.md` y consignas oficiales en `tps/`.
 
 Puntos cubiertos del TP2:
@@ -227,14 +227,30 @@ Puntos cubiertos del TP5:
   * Buscador en tiempo real de comercios por nombre y descripción.
   * Enrutamiento funcional de todos los botones y cards de categorías desde la Home (`homeData.js`).
 
+### 🏪 Milestone 3: Panel de Vendedor y Gestión de Tienda (Cerrado en GitHub)
+* [x] **Issue #19 (Panel de Vendedor y Gestión de Tienda):**
+  * Vista `PanelTienda.jsx` protegida en `/panel-tienda` con control de acceso por roles (`vendedor`, `admin`, `cliente`).
+  * Flujo de onboarding intuitivo para clientes sin comercio registrado con formulario de creación rápida de tienda (`POST /api/stores/`).
+  * Promoción automática de rol y sincronización reactiva inmediata mediante `updateUser()` en `AuthContext`.
+  * Modal `EditarTiendaModal.jsx` para actualización de nombre, descripción, dirección y logo de la tienda (`PATCH /api/stores/:id/`).
+  * Métricas y KPIs de rendimiento en tiempo real (total de productos, catálogo activo, pedidos pendientes y facturación acumulada).
+* [x] **Issue #20 (Gestión de Menú y Catálogo de Productos):**
+  * CRUD completo de productos con modal accesible `ProductoModal.jsx` (`POST`, `PATCH`, `DELETE /api/products/`).
+  * Switch reactivo de disponibilidad gastronómica inmediata (`is_available`) con actualización optimista y feedback visual.
+  * Buscador en tiempo real de ítems del menú con badge de stock y estado visual.
+* [x] **Issue #21 (Monitor de Pedidos y Despacho en Cocina):**
+  * Monitor de comandas en tiempo real con filtrado por estados (Todos, Pendientes, En Preparación, En Reparto, Entregados, Cancelados).
+  * Flujo de avance de estado de despacho según roles: Aceptar y Preparar (`preparing`), Despachar (`delivering`), Marcar Entregado (`delivered`) y Cancelar (`cancelled`).
+  * Desglose completo de clientes, notas de entrega, ítems solicitados y montos totales por pedido.
+
 ### 🖼️ Pipeline Multimedia y Assets de Imágenes
 * [x] Configuración de Django Media en `settings.py` (`MEDIA_URL = '/media/'`, `MEDIA_ROOT = BASE_DIR / 'media'`) y `urls.py`.
 * [x] Script `scripts/download_images.py` ejecutado: 6 tiendas y 29 productos provistos de imágenes reales representativas de alta calidad en `media/` y `frontend/public/images/`.
 * [x] Helper `imageUrl.js` con tests unitarios: compatibilidad total con rutas de backend, URLs remotas y assets locales, con manejo de fallback visual (`onError`) ante fallas de carga.
 
 ### 🧪 Aseguramiento de Calidad y Cobertura de Tests
-* [x] **Frontend:** 129 tests unitarios e integrados pasando al 100% en Vitest (23 suites de prueba).
-* [x] **Backend:** 57 tests automatizados pasando al 100% en Django REST Framework (`python manage.py test`).
+* [x] **Frontend:** 139 tests unitarios e integrados pasando al 100% en Vitest (24 suites de prueba).
+* [x] **Backend:** 60 tests automatizados pasando al 100% en Django REST Framework (`python manage.py test`).
 * [x] **Linter:** 0 errores y 0 warnings en ESLint (`npm run lint`).
 * [x] **Build:** Verificación exitosa de bundle de producción con Vite (`npm run build`).
 

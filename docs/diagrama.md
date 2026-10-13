@@ -47,6 +47,7 @@ flowchart TD
     Routes --> Cart[Cart]
     Routes --> Checkout[Checkout]
     Routes --> Profile[Profile / Pedidos]
+    Routes --> PanelTienda[PanelTienda / Panel de Tienda]
     Routes --> Login[Login]
     Routes --> Register[Register]
 
@@ -72,6 +73,11 @@ flowchart TD
 
     Profile --> AddressManager[Gestor de Direcciones Guardadas]
     Profile --> OrderHistory[Historial Cronológico de Pedidos]
+
+    PanelTienda --> VendorOnboarding[Onboarding de Tienda]
+    PanelTienda --> EditarTiendaModal[EditarTiendaModal]
+    PanelTienda --> ProductoModal[ProductoModal]
+    PanelTienda --> VendorOrdersMonitor[Monitor de Pedidos y Cocina]
 ```
 
 ## 3. Componentes Clave y Responsabilidades
@@ -79,10 +85,10 @@ flowchart TD
 | Componente | Responsabilidad |
 | :--- | :--- |
 | `App` | Configuración de BrowserRouter, enrutado client-side y composición de providers. |
-| `AuthProvider` | Manejo de tokens JWT, usuario actual, login, registro, logout con blacklist y silent refresh. |
+| `AuthProvider` | Manejo de tokens JWT, usuario actual, login, registro, logout con blacklist, silent refresh y actualización de roles (`updateUser`). |
 | `CartProvider` | Carrito mono-tienda reactivo sincronizado con backend (`CartService`), cálculo de totales y stock. |
 | `AddressProvider` | Gestión de direcciones guardadas, persistencia en storage y selección de dirección de envío activa. |
-| `Navbar` | Navegación superior responsive, logo, selector de dirección, link a tiendas/carrito y menú de usuario. |
+| `Navbar` | Navegación superior responsive, logo, selector de dirección, link a tiendas/carrito y menú de usuario / mi tienda. |
 | `Home` | Portada principal con categorías interactivas, comercios destacados y acceso rápido a catálogos. |
 | `Stores` | Catálogo de comercios con buscador en tiempo real y filtrado por categorías gastronómicas. |
 | `StoreDetail` | Perfil del comercio, cartas de productos filtrables y modal interactivo para agregar al carrito. |
@@ -90,6 +96,9 @@ flowchart TD
 | `Cart` | Lista de productos en carrito, botones `+`/`-` con bloqueo de límite, control mono-tienda y subtotal. |
 | `Checkout` | Formulario transaccional con prellenado de dirección/teléfono, pago simulado y confirmación atómica. |
 | `Profile` | Pestañas sincronizadas (`/perfil` y `/pedidos`), gestión de direcciones y seguimiento de órdenes. |
+| `PanelTienda` | Portal administrativo para tiendas: onboarding, métricas, CRUD de productos, toggle `is_available` y monitor de cocina. |
+| `EditarTiendaModal` | Modal de edición de datos, descripción y logo del comercio gastronómico. |
+| `ProductoModal` | Modal de alta y edición de productos de la carta con precio, stock, descripción e imagen. |
 | `BottomNav` | Navegación fija inferior para dispositivos móviles (< 768px). |
 
 ## 4. Matriz de Rutas Client-Side
@@ -103,6 +112,7 @@ flowchart TD
 | `/checkout` | Confirmación y Pago | Autenticado | `Checkout.jsx` |
 | `/perfil` | Perfil y Direcciones | Autenticado | `Profile.jsx` (tab perfil) |
 | `/pedidos` | Historial de Pedidos | Autenticado | `Profile.jsx` (tab pedidos) |
+| `/panel-tienda` | Panel de Vendedor y Cocina | Autenticado (`vendedor`, `admin`, `cliente`) | `PanelTienda.jsx` |
 | `/login` | Iniciar Sesión | Solo Invitados | `Login.jsx` |
 | `/register` | Crear Cuenta | Solo Invitados | `Register.jsx` |
 
@@ -126,10 +136,10 @@ flowchart TD
 
 * Las llamadas HTTP se centralizan en módulos desacoplados bajo `src/services/` sin lógica de API en componentes:
   * `authService.js`: peticiones a `/api/token/`, `/api/register/`, `/api/logout/`.
-  * `storeService.js`: peticiones a `/api/stores/`.
+  * `storeService.js`: peticiones a `/api/stores/`, `/api/stores/my-store/`.
   * `productService.js`: peticiones a `/api/products/`.
   * `cartService.js`: peticiones a `/api/carts/` y `/api/cart-items/`.
-  * `orderService.js`: peticiones a `/api/orders/`.
+  * `orderService.js`: peticiones a `/api/orders/`, `/api/orders/?store=:id`.
   * `profileService.js`: peticiones a `/api/profile/`.
 * `src/utils/imageUrl.js` encapsula la lógica de resolución entre URLs absolutas, rutas de Django Media (`/media/`) y placeholders ante errores de carga.
 
@@ -141,5 +151,6 @@ flowchart TD
 - [x] Integración de Autenticación JWT con backend Django REST (TP8)
 - [x] **Milestone 1 Completado:** Catálogo real, tiendas, productos y carrito mono-tienda (TP9 - M1)
 - [x] **Milestone 2 Completado:** Checkout transaccional, historial de pedidos y perfil con direcciones (TP9 - M2)
+- [x] **Milestone 3 Completado:** Panel de vendedor, onboarding, menú con toggle `is_available` y monitor de cocina (TP9 - M3)
 - [x] **Assets Multimedia:** Aprovisionamiento de imágenes reales para 6 tiendas y 29 productos con fallback
-- [x] **Aseguramiento de Calidad:** 129 tests unitarios e integrados pasando con Vitest y 57 tests en backend Django
+- [x] **Aseguramiento de Calidad:** 139 tests unitarios e integrados pasando con Vitest y 60 tests en backend Django

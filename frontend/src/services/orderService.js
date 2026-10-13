@@ -83,4 +83,29 @@ export const orderService = {
       return { success: false, error: 'Error de conexión al actualizar estado' }
     }
   },
+
+  /**
+   * Obtiene los pedidos recibidos por una tienda específica (panel de vendedor/cocina).
+   *
+   * @param {number|string} storeId
+   * @param {string} token
+   * @returns {Promise<{ success: boolean, data?: any[], error?: string }>}
+   */
+  async getStoreOrders(storeId, token) {
+    try {
+      const response = await fetch(`${API_URL}/orders/?store=${storeId}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        return { success: false, error: data.detail || 'Error al obtener los pedidos de la tienda' }
+      }
+      return { success: true, data }
+    } catch {
+      return { success: false, error: 'Error de conexión con el servicio de pedidos' }
+    }
+  },
 }

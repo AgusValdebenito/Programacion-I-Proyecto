@@ -554,4 +554,60 @@ class OrderItemViewSetTests(APITestCase):
         self.assertEqual(self.product_a.stock, initial_stock - 3)
 
 
+class TiendaYPedidosVendedorFilterTests(APITestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.vendedor = user_model.objects.create_user(
+            username="vendedor_test",
+            email="vendedor_test@test.com",
+            password="password123",
+            role="vendedor",
+        )
+        self.cliente = user_model.objects.create_user(
+            username="cliente_test",
+            email="cliente_test@test.com",
+            password="password123",
+            role="cliente",
+        )
+        self.store = Store.objects.create(
+            owner=self.vendedor,
+            name="Pizzeria Don Vendedor",
+            description="Las mejores pizzas",
+        )
+        self.product = Product.objects.create(
+            store=self.store,
+            name="Pizza Fugazzeta",
+            price=Decimal("1200.00"),
+            stock=10,
+        )
 
+    def test_my_store_returns_vendor_store(self):
+        self.client.force_authenticate(user=self.vendedor)
+        url = reverse("stores-my-store")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["id"], self.store.id)
+        self.assertEqual(response.data["name"], "Pizzeria Don Vendedor")
+
+    def test_my_store_returns_404_when_user_has_no_store(self):
+        self.client.force_authenticate(user=self.cliente)
+        url = reverse("stores-my-store")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_filter_orders_by_store(self):
+        order1 = Order.objects.create(user=self.cliente, store=self.store, total=Decimal("1200.00"))
+        otro_vendedor = get_user_model().objects.create_user(
+            username="vendedor_dos",
+            email="vendedor_dos@test.com",
+            password="password123",
+            role="vendedor",
+        )
+        other_store = Store.objects.create(owner=otro_vendedor, name="Sushi Bar")
+        Order.objects.create(user=self.cliente, store=other_store, total=Decimal("2500.00"))
+
+        self.client.force_authenticate(user=self.cliente)
+        response = self.client.get(reverse("orders-list") + f"?store={self.store.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], order1.id)

@@ -180,7 +180,7 @@ Desarrollar la vista de catálogo completo de comercios (`/tiendas` y `/explorar
 
 ---
 
-## 🏪 Milestone 3: Panel de Vendedor y Gestión de Tienda
+## 🏪 Milestone 3: Panel de Vendedor y Gestión de Tienda (✅ COMPLETADO Y CERRADO)
 
 ### Issue [#19](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/19): [Frontend] Dashboard y Gestión de Tienda para Vendedores
 **Labels:** `frontend`, `feature`, `role:vendedor` | **Milestone:** `M3: Panel de Vendedor y Gestión de Tienda`  
@@ -188,10 +188,10 @@ Desarrollar la vista de catálogo completo de comercios (`/tiendas` y `/explorar
 Crear el panel para usuarios con rol `vendedor` (o clientes que quieran abrir su tienda), permitiendo configurar los datos de su comercio.
 
 **Tareas / Sub-issues:**
-- [ ] Crear vista protegida `/panel-tienda` accesible solo para usuarios con `role === 'vendedor'` o clientes que aún no tienen tienda.
-- [ ] Formulario de creación/edición de tienda: nombre, descripción, carga de logotipo/foto (`multipart/form-data`).
-- [ ] Mostrar estadísticas básicas: cantidad de productos activos y pedidos pendientes del día.
-- [ ] Manejo de permisos en frontend: redirección con mensaje informativo si un usuario sin rol intenta ingresar.
+- [x] Crear vista protegida `/panel-tienda` (`PanelTienda.jsx`) accesible para usuarios con `role === 'vendedor'`, `admin` o clientes que aún no tienen tienda.
+- [x] Formulario de onboarding para creación de tienda y modal `EditarTiendaModal.jsx` para edición de datos de comercio.
+- [x] Mostrar estadísticas básicas: cantidad de productos activos, disponibles, pedidos pendientes del día y facturación.
+- [x] Manejo de permisos en frontend con `ProtectedRoute` y enlace condicional en `Navbar.jsx` ("Mi Tienda" / "Abrir Tienda").
 
 ---
 
@@ -201,11 +201,11 @@ Crear el panel para usuarios con rol `vendedor` (o clientes que quieran abrir su
 Permitir al vendedor agregar nuevos platos/productos, editar precios, descripciones y pausar o activar disponibilidad en un clic.
 
 **Tareas / Sub-issues:**
-- [ ] Tabla o grilla de productos de la tienda del vendedor.
-- [ ] Modal/Formulario de alta de producto (`POST /api/products/`) con subida de imagen.
-- [ ] Switch toggle rápido "Disponible / Pausado" que dispare `PATCH /api/products/{id}/` (`{ "is_available": true/false }`).
-- [ ] Modal de edición de precio y stock.
-- [ ] Botón de eliminación con confirmación modal.
+- [x] Tabla y grilla de productos de la tienda del vendedor con fotos, precios y stock.
+- [x] Modal y formulario de alta y edición de producto (`ProductoModal.jsx`) validado (`POST/PATCH /api/products/`).
+- [x] Switch toggle rápido "Disponible / Pausado" que dispara `PATCH /api/products/{id}/` (`{ "is_available": true/false }`) con feedback visual reactivo.
+- [x] Modal de edición de precio y stock con persistencia en backend.
+- [x] Botón de eliminación con confirmación y llamada a `DELETE /api/products/{id}/`.
 
 ---
 
@@ -215,10 +215,10 @@ Permitir al vendedor agregar nuevos platos/productos, editar precios, descripcio
 Interfaz para que el restaurante vea las órdenes entrantes y controle las transiciones de estado (`pending` -> `preparing` -> `delivering` -> `delivered`).
 
 **Tareas / Sub-issues:**
-- [ ] Vista de pedidos entrantes agrupados por columnas o pestañas según estado.
-- [ ] Botones de avance de estado (`preparing`, `delivering`, `delivered`).
-- [ ] Botón *"Rechazar / Cancelar pedido"* con selección de motivo.
-- [ ] Polling suave o refresco manual con botón *"Actualizar pedidos"*.
+- [x] Vista de pedidos entrantes agrupados por pestañas/filtros según estado (`Todos`, `Pendientes`, `En Preparación`, `En Reparto`, `Entregados`, `Cancelados`).
+- [x] Botones de avance de estado de cocina: `Aceptar y Preparar` (`preparing`), `Despachar / En Reparto` (`delivering`) y `Marcar Entregado` (`delivered`).
+- [x] Botón *"Rechazar / Cancelar pedido"* (`cancelled`) para órdenes no despachadas.
+- [x] Refresco de pedidos con botón *"Actualizar pedidos"* consumiendo `GET /api/orders/?store=<id>`.
 
 ---
 

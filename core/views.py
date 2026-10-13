@@ -29,6 +29,24 @@ class StoreViewSet(viewsets.ModelViewSet):
     serializer_class = StoreSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsResourceOwnerOrReadOnly]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        owner_id = self.request.query_params.get("owner")
+        if owner_id:
+            if owner_id == "me" and self.request.user.is_authenticated:
+                queryset = queryset.filter(owner=self.request.user)
+            else:
+                queryset = queryset.filter(owner_id=owner_id)
+        return queryset
+
+    @action(detail=False, methods=["get"], url_path="my-store", permission_classes=[permissions.IsAuthenticated])
+    def my_store(self, request):
+        store = Store.objects.filter(owner=request.user).first()
+        if not store:
+            return Response({"detail": "No tenés ninguna tienda asociada."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(store)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def perform_create(self, serializer):
         if Store.objects.filter(owner=self.request.user).exists():
             raise ValidationError({"detail": "Este usuario ya tiene una tienda creada."})
@@ -172,9 +190,15 @@ class OrderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if is_admin_user(user):
-            return super().get_queryset()
+            queryset = super().get_queryset()
+        else:
+            queryset = self.queryset.filter(models.Q(user=user) | models.Q(store__owner=user)).distinct()
 
-        return self.queryset.filter(models.Q(user=user) | models.Q(store__owner=user)).distinct()
+        store_id = self.request.query_params.get("store")
+        if store_id:
+            queryset = queryset.filter(store_id=store_id)
+
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

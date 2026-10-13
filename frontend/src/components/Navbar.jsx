@@ -49,6 +49,12 @@ export default function Navbar() {
                   Mi perfil
                 </Link>
               )}
+              {user && (
+                <Link className="fr-nav-link text-primary fw-semibold" to="/panel-tienda">
+                  <i className="bi bi-shop me-1"></i>
+                  {user.role === 'vendedor' || user.role === 'admin' ? 'Mi Tienda' : 'Abrir Tienda'}
+                </Link>
+              )}
             </nav>
             {user ? (
               <div className="d-flex align-items-center gap-2">
