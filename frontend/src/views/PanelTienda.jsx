@@ -28,6 +28,7 @@ export default function PanelTienda() {
   // Catálogo de productos
   const [products, setProducts] = useState([])
   const [loadingProducts, setLoadingProducts] = useState(false)
+  const [productsError, setProductsError] = useState(null)
   const [productSearch, setProductSearch] = useState('')
   const [editingProduct, setEditingProduct] = useState(null)
   const [showProductModal, setShowProductModal] = useState(false)
@@ -36,6 +37,7 @@ export default function PanelTienda() {
   // Monitor de pedidos
   const [orders, setOrders] = useState([])
   const [loadingOrders, setLoadingOrders] = useState(false)
+  const [ordersError, setOrdersError] = useState(null)
   const [orderFilter, setOrderFilter] = useState('todos') // 'todos' | 'pending' | 'preparing' | 'delivering' | 'delivered' | 'cancelled'
   const [updatingOrderId, setUpdatingOrderId] = useState(null)
 
@@ -46,9 +48,12 @@ export default function PanelTienda() {
   const fetchProducts = useCallback(async () => {
     if (!store?.id) return
     setLoadingProducts(true)
+    setProductsError(null)
     const result = await productService.getProducts({ store: store.id })
     if (result.success && Array.isArray(result.data)) {
       setProducts(result.data)
+    } else {
+      setProductsError(result.error || 'Error al cargar los productos del local.')
     }
     setLoadingProducts(false)
   }, [store])
@@ -57,10 +62,13 @@ export default function PanelTienda() {
   const fetchOrders = useCallback(async () => {
     if (!store?.id) return
     setLoadingOrders(true)
+    setOrdersError(null)
     const token = getToken()
     const result = await orderService.getStoreOrders(store.id, token)
     if (result.success && Array.isArray(result.data)) {
       setOrders(result.data)
+    } else {
+      setOrdersError(result.error || 'Error al cargar los pedidos de la tienda.')
     }
     setLoadingOrders(false)
   }, [store, getToken])
@@ -78,6 +86,8 @@ export default function PanelTienda() {
 
       if (result.success && result.data) {
         setStore(result.data)
+        setProductsError(null)
+        setOrdersError(null)
         const [prodRes, ordRes] = await Promise.all([
           productService.getProducts({ store: result.data.id }),
           orderService.getStoreOrders(result.data.id, token),
@@ -85,9 +95,13 @@ export default function PanelTienda() {
         if (!isMounted) return
         if (prodRes.success && Array.isArray(prodRes.data)) {
           setProducts(prodRes.data)
+        } else {
+          setProductsError(prodRes.error || 'Error al cargar los productos del local.')
         }
         if (ordRes.success && Array.isArray(ordRes.data)) {
           setOrders(ordRes.data)
+        } else {
+          setOrdersError(ordRes.error || 'Error al cargar los pedidos de la tienda.')
         }
       } else if (
         !result.success &&
@@ -572,6 +586,30 @@ export default function PanelTienda() {
             </div>
           </div>
 
+          {/* Error al cargar productos */}
+          {productsError && (
+            <div
+              className="alert alert-danger d-flex align-items-center justify-content-between rounded-4 mb-4"
+              role="alert"
+            >
+              <div className="d-flex align-items-center">
+                <i className="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                <div>
+                  <strong>Error al cargar el catálogo:</strong> {productsError}
+                </div>
+              </div>
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-danger rounded-pill px-3"
+                onClick={fetchProducts}
+                disabled={loadingProducts}
+              >
+                <i className={`bi bi-arrow-clockwise me-1 ${loadingProducts ? 'spin' : ''}`}></i>
+                Reintentar
+              </button>
+            </div>
+          )}
+
           {/* Buscador de productos */}
           <div className="mb-3">
             <div className="input-group">
@@ -740,6 +778,30 @@ export default function PanelTienda() {
               Actualizar Pedidos
             </button>
           </div>
+
+          {/* Error al cargar pedidos */}
+          {ordersError && (
+            <div
+              className="alert alert-danger d-flex align-items-center justify-content-between rounded-4 mb-4"
+              role="alert"
+            >
+              <div className="d-flex align-items-center">
+                <i className="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                <div>
+                  <strong>Error al cargar pedidos:</strong> {ordersError}
+                </div>
+              </div>
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-danger rounded-pill px-3"
+                onClick={fetchOrders}
+                disabled={loadingOrders}
+              >
+                <i className={`bi bi-arrow-clockwise me-1 ${loadingOrders ? 'spin' : ''}`}></i>
+                Reintentar
+              </button>
+            </div>
+          )}
 
           {/* Filtros por estado */}
           <div className="d-flex flex-wrap gap-2 mb-4">

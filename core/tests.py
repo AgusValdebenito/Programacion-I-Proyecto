@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from .models import Cart, CartItem, Order, OrderItem, Product, Store
+from .serializers import OrderSerializer
 
 
 class ProductViewSetTests(APITestCase):
@@ -485,16 +486,16 @@ class OrderViewSetTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_order_creation_requires_store(self):
+    def test_direct_order_creation_rejected(self):
         self.client.force_authenticate(user=self.client_user)
 
         response = self.client.post(
             reverse("orders-list"),
-            {"total": "50.00", "status": "pending"},
+            {"store": self.store.id, "total": "50.00", "status": "pending"},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("store", response.data)
+        self.assertIn("checkout", response.data["detail"])
 
     def test_order_creation_forbidden_for_vendor(self):
         self.client.force_authenticate(user=self.vendor_user)
@@ -507,24 +508,10 @@ class OrderViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertIn("detail", response.data)
 
-    def test_order_creation_allowed_for_admin(self):
-        user_model = get_user_model()
-        admin_user = user_model.objects.create_user(
-            username="admin-order-user",
-            password="testpass123",
-            email="admin-order@example.com",
-            role="admin",
-            is_staff=True,
-        )
-        self.client.force_authenticate(user=admin_user)
-
-        response = self.client.post(
-            reverse("orders-list"),
-            {"store": self.store.id, "total": "50.00", "status": "pending"},
-            format="json",
-        )
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data["user"], admin_user.id)
+    def test_order_serializer_read_only_fields(self):
+        serializer = OrderSerializer()
+        for field in ["user", "created_at", "store", "total", "status"]:
+            self.assertIn(field, serializer.Meta.read_only_fields)
 
 
 class OrderItemViewSetTests(APITestCase):

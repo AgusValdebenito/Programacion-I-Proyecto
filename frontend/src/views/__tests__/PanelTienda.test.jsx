@@ -299,4 +299,78 @@ describe('PanelTienda View (TP9 - Milestone 3 TDD: Issues #19, #20, #21)', () =>
       expect(orderService.updateOrderStatus).toHaveBeenCalledWith(201, 'preparing', mockToken)
     })
   })
+
+  it('displays error banner with retry button when loading products fails in menu tab', async () => {
+    const mockStore = { id: 7, name: 'La Trattoria' }
+    storeService.getMyStore.mockResolvedValue({ success: true, data: mockStore })
+    productService.getProducts
+      .mockResolvedValueOnce({ success: false, error: 'Fallo al obtener platos' })
+      .mockResolvedValueOnce({
+        success: true,
+        data: [{ id: 1, name: 'Fideos Caseros', price: '2250.00', stock: 10, is_available: true }],
+      })
+    orderService.getStoreOrders.mockResolvedValue({ success: true, data: [] })
+
+    render(
+      <MemoryRouter>
+        <PanelTienda />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('La Trattoria')).toBeInTheDocument()
+    })
+
+    // Switch to Menu tab
+    fireEvent.click(screen.getByRole('button', { name: /menú y productos/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText(/error al cargar el catálogo:/i)).toBeInTheDocument()
+      expect(screen.getByText(/fallo al obtener platos/i)).toBeInTheDocument()
+    })
+
+    // Click retry
+    fireEvent.click(screen.getByRole('button', { name: /reintentar/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Fideos Caseros')).toBeInTheDocument()
+    })
+  })
+
+  it('displays error banner with retry button when loading orders fails in pedidos tab', async () => {
+    const mockStore = { id: 7, name: 'La Trattoria' }
+    storeService.getMyStore.mockResolvedValue({ success: true, data: mockStore })
+    productService.getProducts.mockResolvedValue({ success: true, data: [] })
+    orderService.getStoreOrders
+      .mockResolvedValueOnce({ success: false, error: 'Fallo al obtener comandas' })
+      .mockResolvedValueOnce({
+        success: true,
+        data: [{ id: 301, status: 'pending', total: '1500.00', items: [] }],
+      })
+
+    render(
+      <MemoryRouter>
+        <PanelTienda />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('La Trattoria')).toBeInTheDocument()
+    })
+
+    // Switch to Pedidos tab
+    fireEvent.click(screen.getByRole('button', { name: /monitor de pedidos/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText(/error al cargar pedidos:/i)).toBeInTheDocument()
+      expect(screen.getByText(/fallo al obtener comandas/i)).toBeInTheDocument()
+    })
+
+    // Click retry
+    fireEvent.click(screen.getByRole('button', { name: /reintentar/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Pedido #301')).toBeInTheDocument()
+    })
+  })
 })

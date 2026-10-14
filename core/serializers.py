@@ -113,4 +113,4 @@ class OrderSerializer(serializers.ModelSerializer):
             "payment_method",
             "created_at",
         ]
-        read_only_fields = ["user", "created_at"]
+        read_only_fields = ["user", "created_at", "store", "total", "status"]

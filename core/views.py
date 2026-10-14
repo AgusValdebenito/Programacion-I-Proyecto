@@ -238,16 +238,18 @@ class OrderViewSet(viewsets.ModelViewSet):
             raise PermissionDenied(
                 "Los vendedores no pueden realizar pedidos. Esta acción está reservada para clientes y administradores."
             )
-        serializer.save(user=user)
+        raise ValidationError(
+            {"detail": "La creación directa de pedidos no está permitida. Use el checkout del carrito (/api/carts/checkout/)."}
+        )
 
     def perform_update(self, serializer):
         instance = self.get_object()
-        if "total" in serializer.validated_data:
+        if "total" in self.request.data:
             raise ValidationError({"total": "No está permitido modificar el total de un pedido existente."})
-        if "store" in serializer.validated_data:
+        if "store" in self.request.data:
             raise ValidationError({"store": "No está permitido modificar la tienda de un pedido existente."})
 
-        new_status = serializer.validated_data.get("status", instance.status)
+        new_status = self.request.data.get("status", instance.status)
 
         if new_status == instance.status:
             return
