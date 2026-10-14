@@ -76,13 +76,15 @@ Decisiones tomadas en el modelo y logica de negocio:
 
 ## Pendiente de implementación (Backlog y Roadmap)
 
-Todas las tareas y funcionalidades se encuentran organizadas y registradas como **GitHub Issues (#13 al #26, #38)** agrupadas en 5 Milestones temáticos:
+Todas las tareas y funcionalidades se encuentran organizadas y registradas como **GitHub Issues (#13 al #26, #38 al #44)** agrupadas en Milestones temáticos:
 
 * **M1: Catálogo Real y Carrito en Frontend:** [COMPLETADO Y CERRADO] Issues [#13](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/13), [#14](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/14) y [#15](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/15).
 * **M2: Checkout Transaccional y Gestión de Pedidos:** [COMPLETADO Y CERRADO] Issues [#16](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/16), [#17](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/17), [#18](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/18) y [#38](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/38).
 * **M3: Panel de Vendedor y Gestión de Tienda:** [COMPLETADO Y CERRADO] Issues [#19](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/19), [#20](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/20) y [#21](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/21).
 * **M4: Reglas Gastronómicas y Stock Híbrido:** Issues [#22](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/22) y [#23](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/23) (especificado en `docs/propuesta_disponibilidad_gastronomica.md`).
 * **M5: Calidad, Moderación y DevOps:** Issues [#24](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/24), [#25](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/25) y [#26](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/26).
+* **M6: Descubrimiento, Publicidad y Fidelización:** Issues [#39](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/39) (Vista Explorar), [#41](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/41) (Carrusel de Destacados y Publicidad) y [#42](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/42) (Tiendas Favoritas).
+* **M7: Tracking en Tiempo Real, Alertas y Calificaciones:** Issues [#40](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/40) (Notificaciones en Navbar), [#43](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/43) (Seguimiento de Pedido con Mapa, Barra y ETA) y [#44](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/44) (Calificaciones por Estrellas y Motivos Preestablecidos).
 
 Asimismo, los trabajos prácticos y refactorizaciones ya entregadas fueron formalizados como **Issues Históricas Cerradas ([#27 al #36](https://github.com/AgusValdebenito/Programacion-I-Proyecto/milestone/6?closed=1))** vinculadas a sus respectivos PRs (#1 al #12).
 

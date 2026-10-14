@@ -291,6 +291,97 @@ Dotar a usuarios con rol `admin` de herramientas para moderar contenido abusivo 
 
 ---
 
+## 🚀 Milestone 6: Descubrimiento, Publicidad y Fidelización
+
+### Issue [#39](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/39): [Feature] Diferenciar navegación: Vista Explorar con buscador global de productos, filtro por rango de precios y comparación entre locales
+**Labels:** `frontend`, `feature`, `role:cliente` | **Milestone:** `M6: Descubrimiento, Publicidad y Fidelización`  
+**Descripción:**  
+Diferenciar funcionalmente la vista `/explorar` de `/tiendas`, convirtiéndola en un buscador transversal de productos individuales que permita comparar precios entre diferentes comercios y filtrar por rango de precios.
+
+**Tareas / Sub-issues:**
+- [ ] Crear vista dedicada `Explore.jsx` vinculada a la ruta `/explorar`.
+- [ ] Buscador global reactivo de productos entre todas las tiendas con debounce (300ms).
+- [ ] Slider o selector de rango de precios (mínimo - máximo) con filtrado en tiempo real.
+- [ ] Grilla de productos encontrados con tarjeta comparativa (foto, precio, nombre y comercio emisor).
+- [ ] Acceso directo al comercio o agregado al carrito desde el buscador global.
+- [ ] Tests de interacción con Vitest (`Explore.test.jsx`).
+
+---
+
+### Issue [#41](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/41): [Feature] Carrusel Automático de Locales Destacados y Publicidad en Home
+**Labels:** `frontend`, `feature`, `role:cliente`, `role:vendedor` | **Milestone:** `M6: Descubrimiento, Publicidad y Fidelización`  
+**Descripción:**  
+Carrusel rotativo automático de imágenes de locales destacados/patrocinados con banners publicitarios en la Home, desplazándose de derecha a izquierda y redirigiendo a la carta del comercio al hacer clic.
+
+**Tareas / Sub-issues:**
+- [ ] Crear componente `FeaturedStoresCarousel.jsx` con autoplay, bucle infinito y controles accesibles.
+- [ ] Integrar el carrusel en la Home complementando la sección existente de descuentos y promociones.
+- [ ] Redirección a `/tiendas/:id` al tocar cualquier slide del carrusel.
+- [ ] Soporte de comercios promocionados (`is_promoted` y `banner_image`).
+- [ ] Tests de renderizado e interacción con Vitest (`FeaturedStoresCarousel.test.jsx`).
+
+---
+
+### Issue [#42](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/42): [Feature] Sistema de Tiendas Favoritas y Lista de Guardados
+**Labels:** `frontend`, `backend`, `feature`, `role:cliente` | **Milestone:** `M6: Descubrimiento, Publicidad y Fidelización`  
+**Descripción:**  
+Botón interactivo de corazón (❤️) en tarjetas y cabeceras de comercios para guardar tiendas favoritas, con sección dedicada en el perfil del cliente y persistencia por usuario.
+
+**Tareas / Sub-issues:**
+- [ ] Crear contexto/hook `useFavorites` para gestión centralizada de locales guardados.
+- [ ] Botón interactivo `FavoriteButton.jsx` con animación de corazón en cards y cabecera de comercio.
+- [ ] Pestaña/sección *"Favoritos"* en `/perfil` con estado vacío amigable.
+- [ ] Persistencia reactiva sincronizada por usuario.
+- [ ] Tests unitarios y de interacción con Vitest (`FavoriteButton.test.jsx`).
+
+---
+
+## 🎯 Milestone 7: Tracking en Tiempo Real, Alertas y Calificaciones
+
+### Issue [#40](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/40): [Feature] Sistema de Notificaciones en Navbar y Alertas de Pedidos
+**Labels:** `frontend`, `feature`, `role:cliente`, `role:vendedor` | **Milestone:** `M7: Tracking en Tiempo Real, Alertas y Calificaciones`  
+**Descripción:**  
+Desplegable interactivo en el Navbar (campanita `<i className="bi bi-bell" />`) con alertas contextuales según rol: pedidos en camino/preparación para clientes y nuevas órdenes o quiebre de stock para vendedores.
+
+**Tareas / Sub-issues:**
+- [ ] Componente `NotificationDropdown.jsx` conectado a la campana del Navbar con cierre en click exterior.
+- [ ] Badge numérico dinámico con conteo de novedades pendientes.
+- [ ] Listado de notificaciones con enlace directo a órdenes (`/pedidos`).
+- [ ] Acción *"Marcar todas como leídas"* y persistencia de estado leído.
+- [ ] Tests unitarios con Vitest (`NotificationDropdown.test.jsx`).
+
+---
+
+### Issue [#43](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/43): [Feature] Seguimiento de Pedido con Mapa Interactivo, Barra de Progreso y Tiempo Estimado (ETA)
+**Labels:** `frontend`, `feature`, `role:cliente` | **Milestone:** `M7: Tracking en Tiempo Real, Alertas y Calificaciones`  
+**Descripción:**  
+Seguimiento post-venta interactivo en `/pedidos` con mapa de recorrido (Leaflet/OSM), barra de progreso por etapas (`Recibido` -> `En preparación` -> `En reparto` -> `Entregado`) y cálculo de tiempo estimado de entrega (ETA).
+
+**Tareas / Sub-issues:**
+- [ ] Componente `OrderProgressBar.jsx` representando los 4 estados del pedido.
+- [ ] Componente `OrderETA.jsx` con cálculo dinámico del tiempo restante.
+- [ ] Componente `OrderTrackingMap.jsx` con mapa Leaflet/OSM, pines de origen/destino y moto de reparto.
+- [ ] Integración en la vista de detalle del pedido y post-checkout.
+- [ ] Tests unitarios con Vitest (`OrderProgressBar.test.jsx`).
+
+---
+
+### Issue [#44](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/44): [Feature] Calificación de Pedidos con Estrellas, Motivos Preestablecidos y Reseña Opcional
+**Labels:** `frontend`, `backend`, `feature`, `role:cliente` | **Milestone:** `M7: Tracking en Tiempo Real, Alertas y Calificaciones`  
+**Descripción:**  
+Calificación de pedidos completados (`status === 'delivered'`) con selector de 1 a 5 estrellas, opciones/chips de motivos preestablecidos según puntuación y comentario de texto estrictamente opcional.
+
+**Tareas / Sub-issues:**
+- [ ] Backend: modelo `OrderRating` (`order`, `rating`, `tags`, `comment`) y endpoint `POST /api/orders/{id}/rating/`.
+- [ ] Modal `RatingModal.jsx` accesible desde `/pedidos` para órdenes entregadas.
+- [ ] Selector interactivo de 1 a 5 estrellas.
+- [ ] Chips dinámicos de motivos preestablecidos (positivos para 4-5 estrellas, oportunidades de mejora para 1-3 estrellas).
+- [ ] Textarea de comentarios opcional (no obligatorio).
+- [ ] Actualización del rating promedio de la tienda.
+- [ ] Tests unitarios y de flujo con Vitest (`RatingModal.test.jsx`).
+
+---
+
 # 📜 Registro de Issues Históricas Cerradas (TP1 a TP8)
 
 Estas issues documentan formalmente los requerimientos completados y validados en los Pull Requests anteriores del proyecto. Están agrupadas en el milestone [**Hitos Completados (TP1 a TP8)**](https://github.com/AgusValdebenito/Programacion-I-Proyecto/milestone/6?closed=1) (100% completado).
