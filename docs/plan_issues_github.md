@@ -382,6 +382,24 @@ Calificación de pedidos completados (`status === 'delivered'`) con selector de 
 
 ---
 
+## ☁️ Milestone 8: Despliegue en Producción, Pruebas UAT y Entrega Final
+
+### Issue [#45](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/45): [QA / Testing] Pruebas de Aceptación de Usuario en la Nube (UAT & Bug Bash)
+**Labels:** `enhancement`, `devops`, `role:cliente`, `role:vendedor` | **Milestone:** `M8: Despliegue en Producción, Pruebas UAT y Entrega Final`  
+**Descripción:**  
+Ejecutar una sesión integral de pruebas de aceptación con usuarios reales (UAT / Bug Bash) sobre la aplicación desplegada en la nube en el TP10, testeando la plataforma en dispositivos reales (móviles Android/iOS, notebooks y tablets) con flujos no técnicos para detectar bugs de borde antes de la entrega final.
+
+**Tareas / Sub-issues:**
+- [ ] Validar despliegue cloud público y HTTPS (frontend + backend + PostgreSQL).
+- [ ] Misión 1 (Cliente): Registro, login y gestión de múltiples direcciones guardadas.
+- [ ] Misión 2 (Cliente): Navegación por catálogo, regla mono-tienda y checkout completo.
+- [ ] Misión 3 (Cliente): Seguimiento de orden con mapa, progreso, ETA y calificación por estrellas con tags.
+- [ ] Misión 4 (Vendedor): Onboarding de tienda, publicación de platos y despacho en monitor de cocina.
+- [ ] Misión 5 (Stress & Edge cases): Clics rápidos, botón atrás del navegador y conexiones móviles.
+- [ ] Recolección de feedback, clasificación de hallazgos y correcciones finales previas a la defensa.
+
+---
+
 # 📜 Registro de Issues Históricas Cerradas (TP1 a TP8)
 
 Estas issues documentan formalmente los requerimientos completados y validados en los Pull Requests anteriores del proyecto. Están agrupadas en el milestone [**Hitos Completados (TP1 a TP8)**](https://github.com/AgusValdebenito/Programacion-I-Proyecto/milestone/6?closed=1) (100% completado).
