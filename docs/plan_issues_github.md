@@ -231,10 +231,10 @@ Interfaz para que el restaurante vea las órdenes entrantes y controle las trans
 Migrar el sistema hacia un modelo adaptado a gastronomía: stock numérico opcional (`track_stock`) y desactivación automática de platos ante quiebre de insumos.
 
 **Tareas / Sub-issues:**
-- [ ] **Migración de Modelos:** `track_stock = BooleanField` en `Product`, `cancellation_reason` y `cancelled_product` en `Order`.
-- [ ] **Lógica en Servicios (`core/services/`):** `CartService` validando stock solo si `track_stock == True`, y `OrderService.reject_order_by_vendor(...)` con apagado automático.
-- [ ] **Endpoints:** extender `PATCH /api/orders/{id}/` para recibir motivo y producto causante.
-- [ ] **Suite de Pruebas:** test completo de pedido -> rechazo -> producto pausado -> bloqueo a nuevos compradores.
+- [x] **Migración de Modelos:** `track_stock = BooleanField` en `Product`, `cancellation_reason` y `cancelled_product` en `Order`.
+- [x] **Lógica en Servicios (`core/services/`):** `CartService` validando stock solo si `track_stock == True`, y `OrderService.reject_order_by_vendor(...)` con apagado automático.
+- [x] **Endpoints:** extender `PATCH /api/orders/{id}/` para recibir motivo y producto causante.
+- [x] **Suite de Pruebas:** test completo de pedido -> rechazo -> producto pausado -> bloqueo a nuevos compradores.
 
 ---
 
@@ -244,10 +244,10 @@ Migrar el sistema hacia un modelo adaptado a gastronomía: stock numérico opcio
 Evitar compras de productos pausados mientras el cliente los tenía en el carrito, y limitar cantidades máximas por producto en carritos gastronómicos.
 
 **Tareas / Sub-issues:**
-- [ ] Limitar cantidad máxima por item en el carrito (ej. máx. 10 unidades por plato).
-- [ ] Validación en checkout ante productos que cambiaron a `is_available = False`.
-- [ ] Código de error `PRODUCT_UNAVAILABLE` con lista de IDs afectados.
-- [ ] Alertar en frontend resaltando el producto agotado y ofreciendo removerlo en 1 clic.
+- [x] Limitar cantidad máxima por item en el carrito (ej. máx. 10 unidades por plato).
+- [x] Validación en checkout ante productos que cambiaron a `is_available = False`.
+- [x] Código de error `PRODUCT_UNAVAILABLE` con lista de IDs afectados.
+- [x] Alertar en frontend resaltando el producto agotado y ofreciendo removerlo en 1 clic.
 
 ---
 

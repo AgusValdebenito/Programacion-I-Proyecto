@@ -201,7 +201,14 @@ export const cartService = {
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
-        return { success: false, error: extractErrorMessage(data, 'Error al procesar el checkout') }
+        return {
+          success: false,
+          error: extractErrorMessage(data, 'Error al procesar el checkout'),
+          errorCode: data?.error || (data?.detail && String(data.detail).includes('PRODUCT_UNAVAILABLE') ? 'PRODUCT_UNAVAILABLE' : null),
+          unavailableProductIds: Array.isArray(data?.unavailable_product_ids)
+            ? data.unavailable_product_ids.map(Number)
+            : [],
+        }
       }
       return { success: true, data }
     } catch {

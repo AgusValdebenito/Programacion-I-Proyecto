@@ -174,6 +174,7 @@ class CartItemViewSetTests(APITestCase):
             description="Muzza",
             price=Decimal("15.00"),
             stock=10,
+            track_stock=True,
             is_available=True,
         )
         self.cart = Cart.objects.create(user=self.user)
@@ -542,6 +543,7 @@ class OrderItemViewSetTests(APITestCase):
             name="Burger A",
             price=Decimal("20.00"),
             stock=5,
+            track_stock=True,
             is_available=True,
         )
         self.product_b = Product.objects.create(
@@ -672,3 +674,141 @@ class TiendaYPedidosVendedorFilterTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["id"], order1.id)
+
+
+class Milestone4HybridStockAndCancellationTests(APITestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.vendedor = user_model.objects.create_user(
+            username="cocinero_m4",
+            email="cocinero_m4@test.com",
+            password="password123",
+            role="vendedor",
+        )
+        self.cliente = user_model.objects.create_user(
+            username="comensal_m4",
+            email="comensal_m4@test.com",
+            password="password123",
+            role="cliente",
+        )
+        self.store = Store.objects.create(
+            owner=self.vendedor,
+            name="Hamburguesería Gourmet M4",
+            description="Hamburguesas caseras bajo demanda",
+        )
+        # Producto gastronómico (cocina bajo demanda, track_stock=False)
+        self.burger = Product.objects.create(
+            store=self.store,
+            name="Smash Burger Doble",
+            price=Decimal("4500.00"),
+            stock=0,
+            track_stock=False,
+            is_available=True,
+        )
+        # Producto envasado con control estricto de inventario (track_stock=True)
+        self.gaseosa = Product.objects.create(
+            store=self.store,
+            name="Gaseosa Cola Lata",
+            price=Decimal("1200.00"),
+            stock=2,
+            track_stock=True,
+            is_available=True,
+        )
+
+        # Carrito del cliente
+        self.cart = Cart.objects.create(user=self.cliente)
+
+    def test_gastronomic_dish_no_track_stock_allows_checkout_without_stock_reduction(self):
+        """Platos con track_stock=False permiten compra aunque stock=0 y no descuentan unidades."""
+        self.client.force_authenticate(user=self.cliente)
+        # Agregar al carrito
+        res_cart = self.client.post(
+            reverse("cart-items-list"),
+            {"cart": self.cart.id, "product": self.burger.id, "quantity": 3},
+            format="json",
+        )
+        self.assertEqual(res_cart.status_code, status.HTTP_201_CREATED)
+
+        # Checkout
+        res_checkout = self.client.post(
+            reverse("carts-checkout"),
+            {"delivery_address": "Calle Falsa 123", "delivery_phone": "1122334455"},
+            format="json",
+        )
+        self.assertEqual(res_checkout.status_code, status.HTTP_201_CREATED)
+        self.burger.refresh_from_db()
+        self.assertTrue(self.burger.is_available)
+        self.assertEqual(self.burger.stock, 0)  # No se redujo ni bloqueó
+
+    def test_retail_product_track_stock_reduces_stock_and_auto_pauses_when_zero(self):
+        """Productos con track_stock=True descuentan y pasan automáticamente a is_available=False al llegar a 0."""
+        self.client.force_authenticate(user=self.cliente)
+        # Agregar 2 gaseosas (stock exacto)
+        res_cart = self.client.post(
+            reverse("cart-items-list"),
+            {"cart": self.cart.id, "product": self.gaseosa.id, "quantity": 2},
+            format="json",
+        )
+        self.assertEqual(res_cart.status_code, status.HTTP_201_CREATED)
+
+        res_checkout = self.client.post(
+            reverse("carts-checkout"),
+            {"delivery_address": "Av. Libertador 500"},
+            format="json",
+        )
+        self.assertEqual(res_checkout.status_code, status.HTTP_201_CREATED)
+        self.gaseosa.refresh_from_db()
+        self.assertEqual(self.gaseosa.stock, 0)
+        self.assertFalse(self.gaseosa.is_available)  # Apagado automático
+
+    def test_vendor_reject_order_with_cancellation_reason_and_product_pauses_dish(self):
+        """El comercio puede cancelar un pedido con motivo y plato causante, apagándolo reactivamente."""
+        order = Order.objects.create(
+            user=self.cliente,
+            store=self.store,
+            total=Decimal("4500.00"),
+            status=Order.StatusChoices.PENDING,
+        )
+        self.client.force_authenticate(user=self.vendedor)
+        url = reverse("orders-detail", args=[order.id])
+        res = self.client.patch(
+            url,
+            {
+                "status": "cancelled",
+                "cancellation_reason": "Se agotó la carne madurada",
+                "cancelled_product": self.burger.id,
+            },
+            format="json",
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        order.refresh_from_db()
+        self.assertEqual(order.status, Order.StatusChoices.CANCELLED)
+        self.assertEqual(order.cancellation_reason, "Se agotó la carne madurada")
+        self.assertEqual(order.cancelled_product_id, self.burger.id)
+
+        # Verificar apagado reactivo del plato
+        self.burger.refresh_from_db()
+        self.assertFalse(self.burger.is_available)
+
+    def test_checkout_cart_blocks_with_product_unavailable_if_product_paused(self):
+        """Si un producto en el carrito fue pausado en caliente, el checkout falla con PRODUCT_UNAVAILABLE."""
+        self.client.force_authenticate(user=self.cliente)
+        res_cart = self.client.post(
+            reverse("cart-items-list"),
+            {"cart": self.cart.id, "product": self.burger.id, "quantity": 1},
+            format="json",
+        )
+        self.assertEqual(res_cart.status_code, status.HTTP_201_CREATED)
+
+        # El cocinero pausa la hamburguesa mientras el cliente tenía el carrito abierto
+        self.burger.is_available = False
+        self.burger.save(update_fields=["is_available"])
+
+        res = self.client.post(
+            reverse("carts-checkout"),
+            {"delivery_address": "Corrientes 800"},
+            format="json",
+        )
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("PRODUCT_UNAVAILABLE", str(res.data))
+        self.assertEqual([int(x) for x in res.json().get("unavailable_product_ids")], [self.burger.id])

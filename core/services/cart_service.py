@@ -29,7 +29,9 @@ class CartService:
                 "quantity": f"El límite máximo por producto es de {cls.MAX_QUANTITY_PER_ITEM} unidades."
             })
 
-        if product.stock < total_requested:
+        # Regla de Stock Híbrido: Si track_stock es True, validar stock numérico estricto.
+        # Si track_stock es False (gastronomía estándar), rige únicamente is_available.
+        if product.track_stock and product.stock < total_requested:
             raise ValidationError({
                 "quantity": f"Stock insuficiente para '{product.name}'. Stock disponible: {product.stock}."
             })

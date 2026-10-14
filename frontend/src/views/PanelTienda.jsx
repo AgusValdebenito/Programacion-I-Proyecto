@@ -41,6 +41,11 @@ export default function PanelTienda() {
   const [orderFilter, setOrderFilter] = useState('todos') // 'todos' | 'pending' | 'preparing' | 'delivering' | 'delivered' | 'cancelled'
   const [updatingOrderId, setUpdatingOrderId] = useState(null)
 
+  // Cancelación / Rechazo reactivo (Milestone 4, Issues #22 y #23)
+  const [rejectingOrder, setRejectingOrder] = useState(null)
+  const [rejectionReason, setRejectionReason] = useState('Falta de insumos / Producto agotado')
+  const [rejectionProductId, setRejectionProductId] = useState('')
+
   // Modales
   const [showStoreModal, setShowStoreModal] = useState(false)
 
@@ -220,19 +225,50 @@ export default function PanelTienda() {
   }
 
   // Transición de estado de pedido (Cocina)
-  const handleTransitionOrder = async (orderId, newStatus) => {
+  const handleTransitionOrder = async (orderId, newStatus, extraData = {}) => {
     const token = getToken()
     setActionError(null)
     setUpdatingOrderId(orderId)
-    const result = await orderService.updateOrderStatus(orderId, newStatus, token)
+    const result = Object.keys(extraData).length > 0
+      ? await orderService.updateOrderStatus(orderId, newStatus, token, extraData)
+      : await orderService.updateOrderStatus(orderId, newStatus, token)
     setUpdatingOrderId(null)
     if (result.success) {
       setOrders((prev) =>
-        prev.map((ord) => (ord.id === orderId ? { ...ord, status: newStatus } : ord))
+        prev.map((ord) => (ord.id === orderId ? { ...ord, ...result.data, status: newStatus } : ord))
       )
+      // Si se canceló y pausó un producto reactivamente, sincronizar en el menú del vendedor
+      if (extraData?.cancelled_product) {
+        setProducts((prev) =>
+          prev.map((p) => (p.id === Number(extraData.cancelled_product) ? { ...p, is_available: false } : p))
+        )
+      }
     } else {
       setActionError(result.error || 'No se pudo actualizar el estado del pedido.')
     }
+  }
+
+  // Apertura del modal de rechazo con opciones y detección de plato causante
+  const handleOpenRejectModal = (ord) => {
+    setRejectingOrder(ord)
+    setRejectionReason('Falta de insumos / Producto agotado')
+    const firstItemProdId = ord.items?.[0]?.product || ''
+    setRejectionProductId(firstItemProdId ? String(firstItemProdId) : '')
+  }
+
+  // Confirmar rechazo de orden
+  const handleConfirmRejectOrder = async () => {
+    if (!rejectingOrder) return
+    const extraData = {
+      cancellation_reason: rejectionReason,
+    }
+    if (rejectionReason.includes('insumos') || rejectionReason.includes('agotado')) {
+      if (rejectionProductId) {
+        extraData.cancelled_product = Number(rejectionProductId)
+      }
+    }
+    await handleTransitionOrder(rejectingOrder.id, 'cancelled', extraData)
+    setRejectingOrder(null)
   }
 
   // Filtrado de productos
@@ -914,6 +950,19 @@ export default function PanelTienda() {
                         <span className="fw-bold fs-5 text-primary">${parseFloat(ord.total || 0).toFixed(2)}</span>
                       </div>
 
+                      {/* Motivo de cancelación si la orden fue cancelada */}
+                      {ord.status === 'cancelled' && ord.cancellation_reason && (
+                        <div className="small text-danger mt-2 pt-2 border-top">
+                          <i className="bi bi-x-circle me-1"></i>
+                          <strong>Motivo:</strong> {ord.cancellation_reason}
+                          {ord.cancelled_product_name && (
+                            <span className="badge bg-danger-subtle text-danger ms-2 border border-danger-subtle">
+                              Plato pausado: {ord.cancelled_product_name}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
                       {/* Botones de acción del monitor de cocina */}
                       <div className="mt-3 d-flex gap-2 justify-content-end">
                         {ord.status === 'pending' && (
@@ -922,7 +971,7 @@ export default function PanelTienda() {
                               type="button"
                               className="btn btn-sm btn-outline-danger"
                               disabled={updatingOrderId === ord.id}
-                              onClick={() => handleTransitionOrder(ord.id, 'cancelled')}
+                              onClick={() => handleOpenRejectModal(ord)}
                             >
                               Rechazar
                             </button>
@@ -944,7 +993,7 @@ export default function PanelTienda() {
                               type="button"
                               className="btn btn-sm btn-outline-danger"
                               disabled={updatingOrderId === ord.id}
-                              onClick={() => handleTransitionOrder(ord.id, 'cancelled')}
+                              onClick={() => handleOpenRejectModal(ord)}
                             >
                               Cancelar
                             </button>
@@ -978,6 +1027,104 @@ export default function PanelTienda() {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Modal de Cancelación / Rechazo Reactivo con motivo y apagado de plato */}
+      {rejectingOrder && (
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          tabIndex="-1"
+          role="dialog"
+          aria-labelledby="rejectModalLabel"
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 rounded-4 shadow">
+              <div className="modal-header border-0 pb-0">
+                <h5 className="modal-title fw-bold text-danger" id="rejectModalLabel">
+                  <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                  Rechazar Pedido #{rejectingOrder.id}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setRejectingOrder(null)}
+                  aria-label="Cerrar"
+                ></button>
+              </div>
+              <div className="modal-body pt-3">
+                <p className="small text-secondary mb-3">
+                  Indicá el motivo del rechazo. Si se debe a falta de ingredientes o insumos, el plato seleccionado
+                  se pausará automáticamente del menú para evitar que otros clientes lo ordenen.
+                </p>
+
+                <div className="mb-3">
+                  <label htmlFor="rejectionReasonSelect" className="form-label small fw-semibold text-secondary">
+                    Motivo de rechazo *
+                  </label>
+                  <select
+                    id="rejectionReasonSelect"
+                    className="form-select"
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                  >
+                    <option value="Falta de insumos / Producto agotado">
+                      Falta de insumos / Producto agotado
+                    </option>
+                    <option value="Demora excesiva en cocina / Saturación">
+                      Demora excesiva en cocina / Saturación
+                    </option>
+                    <option value="Comercio fuera de horario / Cerrando">
+                      Comercio fuera de horario / Cerrando
+                    </option>
+                    <option value="Otro motivo operativo">Otro motivo operativo</option>
+                  </select>
+                </div>
+
+                {(rejectionReason.includes('insumos') || rejectionReason.includes('agotado')) && (
+                  <div className="mb-3">
+                    <label htmlFor="rejectionProductSelect" className="form-label small fw-semibold text-secondary">
+                      Plato/Producto agotado (se pausará del menú)
+                    </label>
+                    <select
+                      id="rejectionProductSelect"
+                      className="form-select"
+                      value={rejectionProductId}
+                      onChange={(e) => setRejectionProductId(e.target.value)}
+                    >
+                      <option value="">-- No pausar ningún plato específico --</option>
+                      {rejectingOrder.items?.map((it) => (
+                        <option key={it.id || it.product} value={it.product}>
+                          {it.product_name || `Producto #${it.product}`}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="form-text small text-muted">
+                      El producto seleccionado pasará automáticamente a &quot;No disponible&quot;.
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="modal-footer border-0 pt-0">
+                <button
+                  type="button"
+                  className="btn btn-light rounded-pill px-3"
+                  onClick={() => setRejectingOrder(null)}
+                >
+                  Volver
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger rounded-pill px-4"
+                  disabled={updatingOrderId === rejectingOrder.id}
+                  onClick={handleConfirmRejectOrder}
+                >
+                  Confirmar Rechazo
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

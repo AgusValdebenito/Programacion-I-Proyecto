@@ -47,6 +47,11 @@ class Product(models.Model):
     )
     is_available = models.BooleanField(default=True, verbose_name="disponible")
     stock = models.PositiveIntegerField(default=0, verbose_name="stock")
+    track_stock = models.BooleanField(
+        default=False,
+        verbose_name="controlar stock numerico",
+        help_text="Si es False, rige solo is_available (gastronomia). Si es True, descuenta stock y se pausa al llegar a 0.",
+    )
     image = models.ImageField(
         upload_to="products/",
         blank=True,
@@ -160,6 +165,20 @@ class Order(models.Model):
         blank=True,
         null=True,
         verbose_name="metodo de pago",
+    )
+    cancellation_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="motivo de cancelacion",
+    )
+    cancelled_product = models.ForeignKey(
+        Product,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="cancelled_orders",
+        verbose_name="producto causante de cancelacion",
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="fecha de creacion")
 

@@ -207,7 +207,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
             raise ValidationError({
                 "quantity": f"El límite máximo por producto es de {CartService.MAX_QUANTITY_PER_ITEM} unidades."
             })
-        if instance.product.stock < new_quantity:
+        if instance.product.track_stock and instance.product.stock < new_quantity:
             raise ValidationError({
                 "quantity": f"Stock insuficiente para '{instance.product.name}'. Stock disponible: {instance.product.stock}."
             })
@@ -254,10 +254,15 @@ class OrderViewSet(viewsets.ModelViewSet):
         if new_status == instance.status:
             return
 
+        cancellation_reason = self.request.data.get("cancellation_reason")
+        cancelled_product = self.request.data.get("cancelled_product") or self.request.data.get("out_of_stock_product")
+
         order = OrderService.transition_status(
             order=instance,
             new_status=new_status,
             user=self.request.user,
+            cancellation_reason=cancellation_reason,
+            cancelled_product=cancelled_product,
         )
         serializer.instance = order
 

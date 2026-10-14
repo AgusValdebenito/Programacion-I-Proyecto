@@ -608,6 +608,12 @@ class Command(BaseCommand):
             stores_count += 1
 
             for p_info in s_info["products"]:
+                is_retail = any(
+                    term in s_info["name"].lower() or term in s_info["description"].lower()
+                    for term in ["farmacia", "kiosco", "super", "almacén", "almacen", "despensa", "market", "bebidas"]
+                )
+                track_stock = p_info.get("track_stock", is_retail)
+
                 prod, p_created = Product.objects.get_or_create(
                     store=store,
                     name=p_info["name"],
@@ -615,13 +621,15 @@ class Command(BaseCommand):
                         "description": p_info["description"],
                         "price": Decimal(p_info["price"]),
                         "stock": p_info["stock"],
+                        "track_stock": track_stock,
                         "is_available": p_info["is_available"],
                         "image": p_info.get("image", ""),
                     },
                 )
-                if not p_created and p_info.get("image"):
+                prod.track_stock = track_stock
+                if p_info.get("image"):
                     prod.image = p_info["image"]
-                    prod.save(update_fields=["image"])
+                prod.save()
                 products_count += 1
 
         self.stdout.write(

@@ -26,10 +26,12 @@ describe('Checkout View Component (TP9 TDD - Issue #17)', () => {
   ]
 
   const mockCheckout = vi.fn()
+  const mockRemoveFromCart = vi.fn()
 
   beforeEach(() => {
     vi.restoreAllMocks()
     mockCheckout.mockReset()
+    mockRemoveFromCart.mockReset()
   })
 
   it('renders empty cart message when cart has no items', () => {
@@ -263,4 +265,59 @@ describe('Checkout View Component (TP9 TDD - Issue #17)', () => {
     expect(screen.getByRole('heading', { name: /finalizar compra/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /confirmar y realizar pedido/i })).toBeInTheDocument()
   })
+
+  it('displays out-of-stock hot alert and allows 1-click removal of unavailable items (Issue #23)', async () => {
+    vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
+      user: { id: 1, phone: '11 4444-5555' },
+    })
+    mockCheckout.mockResolvedValue({
+      success: false,
+      error: 'Algunos productos de tu pedido ya no están disponibles en la cocina.',
+      errorCode: 'PRODUCT_UNAVAILABLE',
+      unavailableProductIds: [101],
+    })
+    mockRemoveFromCart.mockResolvedValue(true)
+
+    vi.spyOn(CartHook, 'useCart').mockReturnValue({
+      items: mockCartItems,
+      itemCount: 2,
+      totalAmount: 8400,
+      loading: false,
+      checkout: mockCheckout,
+      removeItem: mockRemoveFromCart,
+    })
+
+    render(
+      <MemoryRouter>
+        <Checkout />
+      </MemoryRouter>
+    )
+
+    const addressInput = screen.getByLabelText(/dirección de entrega/i)
+    fireEvent.change(addressInput, { target: { value: 'Av. Corrientes 1234' } })
+
+    const phoneInput = screen.getByLabelText(/teléfono de contacto/i)
+    fireEvent.change(phoneInput, { target: { value: '11 4444-5555' } })
+
+    const submitBtn = screen.getByRole('button', { name: /confirmar y realizar pedido/i })
+    fireEvent.click(submitBtn)
+
+    await waitFor(() => {
+      expect(mockCheckout).toHaveBeenCalled()
+      expect(
+        screen.getByText(/algunos productos de tu pedido ya no están disponibles en la cocina/i)
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: /remover productos agotados/i })
+      ).toBeInTheDocument()
+    })
+
+    // Click 1-click removal
+    fireEvent.click(screen.getByRole('button', { name: /remover productos agotados/i }))
+
+    await waitFor(() => {
+      expect(mockRemoveFromCart).toHaveBeenCalledWith(1)
+    })
+  })
 })
+

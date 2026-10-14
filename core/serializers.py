@@ -40,6 +40,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "price",
             "is_available",
             "stock",
+            "track_stock",
             "image",
             "created_at",
         ]
@@ -96,6 +97,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     store_name = serializers.CharField(source="store.name", read_only=True)
+    cancelled_product_name = serializers.CharField(source="cancelled_product.name", read_only=True)
 
     class Meta:
         model = Order
@@ -111,6 +113,16 @@ class OrderSerializer(serializers.ModelSerializer):
             "delivery_phone",
             "delivery_notes",
             "payment_method",
+            "cancellation_reason",
+            "cancelled_product",
+            "cancelled_product_name",
             "created_at",
         ]
-        read_only_fields = ["user", "created_at", "store", "total", "status"]
+        read_only_fields = [
+            "user",
+            "created_at",
+            "store",
+            "total",
+            "status",
+            "cancelled_product_name",
+        ]

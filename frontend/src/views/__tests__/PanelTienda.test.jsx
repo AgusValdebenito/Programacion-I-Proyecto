@@ -373,4 +373,77 @@ describe('PanelTienda View (TP9 - Milestone 3 TDD: Issues #19, #20, #21)', () =>
       expect(screen.getByText('Pedido #301')).toBeInTheDocument()
     })
   })
+
+  it('allows kitchen to reject order with reason and reactive out-of-stock product pause (Issue #22)', async () => {
+    const mockStore = { id: 7, name: 'La Trattoria' }
+    const mockProducts = [
+      { id: 10, name: 'Ravioles con Salsa', price: '2500.00', stock: 5, is_available: true, store: 7 },
+    ]
+    const mockOrder = {
+      id: 202,
+      store: 7,
+      status: 'pending',
+      total: '5000.00',
+      items: [{ id: 1, product: 10, product_name: 'Ravioles con Salsa', quantity: 2, price: '2500.00' }],
+    }
+
+    storeService.getMyStore.mockResolvedValue({ success: true, data: mockStore })
+    productService.getProducts.mockResolvedValue({ success: true, data: mockProducts })
+    orderService.getStoreOrders.mockResolvedValue({
+      success: true,
+      data: [mockOrder],
+    })
+    orderService.updateOrderStatus.mockResolvedValue({
+      success: true,
+      data: {
+        id: 202,
+        status: 'cancelled',
+        cancellation_reason: 'Falta de stock / ingrediente agotado',
+        cancelled_product: 10,
+        cancelled_product_name: 'Ravioles con Salsa',
+      },
+    })
+
+    render(
+      <MemoryRouter>
+        <PanelTienda />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('La Trattoria')).toBeInTheDocument()
+    })
+
+    // Switch to Pedidos tab
+    fireEvent.click(screen.getByRole('button', { name: /monitor de pedidos/i }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Pedido #202')).toBeInTheDocument()
+      expect(screen.getByText('Rechazar')).toBeInTheDocument()
+    })
+
+    // Click Rechazar to open modal
+    fireEvent.click(screen.getByRole('button', { name: /rechazar/i }))
+
+    expect(screen.getByText(/rechazar pedido #202/i)).toBeInTheDocument()
+
+    // Select reason "Falta de insumos / Producto agotado"
+    const reasonSelect = screen.getByLabelText(/motivo de rechazo/i)
+    fireEvent.change(reasonSelect, { target: { value: 'Falta de insumos / Producto agotado' } })
+
+    // Select product dropdown should now appear
+    const productSelect = screen.getByLabelText(/plato\/producto agotado/i)
+    fireEvent.change(productSelect, { target: { value: '10' } })
+
+    // Confirm rejection
+    fireEvent.click(screen.getByRole('button', { name: /confirmar rechazo/i }))
+
+    await waitFor(() => {
+      expect(orderService.updateOrderStatus).toHaveBeenCalledWith(202, 'cancelled', mockToken, {
+        cancellation_reason: 'Falta de insumos / Producto agotado',
+        cancelled_product: 10,
+      })
+    })
+  })
 })
+

@@ -62,9 +62,10 @@ export const orderService = {
    * @param {number|string} orderId
    * @param {string} status
    * @param {string} token
+   * @param {Object} [extraData={}] - Motivo de cancelación, plato causante, etc.
    * @returns {Promise<{ success: boolean, data?: any, error?: string }>}
    */
-  async updateOrderStatus(orderId, status, token) {
+  async updateOrderStatus(orderId, status, token, extraData = {}) {
     try {
       const response = await fetch(`${API_URL}/orders/${orderId}/`, {
         method: 'PATCH',
@@ -72,7 +73,7 @@ export const orderService = {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, ...extraData }),
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
