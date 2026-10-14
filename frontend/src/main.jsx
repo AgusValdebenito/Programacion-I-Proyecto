@@ -10,12 +10,18 @@ import '@fontsource/poppins/700.css'
 import './styles/theme.css'
 import App from './App.jsx'
 import { AuthProvider } from './contexts/AuthContext'
+import { AddressProvider } from './contexts/AddressContext'
+import { CartProvider } from './contexts/CartContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <App />
+        <AddressProvider>
+          <CartProvider>
+            <App />
+          </CartProvider>
+        </AddressProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

@@ -1,0 +1,133 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { storeService } from '../storeService'
+
+describe('storeService (TP9 Service Layer & TDD)', () => {
+  const originalFetch = globalThis.fetch
+
+  beforeEach(() => {
+    globalThis.fetch = vi.fn()
+  })
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch
+    vi.clearAllMocks()
+  })
+
+  it('getStores fetches all stores successfully', async () => {
+    const mockStores = [
+      { id: 1, name: 'Burger Queen', description: 'Las mejores hamburguesas' },
+      { id: 2, name: 'Pizza Planet', description: 'Pizzas al horno de barro' },
+    ]
+
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockStores,
+    })
+
+    const result = await storeService.getStores()
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/stores/'),
+      expect.objectContaining({ method: 'GET' })
+    )
+    expect(result.success).toBe(true)
+    expect(result.data).toEqual(mockStores)
+  })
+
+  it('getStoreById fetches a single store by ID', async () => {
+    const mockStore = { id: 1, name: 'Burger Queen', description: 'Las mejores hamburguesas' }
+
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockStore,
+    })
+
+    const result = await storeService.getStoreById(1)
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/stores/1/'),
+      expect.objectContaining({ method: 'GET' })
+    )
+    expect(result.success).toBe(true)
+    expect(result.data).toEqual(mockStore)
+  })
+
+  it('handles error response gracefully', async () => {
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      json: async () => ({ detail: 'Tienda no encontrada' }),
+    })
+
+    const result = await storeService.getStoreById(999)
+
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('Tienda no encontrada')
+  })
+
+  it('getMyStore fetches current user store with Bearer token', async () => {
+    const mockStore = { id: 3, name: 'Tacos Al Pastor', owner: 5 }
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockStore,
+    })
+
+    const result = await storeService.getMyStore('fake-token')
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/stores/my-store/'),
+      expect.objectContaining({
+        method: 'GET',
+        headers: expect.objectContaining({ Authorization: 'Bearer fake-token' }),
+      })
+    )
+    expect(result.success).toBe(true)
+    expect(result.data).toEqual(mockStore)
+  })
+
+  it('createStore sends POST with store payload and token', async () => {
+    const payload = { name: 'Nueva Pizzeria', description: 'Pizzas ricas' }
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: 10, ...payload }),
+    })
+
+    const result = await storeService.createStore(payload, 'fake-token')
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/stores/'),
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer fake-token',
+        }),
+        body: JSON.stringify(payload),
+      })
+    )
+    expect(result.success).toBe(true)
+    expect(result.data.id).toBe(10)
+  })
+
+  it('updateStore sends PATCH with partial store updates', async () => {
+    const updates = { name: 'Pizzeria Don Juan Modificada' }
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: 10, ...updates }),
+    })
+
+    const result = await storeService.updateStore(10, updates, 'fake-token')
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/stores/10/'),
+      expect.objectContaining({
+        method: 'PATCH',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer fake-token',
+        }),
+      })
+    )
+    expect(result.success).toBe(true)
+    expect(result.data.name).toBe('Pizzeria Don Juan Modificada')
+  })
+})

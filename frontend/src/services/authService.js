@@ -88,4 +88,30 @@ export const authService = {
     if (!response.ok) return null
     return await response.json()
   },
+
+  /**
+   * Actualiza los datos del perfil (nombre, teléfono) en el backend.
+   */
+  async updateProfile(profileData, accessToken) {
+    try {
+      const response = await fetch(`${API_URL}/profile/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(profileData),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.detail || (typeof data === 'object' ? Object.values(data)[0] : 'Error al actualizar el perfil'),
+        }
+      }
+      return { success: true, data }
+    } catch {
+      return { success: false, error: 'Error de conexión al actualizar el perfil' }
+    }
+  },
 }

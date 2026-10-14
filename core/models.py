@@ -138,6 +138,29 @@ class Order(models.Model):
         default=StatusChoices.PENDING,
         verbose_name="estado",
     )
+    delivery_address = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="direccion de entrega",
+    )
+    delivery_phone = models.CharField(
+        max_length=30,
+        blank=True,
+        null=True,
+        verbose_name="telefono de contacto",
+    )
+    delivery_notes = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="notas de entrega",
+    )
+    payment_method = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        verbose_name="metodo de pago",
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="fecha de creacion")
 
     class Meta:

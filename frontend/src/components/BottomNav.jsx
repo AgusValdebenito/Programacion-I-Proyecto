@@ -10,11 +10,16 @@ export default function BottomNav() {
     { icon: 'bi-person', label: 'Mi perfil', to: '/perfil' },
   ]
 
+  const isItemActive = (to) => {
+    if (to === '/explorar') return pathname === '/explorar' || pathname.startsWith('/tiendas')
+    return pathname === to
+  }
+
   return (
     <nav className="fr-bottom-nav d-md-none" aria-label="Navegación inferior">
       <div className="d-flex justify-content-around">
         {items.map((item) => {
-          const isActive = pathname === item.to
+          const isActive = isItemActive(item.to)
           return (
             <Link
               key={item.label}

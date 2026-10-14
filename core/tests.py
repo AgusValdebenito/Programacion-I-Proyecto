@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from .models import Cart, CartItem, Order, OrderItem, Product, Store
+from .serializers import OrderSerializer
 
 
 class ProductViewSetTests(APITestCase):
@@ -57,6 +58,45 @@ class ProductViewSetTests(APITestCase):
         self.assertEqual(response_desc.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response_desc.data), 1)
         self.assertEqual(response_desc.data[0]["name"], "Ensalada Caesar")
+
+    def test_filter_products_by_store(self):
+        user_model = get_user_model()
+        other_owner = user_model.objects.create_user(
+            username="other-store-owner",
+            password="testpass123",
+            email="other-owner@example.com",
+            role="vendedor",
+        )
+        other_store = Store.objects.create(owner=other_owner, name="Segunda Tienda")
+        Product.objects.create(
+            store=other_store,
+            name="Empanada de Carne",
+            price=Decimal("5.00"),
+            stock=10,
+        )
+
+        response = self.client.get(reverse("products-list") + f"?store={self.store.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], self.product.id)
+        self.assertEqual(response.data[0]["store"], self.store.id)
+
+    def test_update_product_with_image_url_string_succeeds(self):
+        self.client.force_authenticate(user=self.owner)
+        response = self.client.patch(
+            reverse("products-detail", args=[self.product.id]),
+            {
+                "name": "Hamburguesa Modificada",
+                "price": "67.00",
+                "description": "para farmear aura con tus amigos",
+                "image": "http://testserver/media/products/fake.jpg",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.price, Decimal("67.00"))
+        self.assertEqual(self.product.description, "para farmear aura con tus amigos")
 
 
 class StoreViewSetTests(APITestCase):
@@ -184,6 +224,16 @@ class CartItemViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("product", response.data)
 
+    def test_create_cart_item_fails_when_exceeding_max_quantity(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            reverse("cart-items-list"),
+            {"cart": self.cart.id, "product": self.product.id, "quantity": 11},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("quantity", response.data)
+
     def test_create_cart_item_fails_when_mixing_different_stores(self):
         user_model = get_user_model()
         other_owner = user_model.objects.create_user(
@@ -214,6 +264,119 @@ class CartItemViewSetTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("detail", response.data)
+
+    def test_get_active_cart_returns_items_and_product_details(self):
+        CartItem.objects.create(cart=self.cart, product=self.product, quantity=2)
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.get(reverse("carts-active"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["items"]), 1)
+        item = response.data["items"][0]
+        self.assertEqual(item["product"], self.product.id)
+        self.assertEqual(item["quantity"], 2)
+        self.assertEqual(item["product_details"]["name"], "Pizza")
+
+    def test_clear_cart_action_removes_all_cart_items(self):
+        CartItem.objects.create(cart=self.cart, product=self.product, quantity=3)
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.delete(reverse("carts-clear"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(CartItem.objects.filter(cart=self.cart).count(), 0)
+
+    def test_checkout_fails_with_empty_cart(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(reverse("carts-checkout"), {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("detail", response.data)
+
+    def test_checkout_atomic_success_creates_order_deducts_stock_and_clears_cart(self):
+        CartItem.objects.create(cart=self.cart, product=self.product, quantity=2)
+        self.client.force_authenticate(user=self.user)
+
+        initial_stock = self.product.stock  # 10
+        response = self.client.post(reverse("carts-checkout"), {}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn("id", response.data)
+        self.assertEqual(Decimal(str(response.data["total"])), Decimal("30.00"))
+        self.assertEqual(response.data["status"], "pending")
+
+        # Verifica que el producto haya descontado su stock
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.stock, initial_stock - 2)
+
+        # Verifica que los items del carrito se hayan vaciado
+        self.assertEqual(CartItem.objects.filter(cart=self.cart).count(), 0)
+
+        # Verifica la orden y sus OrderItems en la BD
+        order = Order.objects.get(id=response.data["id"])
+        self.assertEqual(order.user, self.user)
+        self.assertEqual(order.store, self.store)
+        self.assertEqual(order.items.count(), 1)
+        order_item = order.items.first()
+        self.assertEqual(order_item.product, self.product)
+        self.assertEqual(order_item.quantity, 2)
+        self.assertEqual(order_item.unit_price, Decimal("15.00"))
+
+    def test_checkout_fails_when_product_stock_is_insufficient(self):
+        # Solicitamos 15 cuando el stock es 10
+        CartItem.objects.create(cart=self.cart, product=self.product, quantity=15)
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(reverse("carts-checkout"), {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("detail", response.data)
+
+        # Ninguna orden debe crearse
+        self.assertEqual(Order.objects.filter(user=self.user).count(), 0)
+        # El carrito no debe borrarse
+        self.assertEqual(CartItem.objects.filter(cart=self.cart).count(), 1)
+        # El stock no debe alterarse
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.stock, 10)
+
+    def test_checkout_fails_when_product_is_unavailable(self):
+        self.product.is_available = False
+        self.product.save(update_fields=["is_available"])
+        CartItem.objects.create(cart=self.cart, product=self.product, quantity=1)
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.post(reverse("carts-checkout"), {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("detail", response.data)
+
+        # Ninguna orden creada y stock inalterado
+        self.assertEqual(Order.objects.filter(user=self.user).count(), 0)
+        self.assertEqual(CartItem.objects.filter(cart=self.cart).count(), 1)
+
+    def test_checkout_forbidden_for_vendor_user(self):
+        vendor_cart = Cart.objects.create(user=self.store_owner)
+        CartItem.objects.create(cart=vendor_cart, product=self.product, quantity=1)
+        self.client.force_authenticate(user=self.store_owner)
+
+        response = self.client.post(reverse("carts-checkout"), {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn("detail", response.data)
+        self.assertEqual(Order.objects.filter(user=self.store_owner).count(), 0)
+
+    def test_checkout_allowed_for_admin_user(self):
+        user_model = get_user_model()
+        admin_user = user_model.objects.create_user(
+            username="admin-cart-user",
+            password="testpass123",
+            email="admin-cart@example.com",
+            role="admin",
+            is_staff=True,
+        )
+        admin_cart = Cart.objects.create(user=admin_user)
+        CartItem.objects.create(cart=admin_cart, product=self.product, quantity=1)
+        self.client.force_authenticate(user=admin_user)
+
+        response = self.client.post(reverse("carts-checkout"), {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Order.objects.filter(user=admin_user).count(), 1)
 
 
 class OrderViewSetTests(APITestCase):
@@ -323,16 +486,32 @@ class OrderViewSetTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_order_creation_requires_store(self):
+    def test_direct_order_creation_rejected(self):
         self.client.force_authenticate(user=self.client_user)
 
         response = self.client.post(
             reverse("orders-list"),
-            {"total": "50.00", "status": "pending"},
+            {"store": self.store.id, "total": "50.00", "status": "pending"},
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("store", response.data)
+        self.assertIn("checkout", response.data["detail"])
+
+    def test_order_creation_forbidden_for_vendor(self):
+        self.client.force_authenticate(user=self.vendor_user)
+
+        response = self.client.post(
+            reverse("orders-list"),
+            {"store": self.store.id, "total": "50.00", "status": "pending"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn("detail", response.data)
+
+    def test_order_serializer_read_only_fields(self):
+        serializer = OrderSerializer()
+        for field in ["user", "created_at", "store", "total", "status"]:
+            self.assertIn(field, serializer.Meta.read_only_fields)
 
 
 class OrderItemViewSetTests(APITestCase):
@@ -436,4 +615,60 @@ class OrderItemViewSetTests(APITestCase):
         self.assertEqual(self.product_a.stock, initial_stock - 3)
 
 
+class TiendaYPedidosVendedorFilterTests(APITestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.vendedor = user_model.objects.create_user(
+            username="vendedor_test",
+            email="vendedor_test@test.com",
+            password="password123",
+            role="vendedor",
+        )
+        self.cliente = user_model.objects.create_user(
+            username="cliente_test",
+            email="cliente_test@test.com",
+            password="password123",
+            role="cliente",
+        )
+        self.store = Store.objects.create(
+            owner=self.vendedor,
+            name="Pizzeria Don Vendedor",
+            description="Las mejores pizzas",
+        )
+        self.product = Product.objects.create(
+            store=self.store,
+            name="Pizza Fugazzeta",
+            price=Decimal("1200.00"),
+            stock=10,
+        )
 
+    def test_my_store_returns_vendor_store(self):
+        self.client.force_authenticate(user=self.vendedor)
+        url = reverse("stores-my-store")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["id"], self.store.id)
+        self.assertEqual(response.data["name"], "Pizzeria Don Vendedor")
+
+    def test_my_store_returns_404_when_user_has_no_store(self):
+        self.client.force_authenticate(user=self.cliente)
+        url = reverse("stores-my-store")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_filter_orders_by_store(self):
+        order1 = Order.objects.create(user=self.cliente, store=self.store, total=Decimal("1200.00"))
+        otro_vendedor = get_user_model().objects.create_user(
+            username="vendedor_dos",
+            email="vendedor_dos@test.com",
+            password="password123",
+            role="vendedor",
+        )
+        other_store = Store.objects.create(owner=otro_vendedor, name="Sushi Bar")
+        Order.objects.create(user=self.cliente, store=other_store, total=Decimal("2500.00"))
+
+        self.client.force_authenticate(user=self.cliente)
+        response = self.client.get(reverse("orders-list") + f"?store={self.store.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["id"], order1.id)

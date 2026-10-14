@@ -16,6 +16,18 @@ class StoreSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["owner", "created_at"]
 
+    def to_internal_value(self, data):
+        if isinstance(data, dict) and "image" in data:
+            image_val = data.get("image")
+            if isinstance(image_val, str):
+                mutable_data = data.copy()
+                if self.instance and (not image_val or image_val.startswith("http") or image_val.startswith("/")):
+                    mutable_data.pop("image")
+                elif not image_val:
+                    mutable_data["image"] = None
+                data = mutable_data
+        return super().to_internal_value(data)
+
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,12 +45,17 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["created_at"]
 
-
-class CartSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cart
-        fields = ["id", "user", "created_at"]
-        read_only_fields = ["user", "created_at"]
+    def to_internal_value(self, data):
+        if isinstance(data, dict) and "image" in data:
+            image_val = data.get("image")
+            if isinstance(image_val, str):
+                mutable_data = data.copy()
+                if self.instance and (not image_val or image_val.startswith("http") or image_val.startswith("/")):
+                    mutable_data.pop("image")
+                elif not image_val:
+                    mutable_data["image"] = None
+                data = mutable_data
+        return super().to_internal_value(data)
 
 
 class CartItemSerializer(serializers.ModelSerializer):
@@ -50,28 +67,50 @@ class CartItemSerializer(serializers.ModelSerializer):
     agregar el mismo producto al carrito.
     """
 
+    product_details = ProductSerializer(source="product", read_only=True)
+
     class Meta:
         model = CartItem
-        fields = ["id", "cart", "product", "quantity"]
+        fields = ["id", "cart", "product", "quantity", "product_details"]
         validators = []
 
 
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Cart
+        fields = ["id", "user", "items", "created_at"]
+        read_only_fields = ["user", "created_at"]
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name", read_only=True)
+
+    class Meta:
+        model = OrderItem
+        fields = ["id", "order", "product", "product_name", "quantity", "unit_price"]
+        read_only_fields = ["unit_price"]
+
+
 class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+    store_name = serializers.CharField(source="store.name", read_only=True)
+
     class Meta:
         model = Order
         fields = [
             "id",
             "user",
             "store",
+            "store_name",
+            "items",
             "total",
             "status",
+            "delivery_address",
+            "delivery_phone",
+            "delivery_notes",
+            "payment_method",
             "created_at",
         ]
-        read_only_fields = ["user", "created_at"]
-
-
-class OrderItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderItem
-        fields = ["id", "order", "product", "quantity", "unit_price"]
-        read_only_fields = ["unit_price"]
+        read_only_fields = ["user", "created_at", "store", "total", "status"]

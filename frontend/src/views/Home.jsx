@@ -3,14 +3,36 @@ import Hero from '../components/Hero.jsx'
 import CategoryCard from '../components/CategoryCard.jsx'
 import SectionHeader from '../components/SectionHeader.jsx'
 import StoreLogo from '../components/StoreLogo.jsx'
-import { categories, stores } from '../data/homeData.js'
+import { categories } from '../data/homeData.js'
 import { useAuth } from '../hooks/useAuth'
 import { authService } from '../services/authService'
+import { storeService } from '../services/storeService'
 import { setStoredTokens } from '../utils/token'
 
 export default function Home() {
   const { user, setUser, getValidToken } = useAuth()
   const [profile, setProfile] = useState(user)
+  const [stores, setStores] = useState([])
+  const [loadingStores, setLoadingStores] = useState(true)
+  const [storesError, setStoresError] = useState(null)
+
+  const handleRetryStores = async () => {
+    setLoadingStores(true)
+    setStoresError(null)
+    try {
+      const res = await storeService.getStores()
+      if (res && res.success) {
+        setStores(res.data || [])
+        setStoresError(null)
+      } else {
+        setStoresError(res?.error || 'Error al obtener las tiendas disponibles')
+      }
+    } catch {
+      setStoresError('Error de conexión con el servidor')
+    } finally {
+      setLoadingStores(false)
+    }
+  }
 
   useEffect(() => {
     let isMounted = true
@@ -32,7 +54,29 @@ export default function Home() {
       }
     }
 
+    const loadStores = async () => {
+      try {
+        const res = await storeService.getStores()
+        if (!isMounted) return
+        if (res && res.success) {
+          setStores(res.data || [])
+          setStoresError(null)
+        } else {
+          setStoresError(res?.error || 'Error al obtener las tiendas disponibles')
+        }
+      } catch {
+        if (isMounted) {
+          setStoresError('Error de conexión con el servidor')
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingStores(false)
+        }
+      }
+    }
+
     fetchProfile()
+    loadStores()
 
     return () => {
       isMounted = false
@@ -67,19 +111,49 @@ export default function Home() {
       <section id="tiendas" className="container pt-5 pb-4 mb-5">
         <SectionHeader title="Tiendas destacadas" />
 
-        <div className="d-flex overflow-auto gap-4 pb-2 d-md-none">
-          {stores.map((store) => (
-            <StoreLogo key={store.name} store={store} />
-          ))}
-        </div>
-
-        <div className="row g-4 d-none d-md-flex">
-          {stores.map((store) => (
-            <div className="col" key={store.name}>
-              <StoreLogo store={store} />
+        {loadingStores ? (
+          <div className="d-flex justify-content-center align-items-center py-5">
+            <div className="spinner-border text-primary me-2" role="status">
+              <span className="visually-hidden">Cargando tiendas...</span>
             </div>
-          ))}
-        </div>
+            <span className="text-secondary fw-semibold">Cargando tiendas...</span>
+          </div>
+        ) : storesError ? (
+          <div className="alert alert-danger d-flex align-items-center justify-content-between p-3 rounded-3" role="alert">
+            <div>
+              <i className="bi bi-exclamation-triangle-fill me-2" />
+              <span>{storesError}</span>
+            </div>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-danger"
+              onClick={handleRetryStores}
+            >
+              Reintentar
+            </button>
+          </div>
+        ) : stores.length === 0 ? (
+          <div className="text-center py-5 bg-light rounded-3 border">
+            <i className="bi bi-shop text-muted fs-1 mb-2 d-block" />
+            <p className="text-secondary fw-medium mb-0">No hay tiendas disponibles en este momento.</p>
+          </div>
+        ) : (
+          <>
+            <div className="d-flex overflow-auto gap-4 pb-2 d-md-none">
+              {stores.map((store) => (
+                <StoreLogo key={store.id || store.name} store={store} />
+              ))}
+            </div>
+
+            <div className="row g-4 d-none d-md-flex">
+              {stores.map((store) => (
+                <div className="col" key={store.id || store.name}>
+                  <StoreLogo store={store} />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </section>
     </>
   )

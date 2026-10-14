@@ -131,11 +131,20 @@ export function AuthProvider({ children }) {
     logoutLocal()
   }
 
+  const updateUser = useCallback((updatedFields) => {
+    setUser((prev) => {
+      const nextUser = { ...prev, ...updatedFields }
+      setStoredTokens({ user: nextUser })
+      return nextUser
+    })
+  }, [])
+
   return (
     <AuthContext.Provider
       value={{
         user,
         setUser,
+        updateUser,
         loading,
         login,
         register,

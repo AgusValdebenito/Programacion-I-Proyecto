@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import Logo from './Logo'
 
 export default function Footer() {
@@ -17,30 +18,30 @@ export default function Footer() {
             <h5 className="fw-semibold mb-3">Navegación</h5>
             <ul className="list-unstyled small d-grid gap-2 mb-0">
               <li>
-                <a href="#inicio">Inicio</a>
+                <Link to="/">Inicio</Link>
               </li>
               <li>
-                <a href="#categorias">Categorías</a>
+                <Link to="/explorar">Explorar comercios</Link>
               </li>
               <li>
-                <a href="#tiendas">Tiendas</a>
+                <Link to="/tiendas">Tiendas destacadas</Link>
               </li>
               <li>
-                <a href="#">Promociones</a>
+                <Link to="/carrito">Mi carrito</Link>
               </li>
             </ul>
           </div>
           <div className="col-6 col-md-4">
-            <h5 className="fw-semibold mb-3">Ayuda</h5>
+            <h5 className="fw-semibold mb-3">Mi Cuenta</h5>
             <ul className="list-unstyled small d-grid gap-2 mb-0">
               <li>
-                <a href="#">Mis pedidos</a>
+                <Link to="/pedidos">Mis pedidos</Link>
               </li>
               <li>
-                <a href="#">Mi perfil</a>
+                <Link to="/perfil">Mi perfil</Link>
               </li>
               <li>
-                <a href="#">Soporte</a>
+                <Link to="/perfil">Direcciones guardadas</Link>
               </li>
             </ul>
           </div>

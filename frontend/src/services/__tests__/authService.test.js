@@ -130,4 +130,27 @@ describe('authService (TP8 Clean Code & TDD)', () => {
       expect(profile).toBeNull()
     })
   })
+
+  describe('updateProfile', () => {
+    it('sends PATCH request to update user name and phone', async () => {
+      const updatedUser = { id: 1, name: 'Carlos Gomez', phone: '1122334455' }
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => updatedUser,
+      })
+
+      const res = await authService.updateProfile({ name: 'Carlos Gomez', phone: '1122334455' }, 'valid-token')
+      expect(res.success).toBe(true)
+      expect(res.data).toEqual(updatedUser)
+      expect(fetchSpy).toHaveBeenCalledWith(
+        expect.stringContaining('/profile/'),
+        expect.objectContaining({
+          method: 'PATCH',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer valid-token',
+          }),
+        })
+      )
+    })
+  })
 })
