@@ -17,6 +17,22 @@ class OrderService:
     }
 
     @classmethod
+    def restore_order_stock(cls, order, excluded_product_id=None):
+        """Reintegra el stock de los productos con track_stock al cancelar un pedido."""
+        for item in order.items.select_related("product").all():
+            prod = item.product
+            if prod.track_stock:
+                prod.stock += item.quantity
+                if excluded_product_id is None or prod.id != excluded_product_id:
+                    if not prod.is_available and prod.stock > 0:
+                        prod.is_available = True
+                        prod.save(update_fields=["stock", "is_available"])
+                    else:
+                        prod.save(update_fields=["stock"])
+                else:
+                    prod.save(update_fields=["stock"])
+
+    @classmethod
     def reject_order_by_vendor(cls, order, user, reason=None, out_of_stock_product=None):
         """Cancela un pedido por parte del comercio o admin, registrando motivo y apagando reactivamente el plato agotado."""
         is_admin = is_admin_user(user)
@@ -33,6 +49,7 @@ class OrderService:
         order.status = Order.StatusChoices.CANCELLED
         order.cancellation_reason = reason or "Cancelado por el comercio"
 
+        prod_id = None
         if out_of_stock_product is not None:
             from core.models import Product
 
@@ -46,10 +63,12 @@ class OrderService:
                     })
 
             order.cancelled_product = prod
+            prod_id = prod.id
             # Desactivación reactiva automática del plato/producto que originó la falta de stock
             prod.is_available = False
             prod.save(update_fields=["is_available"])
 
+        cls.restore_order_stock(order, excluded_product_id=prod_id)
         order.save(update_fields=["status", "cancellation_reason", "cancelled_product"])
         return order
 
@@ -76,11 +95,14 @@ class OrderService:
                     raise ValidationError({"detail": "Solo podes cancelar pedidos en estado 'Pendiente'."})
                 order.status = Order.StatusChoices.CANCELLED
                 order.cancellation_reason = cancellation_reason or "Cancelado por el cliente"
+                cls.restore_order_stock(order)
                 order.save(update_fields=["status", "cancellation_reason"])
                 return order
             raise PermissionDenied("No tenes permisos para cancelar este pedido.")
 
         if is_admin:
+            if new_status == Order.StatusChoices.CANCELLED and order.status != Order.StatusChoices.CANCELLED:
+                cls.restore_order_stock(order)
             order.status = new_status
             order.save(update_fields=["status"])
             return order

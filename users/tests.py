@@ -186,6 +186,27 @@ class UsuarioProfileAndLogoutTests(APITestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.name, "Nombre Actualizado")
 
+    def test_profile_patch_rejects_weak_password(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.patch(
+            reverse("profile"),
+            {"password": "123"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("password", response.data)
+
+    def test_profile_patch_accepts_strong_password(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.patch(
+            reverse("profile"),
+            {"password": "NewSecretPassword2026!"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("NewSecretPassword2026!"))
+
     def test_logout_blacklists_refresh_token(self):
         refresh = RefreshToken.for_user(self.user)
         self.client.force_authenticate(user=self.user)

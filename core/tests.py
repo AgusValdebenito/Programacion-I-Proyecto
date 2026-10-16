@@ -812,3 +812,61 @@ class Milestone4HybridStockAndCancellationTests(APITestCase):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("PRODUCT_UNAVAILABLE", str(res.data))
         self.assertEqual([int(x) for x in res.json().get("unavailable_product_ids")], [self.burger.id])
+
+    def test_order_item_update_is_blocked(self):
+        """Los ítems de una orden no pueden ser modificados individualmente por PATCH/PUT."""
+        order = Order.objects.create(
+            user=self.cliente,
+            store=self.store,
+            total=Decimal("1200.00"),
+            status=Order.StatusChoices.PENDING,
+        )
+        item = OrderItem.objects.create(
+            order=order,
+            product=self.gaseosa,
+            quantity=1,
+            unit_price=self.gaseosa.price,
+        )
+        self.client.force_authenticate(user=self.cliente)
+        res = self.client.patch(
+            reverse("order-items-detail", args=[item.id]),
+            {"quantity": 50},
+            format="json",
+        )
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("individualmente", str(res.data))
+
+    def test_order_cancellation_restores_stock_for_tracked_products(self):
+        """Al cancelar un pedido pendiente, se reintegra el stock a los productos con control de stock."""
+        # Se compran las 2 gaseosas
+        self.client.force_authenticate(user=self.cliente)
+        self.client.post(
+            reverse("cart-items-list"),
+            {"cart": self.cart.id, "product": self.gaseosa.id, "quantity": 2},
+            format="json",
+        )
+        res_checkout = self.client.post(
+            reverse("carts-checkout"),
+            {"delivery_address": "Mitre 123"},
+            format="json",
+        )
+        self.assertEqual(res_checkout.status_code, status.HTTP_201_CREATED)
+        order_id = res_checkout.data["id"]
+
+        # Stock se fue a 0 y se apagó
+        self.gaseosa.refresh_from_db()
+        self.assertEqual(self.gaseosa.stock, 0)
+        self.assertFalse(self.gaseosa.is_available)
+
+        # Cliente cancela el pedido
+        res_cancel = self.client.patch(
+            reverse("orders-detail", args=[order_id]),
+            {"status": "cancelled", "cancellation_reason": "Me arrepentí"},
+            format="json",
+        )
+        self.assertEqual(res_cancel.status_code, status.HTTP_200_OK)
+
+        # Stock debe restaurarse a 2 y reactivarse is_available
+        self.gaseosa.refresh_from_db()
+        self.assertEqual(self.gaseosa.stock, 2)
+        self.assertTrue(self.gaseosa.is_available)

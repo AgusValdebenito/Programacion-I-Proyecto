@@ -314,5 +314,8 @@ class OrderItemViewSet(viewsets.ModelViewSet):
             order.total += unit_price * quantity
             order.save(update_fields=["total"])
 
+    def update(self, request, *args, **kwargs):
+        raise ValidationError({"detail": "Los ítems de pedido no pueden ser modificados individualmente."})
+
     def destroy(self, request, *args, **kwargs):
         raise ValidationError({"detail": "Los ítems de pedido no pueden ser eliminados individualmente."})
