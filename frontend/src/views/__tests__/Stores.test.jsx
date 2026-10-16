@@ -215,4 +215,40 @@ describe('Stores View Component (TP9 TDD - Issue #38)', () => {
     const storeLink = screen.getByRole('link', { name: /crazy burgers/i })
     expect(storeLink).toHaveAttribute('href', '/tiendas/5')
   })
+
+  it('initializes search filter from URL query param ?buscar=', async () => {
+    render(
+      <MemoryRouter initialEntries={['/tiendas?buscar=Gelato']}>
+        <Stores />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Heladería Gelato Real')).toBeInTheDocument()
+      expect(screen.queryByText('Crazy Burgers')).not.toBeInTheDocument()
+    })
+  })
+
+  it('sorts stores alphabetically when ordering is changed', async () => {
+    render(
+      <MemoryRouter initialEntries={['/tiendas']}>
+        <Stores />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Crazy Burgers')).toBeInTheDocument()
+    })
+
+    const orderSelect = screen.getByLabelText(/ordenar tiendas/i)
+    fireEvent.change(orderSelect, { target: { value: '-name' } })
+
+    const headings = screen.getAllByRole('heading', { level: 2 })
+    // With Z-A, Pizza Planet comes before Café Central
+    const storeHeadings = headings.map((h) => h.textContent).filter(Boolean)
+    const pizzaIdx = storeHeadings.findIndex((t) => t.includes('Pizza Planet'))
+    const cafeIdx = storeHeadings.findIndex((t) => t.includes('Café Central'))
+    expect(pizzaIdx).toBeLessThan(cafeIdx)
+  })
 })
+

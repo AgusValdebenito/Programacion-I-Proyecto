@@ -29,6 +29,9 @@ class StoreViewSet(viewsets.ModelViewSet):
     queryset = Store.objects.all().order_by("id")
     serializer_class = StoreSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsResourceOwnerOrReadOnly]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["name", "description"]
+    ordering_fields = ["name", "id", "created_at"]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -38,6 +41,19 @@ class StoreViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(owner=self.request.user)
             else:
                 queryset = queryset.filter(owner_id=owner_id)
+
+        # Usuarios regulares no ven tiendas suspendidas, salvo que el dueño consulte su propia tienda
+        if not is_admin_user(self.request.user):
+            if owner_id != "me":
+                queryset = queryset.filter(is_active=True)
+        else:
+            is_active = self.request.query_params.get("is_active")
+            if is_active is not None:
+                if is_active.lower() in ("true", "1"):
+                    queryset = queryset.filter(is_active=True)
+                elif is_active.lower() in ("false", "0"):
+                    queryset = queryset.filter(is_active=False)
+
         return queryset
 
     @action(detail=False, methods=["get"], url_path="my-store", permission_classes=[permissions.IsAuthenticated])
@@ -47,6 +63,15 @@ class StoreViewSet(viewsets.ModelViewSet):
             return Response({"detail": "No tenés ninguna tienda asociada."}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(store)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="toggle-active", permission_classes=[permissions.IsAuthenticated])
+    def toggle_active(self, request, pk=None):
+        if not is_admin_user(request.user):
+            raise PermissionDenied("Solo los administradores pueden suspender o reactivar tiendas.")
+        store = self.get_object()
+        store.is_active = not store.is_active
+        store.save(update_fields=["is_active"])
+        return Response(self.get_serializer(store).data, status=status.HTTP_200_OK)
 
     def perform_create(self, serializer):
         if Store.objects.filter(owner=self.request.user).exists():
@@ -59,15 +84,23 @@ class StoreViewSet(viewsets.ModelViewSet):
             user.role = Usuario.RoleChoices.VENDEDOR
             user.save(update_fields=["role"])
 
+    def perform_update(self, serializer):
+        if "is_active" in serializer.validated_data and not is_admin_user(self.request.user):
+            raise PermissionDenied("Solo los administradores pueden suspender o reactivar tiendas.")
+        serializer.save()
+
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all().order_by("id")
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsResourceOwnerOrReadOnly]
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["name", "description"]
+    ordering_fields = ["name", "price", "stock", "id", "created_at"]
 
     def get_queryset(self):
+        from decimal import Decimal
+
         queryset = super().get_queryset()
         store_id = self.request.query_params.get("store")
         if store_id:
@@ -79,6 +112,24 @@ class ProductViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(is_available=True)
             elif is_available.lower() in ("false", "0"):
                 queryset = queryset.filter(is_available=False)
+
+        min_price = self.request.query_params.get("min_price")
+        if min_price is not None:
+            try:
+                queryset = queryset.filter(price__gte=Decimal(min_price))
+            except Exception:
+                pass
+
+        max_price = self.request.query_params.get("max_price")
+        if max_price is not None:
+            try:
+                queryset = queryset.filter(price__lte=Decimal(max_price))
+            except Exception:
+                pass
+
+        # No mostrar productos de tiendas suspendidas a usuarios regulares
+        if not is_admin_user(self.request.user):
+            queryset = queryset.filter(store__is_active=True)
 
         return queryset
 
@@ -100,6 +151,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if new_store != instance.store and not is_admin_user(self.request.user):
             raise ValidationError({"store": "No podés reasignar un producto a otra tienda."})
         serializer.save()
+
 
 
 class CartViewSet(viewsets.ModelViewSet):

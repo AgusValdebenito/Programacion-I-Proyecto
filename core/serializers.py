@@ -12,9 +12,11 @@ class StoreSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "image",
+            "is_active",
             "created_at",
         ]
         read_only_fields = ["owner", "created_at"]
+
 
     def to_internal_value(self, data):
         if isinstance(data, dict) and "image" in data:

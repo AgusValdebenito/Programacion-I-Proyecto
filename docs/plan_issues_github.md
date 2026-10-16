@@ -251,7 +251,7 @@ Evitar compras de productos pausados mientras el cliente los tenía en el carrit
 
 ---
 
-## 🛡️ Milestone 5: Calidad, Moderación y DevOps
+## 🛡️ Milestone 5: Calidad, Moderación y DevOps (✅ COMPLETADO Y CERRADO)
 
 ### Issue [#24](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/24): [DevOps] Pipeline de CI/CD para Frontend en GitHub Actions
 **Labels:** `devops`, `enhancement` | **Milestone:** `M5: Calidad, Moderación y DevOps`  
@@ -259,9 +259,9 @@ Evitar compras de productos pausados mientras el cliente los tenía en el carrit
 Completar la integración continua sumando un workflow que ejecute linters, tests unitarios y build del frontend en cada Pull Request a `main`.
 
 **Tareas / Sub-issues:**
-- [ ] Crear `.github/workflows/frontend-ci.yml`.
-- [ ] Configurar job con Node.js 22.x: `npm ci`, `npm run lint`, `npm test -- --run`, `npm run build`.
-- [ ] Asegurar que el pipeline de Django y el de Vite corran en paralelo.
+- [x] Crear `.github/workflows/frontend-ci.yml`.
+- [x] Configurar job con Node.js 22.x: `npm ci`, `npm run lint`, `npm test`, `npm run build`.
+- [x] Asegurar que el pipeline de Django y el de Vite corran en paralelo.
 
 ---
 
@@ -271,10 +271,10 @@ Completar la integración continua sumando un workflow que ejecute linters, test
 Permitir a los clientes buscar productos y filtrar comercios por texto y categoría desde la barra de búsqueda del Navbar.
 
 **Tareas / Sub-issues:**
-- [ ] Backend: configurar `SearchFilter` y `OrderingFilter` en DRF para `StoreViewSet` y `ProductViewSet`.
-- [ ] Backend: filtro por categoría o rango de precios.
-- [ ] Frontend: vincular el input de búsqueda del `Navbar.jsx` a la vista de resultados o filtro en la Home.
-- [ ] Debounce en el input de búsqueda (300ms).
+- [x] Backend: configurar `SearchFilter` y `OrderingFilter` en DRF para `StoreViewSet` y `ProductViewSet`.
+- [x] Backend: filtro por categoría o rango de precios (`min_price`, `max_price`).
+- [x] Frontend: vincular el input de búsqueda del `Navbar.jsx` a la vista de resultados y catálogo de tiendas.
+- [x] Debounce en el input de búsqueda (300ms) y selector de ordenamiento A-Z, Z-A y recientes.
 
 ---
 
@@ -284,10 +284,11 @@ Permitir a los clientes buscar productos y filtrar comercios por texto y categor
 Dotar a usuarios con rol `admin` de herramientas para moderar contenido abusivo sin depender exclusivamente del Django Admin tradicional.
 
 **Tareas / Sub-issues:**
-- [ ] Backend: permisos globales de eliminación y suspensión en ViewSets correspondientes.
-- [ ] Frontend: vista `/admin/moderacion` protegida para `role === 'admin'`.
-- [ ] Listado de tiendas y productos con opción de baja preventiva (*"Suspender tienda"* / *"Pausar producto"*).
-- [ ] Registro de auditoría o motivo de moderación.
+- [x] Backend: permisos globales de eliminación y suspensión en ViewSets correspondientes (`IsResourceOwnerOrReadOnly` con soporte `is_admin_user`, acción `toggle_active`).
+- [x] Frontend: vista `/admin/moderacion` protegida para `role === 'admin'`.
+- [x] Listado de tiendas y productos con opción de baja preventiva (*"Suspender tienda"* / *"Pausar producto"*).
+- [x] Registro de auditoría con historial de acciones y motivo de moderación.
+
 
 ---
 

@@ -116,4 +116,50 @@ describe('Navbar Component - Delivery Location Visibility', () => {
 
     expect(screen.getByLabelText(/seleccionar dirección de entrega/i)).toBeInTheDocument()
   })
+
+  it('renders quick search input and navigates on search submit', () => {
+    vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
+      user: { id: 1, role: 'cliente', name: 'Juan Cliente' },
+      logout: vi.fn(),
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Navbar />
+      </MemoryRouter>
+    )
+
+    const searchInput = screen.getByLabelText(/buscar en foodrush/i)
+    expect(searchInput).toBeInTheDocument()
+  })
+
+  it('renders Moderación link when user role is admin and hides it for normal clients', () => {
+    vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
+      user: { id: 99, role: 'admin', is_staff: true, name: 'Super Admin' },
+      logout: vi.fn(),
+    })
+
+    const { unmount } = render(
+      <MemoryRouter initialEntries={['/']}>
+        <Navbar />
+      </MemoryRouter>
+    )
+
+    expect(screen.getByRole('link', { name: /moderación/i })).toBeInTheDocument()
+    unmount()
+
+    vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
+      user: { id: 2, role: 'cliente', name: 'Cliente Normal' },
+      logout: vi.fn(),
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Navbar />
+      </MemoryRouter>
+    )
+
+    expect(screen.queryByRole('link', { name: /moderación/i })).not.toBeInTheDocument()
+  })
 })
+

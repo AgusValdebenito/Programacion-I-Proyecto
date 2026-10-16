@@ -870,3 +870,132 @@ class Milestone4HybridStockAndCancellationTests(APITestCase):
         self.gaseosa.refresh_from_db()
         self.assertEqual(self.gaseosa.stock, 2)
         self.assertTrue(self.gaseosa.is_available)
+
+
+class Milestone5SearchOrderingAndModerationTests(APITestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_user(
+            username="admin_m5",
+            email="admin_m5@test.com",
+            password="Password123!",
+            role="admin",
+            is_staff=True,
+        )
+        self.vendedor = user_model.objects.create_user(
+            username="vendedor_m5",
+            email="vendedor_m5@test.com",
+            password="Password123!",
+            role="vendedor",
+        )
+        self.cliente = user_model.objects.create_user(
+            username="cliente_m5",
+            email="cliente_m5@test.com",
+            password="Password123!",
+            role="cliente",
+        )
+        self.store_a = Store.objects.create(
+            owner=self.vendedor,
+            name="Pizzeria Don Luigi",
+            description="Las mejores pizzas napolitanas al horno de barro",
+        )
+        self.vendor_b = user_model.objects.create_user(
+            username="vendedor_b_m5",
+            email="vendedor_b_m5@test.com",
+            password="Password123!",
+            role="vendedor",
+        )
+
+        self.store_b = Store.objects.create(
+            owner=self.vendor_b,
+            name="Hamburguesas Gourmet",
+            description="Carne premium y papas fritas crocantes",
+        )
+        self.prod_cheap = Product.objects.create(
+            store=self.store_a,
+            name="Faina Tradicional",
+            description="Porcion clasica de faina dorada",
+            price=Decimal("450.00"),
+            stock=10,
+            track_stock=True,
+        )
+        self.prod_expensive = Product.objects.create(
+            store=self.store_b,
+            name="Combo Doble Smash con Papas",
+            description="Doble medallon smash y salsa secreta",
+            price=Decimal("3800.00"),
+            stock=5,
+            track_stock=True,
+        )
+
+    def test_search_stores_by_name_and_description(self):
+        res = self.client.get(reverse("stores-list"), {"search": "Luigi"})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        ids = [s["id"] for s in res.data]
+        self.assertIn(self.store_a.id, ids)
+        self.assertNotIn(self.store_b.id, ids)
+
+        res_desc = self.client.get(reverse("stores-list"), {"search": "crocantes"})
+        self.assertEqual(res_desc.status_code, status.HTTP_200_OK)
+        ids_desc = [s["id"] for s in res_desc.data]
+        self.assertIn(self.store_b.id, ids_desc)
+        self.assertNotIn(self.store_a.id, ids_desc)
+
+    def test_ordering_stores_by_name(self):
+        res_asc = self.client.get(reverse("stores-list"), {"ordering": "name"})
+        self.assertEqual(res_asc.status_code, status.HTTP_200_OK)
+        names = [s["name"] for s in res_asc.data]
+        self.assertTrue(names.index("Hamburguesas Gourmet") < names.index("Pizzeria Don Luigi"))
+
+    def test_search_and_price_filtering_products(self):
+        res = self.client.get(reverse("products-list"), {"search": "Smash"})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), 1)
+        self.assertEqual(res.data[0]["id"], self.prod_expensive.id)
+
+        res_price = self.client.get(reverse("products-list"), {"max_price": "1000.00"})
+        self.assertEqual(res_price.status_code, status.HTTP_200_OK)
+        ids = [p["id"] for p in res_price.data]
+        self.assertIn(self.prod_cheap.id, ids)
+        self.assertNotIn(self.prod_expensive.id, ids)
+
+        res_order = self.client.get(reverse("products-list"), {"ordering": "-price"})
+        self.assertEqual(res_order.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_order.data[0]["id"], self.prod_expensive.id)
+
+    def test_admin_can_toggle_store_active_status(self):
+        self.client.force_authenticate(user=self.admin)
+        res = self.client.post(reverse("stores-toggle-active", args=[self.store_a.id]))
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.store_a.refresh_from_db()
+        self.assertFalse(self.store_a.is_active)
+
+        self.client.force_authenticate(user=self.cliente)
+        res_client = self.client.get(reverse("stores-list"))
+        ids = [s["id"] for s in res_client.data]
+        self.assertNotIn(self.store_a.id, ids)
+
+        res_prod = self.client.get(reverse("products-list"))
+        prod_ids = [p["id"] for p in res_prod.data]
+        self.assertNotIn(self.prod_cheap.id, prod_ids)
+
+    def test_non_admin_cannot_toggle_store_active_status(self):
+        self.client.force_authenticate(user=self.vendedor)
+        res = self.client.post(reverse("stores-toggle-active", args=[self.store_a.id]))
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_pause_and_delete_any_product(self):
+        self.client.force_authenticate(user=self.admin)
+        res_pause = self.client.patch(
+            reverse("products-detail", args=[self.prod_cheap.id]),
+            {"is_available": False},
+            format="json",
+        )
+        self.assertEqual(res_pause.status_code, status.HTTP_200_OK)
+        self.prod_cheap.refresh_from_db()
+        self.assertFalse(self.prod_cheap.is_available)
+
+        res_del = self.client.delete(reverse("products-detail", args=[self.prod_expensive.id]))
+        self.assertEqual(res_del.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Product.objects.filter(id=self.prod_expensive.id).exists())
+

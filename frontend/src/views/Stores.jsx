@@ -16,13 +16,44 @@ function getInitials(name) {
 export default function Stores() {
   const [searchParams, setSearchParams] = useSearchParams()
   const categoryParam = searchParams.get('categoria')
+  const urlSearchParam = searchParams.get('buscar') || searchParams.get('search') || ''
 
   const [stores, setStores] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState(urlSearchParam)
+  const [ordering, setOrdering] = useState('name')
 
   const activeCategoryId = categoryParam ? Number(categoryParam) : null
+
+  const [prevUrlParam, setPrevUrlParam] = useState(urlSearchParam)
+
+  // Sincronizar durante el render si el param de la URL cambia externamente (patrón oficial de React)
+  if (prevUrlParam !== urlSearchParam) {
+    setPrevUrlParam(urlSearchParam)
+    setSearchQuery(urlSearchParam)
+  }
+
+
+  // Debounce de 300ms para reflejar la búsqueda en la URL
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const currentInUrl = searchParams.get('buscar') || searchParams.get('search') || ''
+      if (searchQuery.trim() !== currentInUrl.trim()) {
+        const nextParams = new URLSearchParams(searchParams)
+        if (searchQuery.trim()) {
+          nextParams.set('buscar', searchQuery.trim())
+          nextParams.delete('search')
+        } else {
+          nextParams.delete('buscar')
+          nextParams.delete('search')
+        }
+        setSearchParams(nextParams, { replace: true })
+      }
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchQuery, searchParams, setSearchParams])
 
   const handleRetry = async () => {
     setLoading(true)
@@ -85,14 +116,13 @@ export default function Stores() {
 
   const handleClearFilters = () => {
     setSearchQuery('')
-    const nextParams = new URLSearchParams(searchParams)
-    nextParams.delete('categoria')
-    setSearchParams(nextParams)
+    setOrdering('name')
+    setSearchParams(new URLSearchParams())
   }
 
-  // Filtered store list
+  // Filtered and sorted store list
   const filteredStores = useMemo(() => {
-    return stores.filter((store) => {
+    const list = stores.filter((store) => {
       // Category filter
       if (activeCategoryId) {
         const storeCat = getStoreCategory(store)
@@ -113,7 +143,19 @@ export default function Stores() {
 
       return true
     })
-  }, [stores, activeCategoryId, searchQuery])
+
+    if (ordering === 'name') {
+      return [...list].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+    }
+    if (ordering === '-name') {
+      return [...list].sort((a, b) => (b.name || '').localeCompare(a.name || ''))
+    }
+    if (ordering === 'recent') {
+      return [...list].sort((a, b) => (b.id || 0) - (a.id || 0))
+    }
+    return list
+  }, [stores, activeCategoryId, searchQuery, ordering])
+
 
   const activeCategoryObj = activeCategoryId ? getCategoryById(activeCategoryId) : null
 
@@ -153,32 +195,47 @@ export default function Stores() {
             </p>
           </div>
 
-          {/* Search bar */}
-          <div className="position-relative" style={{ minWidth: '280px', maxWidth: '380px' }}>
-            <span className="position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary">
-              <i className="bi bi-search" />
-            </span>
-            <input
-              type="text"
-              className="form-control rounded-pill ps-5 pe-4 py-2 border shadow-sm"
-              placeholder="Buscar tiendas o productos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              aria-label="Buscar tiendas o productos"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                className="btn btn-sm btn-link position-absolute top-50 end-0 translate-middle-y me-2 text-secondary text-decoration-none"
-                onClick={() => setSearchQuery('')}
-                aria-label="Limpiar búsqueda"
-              >
-                <i className="bi bi-x-circle-fill" />
-              </button>
-            )}
+          {/* Search bar & Ordering */}
+          <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2">
+            <div className="position-relative" style={{ minWidth: '240px', maxWidth: '340px' }}>
+              <span className="position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary">
+                <i className="bi bi-search" />
+              </span>
+              <input
+                type="text"
+                className="form-control rounded-pill ps-5 pe-4 py-2 border shadow-sm"
+                placeholder="Buscar tiendas o productos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Buscar tiendas o productos"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-link position-absolute top-50 end-0 translate-middle-y me-2 text-secondary text-decoration-none"
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Limpiar búsqueda"
+                >
+                  <i className="bi bi-x-circle-fill" />
+                </button>
+              )}
+            </div>
+
+            <select
+              className="form-select rounded-pill py-2 px-3 border shadow-sm text-secondary small"
+              style={{ minWidth: '160px' }}
+              value={ordering}
+              onChange={(e) => setOrdering(e.target.value)}
+              aria-label="Ordenar tiendas"
+            >
+              <option value="name">Nombre (A - Z)</option>
+              <option value="-name">Nombre (Z - A)</option>
+              <option value="recent">Más recientes</option>
+            </select>
           </div>
         </div>
       </div>
+
 
       {/* Category Filter Chips */}
       <div className="mb-4 overflow-auto pb-2">
