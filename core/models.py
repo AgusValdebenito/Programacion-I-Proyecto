@@ -219,3 +219,29 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
+
+
+class FavoriteStore(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="favorite_stores",
+        verbose_name="usuario",
+    )
+    store = models.ForeignKey(
+        Store,
+        on_delete=models.CASCADE,
+        related_name="favorites",
+        verbose_name="tienda",
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="fecha de guardado")
+
+    class Meta:
+        verbose_name = "tienda favorita"
+        verbose_name_plural = "tiendas favoritas"
+        constraints = [
+            models.UniqueConstraint(fields=["user", "store"], name="unique_user_favorite_store")
+        ]
+
+    def __str__(self):
+        return f"{self.user} -> {self.store.name}"

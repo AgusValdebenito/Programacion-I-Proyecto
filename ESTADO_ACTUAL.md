@@ -42,8 +42,8 @@ El TP9 (Vistas Completas y Funcionalidad Full-Stack) se encuentra en desarrollo 
 * Manejo de multimedia y estáticos configurado en Django (`MEDIA_URL = '/media/'`, `MEDIA_ROOT = BASE_DIR / 'media'`)
 * Catálogo visual completo: imágenes reales para las 6 tiendas y 29 productos descargadas y vinculadas
 * Helper `imageUrl.js` en frontend con resolución dinámica de URLs de backend y fallbacks ante error (`onError`)
-* 139 tests unitarios e integrados pasando en frontend con Vitest y React Testing Library (0 errores ESLint)
-* 60 tests automatizados pasando en backend con Django REST Framework y PostgreSQL/SQLite de testing
+* 179 tests unitarios e integrados pasando en frontend con Vitest y React Testing Library (0 errores ESLint)
+* 82 tests automatizados pasando en backend con Django REST Framework y PostgreSQL/SQLite de testing
 * Milestones 1, 2 y 3 formalmente completados y cerrados en GitHub (#13 al #21, #38)
 
 ## Modelos implementados
@@ -57,6 +57,7 @@ Actualmente existen estos modelos:
 * `core.CartItem`
 * `core.Order`
 * `core.OrderItem`
+* `core.FavoriteStore`
 
 ## Modelado definido hasta ahora
 
@@ -83,7 +84,7 @@ Todas las tareas y funcionalidades se encuentran organizadas y registradas como 
 * **M3: Panel de Vendedor y Gestión de Tienda:** [COMPLETADO Y CERRADO] Issues [#19](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/19), [#20](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/20) y [#21](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/21).
 * **M4: Reglas Gastronómicas y Stock Híbrido:** [COMPLETADO Y CERRADO] Issues [#22](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/22) y [#23](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/23) (especificado en `docs/propuesta_disponibilidad_gastronomica.md`).
 * **M5: Calidad, Moderación y DevOps:** [COMPLETADO Y CERRADO] Issues [#24](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/24), [#25](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/25) y [#26](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/26).
-* **M6: Descubrimiento, Publicidad y Fidelización:** Issues [#39](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/39) (Vista Explorar), [#41](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/41) (Carrusel de Destacados y Publicidad) y [#42](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/42) (Tiendas Favoritas).
+* **M6: Descubrimiento, Publicidad y Fidelización:** En desarrollo en `feature/roadmap-tp10`. Issue [#42](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/42) (Tiendas Favoritas) [COMPLETADO Y TESTEADO]; Issues [#39](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/39) (Vista Explorar) y [#41](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/41) (Carrusel de Destacados) pospuestos según decisión de roadmap.
 * **M7: Tracking en Tiempo Real, Alertas y Calificaciones:** Issues [#40](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/40) (Notificaciones en Navbar), [#43](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/43) (Seguimiento de Pedido con Mapa, Barra y ETA) y [#44](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/44) (Calificaciones por Estrellas y Motivos Preestablecidos).
 * **M8: Despliegue en Producción, Pruebas UAT y Entrega Final:** Issue [#45](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/45) (Pruebas de Aceptación UAT y Bug Bash en la nube).
 

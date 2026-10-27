@@ -999,3 +999,55 @@ class Milestone5SearchOrderingAndModerationTests(APITestCase):
         self.assertEqual(res_del.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Product.objects.filter(id=self.prod_expensive.id).exists())
 
+
+    def test_anonymous_cannot_toggle_favorite_or_list_favorites(self):
+        url_toggle = reverse("stores-toggle-favorite", args=[self.store_a.id])
+        res_toggle = self.client.post(url_toggle)
+        self.assertEqual(res_toggle.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        url_favs = reverse("stores-favorites")
+        res_favs = self.client.get(url_favs)
+        self.assertEqual(res_favs.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_authenticated_user_can_toggle_favorite_and_list_favorites(self):
+        self.client.force_authenticate(user=self.cliente)
+        url_toggle = reverse("stores-toggle-favorite", args=[self.store_a.id])
+
+        # 1. Marcar como favorita
+        res_add = self.client.post(url_toggle)
+        self.assertEqual(res_add.status_code, status.HTTP_200_OK)
+        self.assertTrue(res_add.data["favorited"])
+        self.assertEqual(res_add.data["store_id"], self.store_a.id)
+
+        # 2. Verificar que stores-list devuelva is_favorite=True
+        res_list = self.client.get(reverse("stores-list"))
+        store_a_data = next(s for s in res_list.data if s["id"] == self.store_a.id)
+        self.assertTrue(store_a_data["is_favorite"])
+
+        # 3. Listar favoritas
+        res_favs = self.client.get(reverse("stores-favorites"))
+        self.assertEqual(res_favs.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res_favs.data), 1)
+        self.assertEqual(res_favs.data[0]["id"], self.store_a.id)
+
+        # 4. Quitar de favoritas (segundo toggle)
+        res_remove = self.client.post(url_toggle)
+        self.assertEqual(res_remove.status_code, status.HTTP_200_OK)
+        self.assertFalse(res_remove.data["favorited"])
+
+        # 5. Listar favoritas nuevamente (debe estar vacio)
+        res_favs_empty = self.client.get(reverse("stores-favorites"))
+        self.assertEqual(res_favs_empty.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res_favs_empty.data), 0)
+
+    def test_suspended_store_is_excluded_from_favorites_list(self):
+        self.client.force_authenticate(user=self.cliente)
+        self.client.post(reverse("stores-toggle-favorite", args=[self.store_a.id]))
+
+        # Suspender la tienda
+        self.store_a.is_active = False
+        self.store_a.save()
+
+        res_favs = self.client.get(reverse("stores-favorites"))
+        self.assertEqual(res_favs.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res_favs.data), 0)

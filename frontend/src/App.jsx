@@ -32,6 +32,7 @@ function App() {
           <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
           <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/pedidos" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/favoritos" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/panel-tienda" element={<ProtectedRoute allowedRoles={['vendedor', 'admin']}><PanelTienda /></ProtectedRoute>} />
           <Route path="/admin/moderacion" element={<ProtectedRoute allowedRoles={['admin']}><ModerationPanel /></ProtectedRoute>} />
         </Routes>

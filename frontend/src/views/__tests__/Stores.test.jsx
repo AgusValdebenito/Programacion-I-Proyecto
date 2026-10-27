@@ -107,7 +107,7 @@ describe('Stores View Component (TP9 TDD - Issue #38)', () => {
     expect(screen.getByRole('button', { name: /súper y kioscos/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /cafeterías/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /helados/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /farmacia/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /farmacia$/i })).toBeInTheDocument()
   })
 
   it('filters stores when a category chip is clicked', async () => {
@@ -122,7 +122,7 @@ describe('Stores View Component (TP9 TDD - Issue #38)', () => {
     })
 
     // Click Farmacia category chip
-    const farmaciaChip = screen.getByRole('button', { name: /farmacia/i })
+    const farmaciaChip = screen.getByRole('button', { name: /farmacia$/i })
     fireEvent.click(farmaciaChip)
 
     // Should only show Farmacia

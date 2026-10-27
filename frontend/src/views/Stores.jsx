@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { storeService } from '../services/storeService'
 import { categories, getStoreCategory, getCategoryById } from '../utils/categoryUtils'
 import { getImageUrl } from '../utils/imageUrl'
+import FavoriteButton from '../components/FavoriteButton'
 
 const GRADIENTS = ['fr-grad-1', 'fr-grad-2', 'fr-grad-3', 'fr-grad-4', 'fr-grad-5']
 
@@ -342,12 +343,15 @@ export default function Stores() {
                             initials
                           )}
                         </div>
-                        {storeCat && (
-                          <span className="badge bg-white text-dark shadow-sm rounded-pill px-3 py-2 fw-semibold">
-                            <span className="me-1">{storeCat.emoji}</span>
-                            {storeCat.title}
-                          </span>
-                        )}
+                        <div className="d-flex align-items-center gap-2">
+                          {storeCat && (
+                            <span className="badge bg-white text-dark shadow-sm rounded-pill px-3 py-2 fw-semibold">
+                              <span className="me-1">{storeCat.emoji}</span>
+                              {storeCat.title}
+                            </span>
+                          )}
+                          <FavoriteButton store={store} size="sm" />
+                        </div>
                       </div>
 
                       {/* Card Body */}

@@ -323,17 +323,17 @@ Carrusel rotativo automático de imágenes de locales destacados/patrocinados co
 
 ---
 
-### Issue [#42](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/42): [Feature] Sistema de Tiendas Favoritas y Lista de Guardados
+### Issue [#42](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/42): [Feature] Sistema de Tiendas Favoritas y Lista de Guardados (✅ IMPLEMENTADO Y TESTEADO)
 **Labels:** `frontend`, `backend`, `feature`, `role:cliente` | **Milestone:** `M6: Descubrimiento, Publicidad y Fidelización`  
 **Descripción:**  
 Botón interactivo de corazón (❤️) en tarjetas y cabeceras de comercios para guardar tiendas favoritas, con sección dedicada en el perfil del cliente y persistencia por usuario.
 
 **Tareas / Sub-issues:**
-- [ ] Crear contexto/hook `useFavorites` para gestión centralizada de locales guardados.
-- [ ] Botón interactivo `FavoriteButton.jsx` con animación de corazón en cards y cabecera de comercio.
-- [ ] Pestaña/sección *"Favoritos"* en `/perfil` con estado vacío amigable.
-- [ ] Persistencia reactiva sincronizada por usuario.
-- [ ] Tests unitarios y de interacción con Vitest (`FavoriteButton.test.jsx`).
+- [x] Crear contexto/hook `useFavorites` para gestión centralizada de locales guardados.
+- [x] Botón interactivo `FavoriteButton.jsx` con animación de corazón en cards y cabecera de comercio.
+- [x] Pestaña/sección *"Favoritos"* en `/perfil` y ruta `/favoritos` con estado vacío amigable.
+- [x] Persistencia reactiva sincronizada por usuario (modelo `FavoriteStore`, endpoints DRF y cache localStorage).
+- [x] Tests unitarios y de interacción con Vitest (`FavoriteButton.test.jsx`, `FavoritesContext.test.jsx`) y DRF (`core.tests`).
 
 ---
 

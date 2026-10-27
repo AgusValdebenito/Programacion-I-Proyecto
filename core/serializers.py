@@ -1,9 +1,11 @@
 from rest_framework import serializers
 
-from .models import Cart, CartItem, Order, OrderItem, Product, Store
+from .models import Cart, CartItem, FavoriteStore, Order, OrderItem, Product, Store
 
 
 class StoreSerializer(serializers.ModelSerializer):
+    is_favorite = serializers.SerializerMethodField()
+
     class Meta:
         model = Store
         fields = [
@@ -13,10 +15,16 @@ class StoreSerializer(serializers.ModelSerializer):
             "description",
             "image",
             "is_active",
+            "is_favorite",
             "created_at",
         ]
-        read_only_fields = ["owner", "created_at"]
+        read_only_fields = ["owner", "is_favorite", "created_at"]
 
+    def get_is_favorite(self, obj):
+        request = self.context.get("request")
+        if request and request.user and request.user.is_authenticated:
+            return obj.favorites.filter(user=request.user).exists()
+        return False
 
     def to_internal_value(self, data):
         if isinstance(data, dict) and "image" in data:

@@ -258,4 +258,17 @@ describe('Profile View & Components (TP9 TDD - Issue #18)', () => {
       expect(screen.getByDisplayValue('Juan Perez')).toBeInTheDocument()
     })
   })
+
+  it('directly shows favorites tab when navigating to /favoritos', async () => {
+    render(
+      <MemoryRouter initialEntries={['/favoritos']}>
+        <Profile />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /mis tiendas favoritas/i })).toBeInTheDocument()
+      expect(screen.getByText(/todavía no tenés tiendas favoritas/i)).toBeInTheDocument()
+    })
+  })
 })

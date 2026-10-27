@@ -12,6 +12,7 @@ import App from './App.jsx'
 import { AuthProvider } from './contexts/AuthContext'
 import { AddressProvider } from './contexts/AddressContext'
 import { CartProvider } from './contexts/CartContext'
+import { FavoritesProvider } from './contexts/FavoritesContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -19,7 +20,9 @@ createRoot(document.getElementById('root')).render(
       <AuthProvider>
         <AddressProvider>
           <CartProvider>
-            <App />
+            <FavoritesProvider>
+              <App />
+            </FavoritesProvider>
           </CartProvider>
         </AddressProvider>
       </AuthProvider>

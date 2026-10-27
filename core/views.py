@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from users.models import Usuario
 
-from .models import Cart, CartItem, Order, OrderItem, Product, Store
+from .models import Cart, CartItem, FavoriteStore, Order, OrderItem, Product, Store
 from .permissions import (
     IsAdminOrVendedor,
     IsClienteOrAdmin,
@@ -72,6 +72,29 @@ class StoreViewSet(viewsets.ModelViewSet):
         store.is_active = not store.is_active
         store.save(update_fields=["is_active"])
         return Response(self.get_serializer(store).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="toggle-favorite", permission_classes=[permissions.IsAuthenticated])
+    def toggle_favorite(self, request, pk=None):
+        store = self.get_object()
+        favorite = FavoriteStore.objects.filter(user=request.user, store=store).first()
+        if favorite:
+            favorite.delete()
+            return Response(
+                {"detail": "Comercio quitado de favoritos.", "favorited": False, "store_id": store.id},
+                status=status.HTTP_200_OK,
+            )
+        FavoriteStore.objects.create(user=request.user, store=store)
+        return Response(
+            {"detail": "Comercio agregado a favoritos.", "favorited": True, "store_id": store.id},
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=False, methods=["get"], url_path="favorites", permission_classes=[permissions.IsAuthenticated])
+    def favorites(self, request):
+        fav_stores = Store.objects.filter(favorites__user=request.user, is_active=True).order_by("-favorites__created_at")
+        serializer = self.get_serializer(fav_stores, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
     def perform_create(self, serializer):
         if Store.objects.filter(owner=self.request.user).exists():
