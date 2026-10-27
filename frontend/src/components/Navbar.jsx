@@ -3,14 +3,12 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useCart } from '../hooks/useCart'
 import { useAddress } from '../hooks/useAddress'
-import { useFavorites } from '../hooks/useFavorites'
 import Logo from './Logo'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
   const { itemCount } = useCart()
   const { addresses, activeAddress, selectAddress } = useAddress()
-  const { favorites } = useFavorites()
   const [showLocationMenu, setShowLocationMenu] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const locationMenuRef = useRef(null)
@@ -96,12 +94,6 @@ export default function Navbar() {
                 </Link>
               )}
               {user && (
-                <Link className="fr-nav-link" to="/favoritos">
-                  <i className="bi bi-heart me-1" />
-                  Favoritos
-                </Link>
-              )}
-              {user && (
                 <Link className="fr-nav-link text-primary fw-semibold" to="/panel-tienda">
                   <i className="bi bi-shop me-1"></i>
                   {user.role === 'vendedor' || user.role === 'admin' ? 'Mi Tienda' : 'Abrir Tienda'}
@@ -120,23 +112,6 @@ export default function Navbar() {
                   <i className="bi bi-person-fill me-1 text-primary"></i>
                   {user.name || user.username || user.email}
                 </span>
-                <Link
-                  to="/favoritos"
-                  className="fr-icon-btn position-relative"
-                  aria-label="Mis Favoritos"
-                  title="Mis Tiendas Favoritas"
-                >
-                  <i className="bi bi-heart" />
-                  {favorites && favorites.length > 0 && (
-                    <span
-                      className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                      style={{ fontSize: '0.65rem' }}
-                    >
-                      {favorites.length}
-                      <span className="visually-hidden">tiendas favoritas</span>
-                    </span>
-                  )}
-                </Link>
                 <button type="button" className="fr-icon-btn" aria-label="Notificaciones">
                   <i className="bi bi-bell" />
                 </button>

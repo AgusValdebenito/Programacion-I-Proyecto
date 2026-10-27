@@ -4,6 +4,7 @@ import { storeService } from '../services/storeService'
 import { categories, getStoreCategory, getCategoryById } from '../utils/categoryUtils'
 import { getImageUrl } from '../utils/imageUrl'
 import FavoriteButton from '../components/FavoriteButton'
+import { useFavorites } from '../hooks/useFavorites'
 
 const GRADIENTS = ['fr-grad-1', 'fr-grad-2', 'fr-grad-3', 'fr-grad-4', 'fr-grad-5']
 
@@ -24,6 +25,7 @@ export default function Stores() {
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState(urlSearchParam)
   const [ordering, setOrdering] = useState('name')
+  const { isFavorite } = useFavorites()
 
   const activeCategoryId = categoryParam ? Number(categoryParam) : null
 
@@ -123,7 +125,7 @@ export default function Stores() {
 
   // Filtered and sorted store list
   const filteredStores = useMemo(() => {
-    const list = stores.filter((store) => {
+    let list = stores.filter((store) => {
       // Category filter
       if (activeCategoryId) {
         const storeCat = getStoreCategory(store)
@@ -145,7 +147,12 @@ export default function Stores() {
       return true
     })
 
-    if (ordering === 'name') {
+    // Filtro por favoritas
+    if (ordering === 'favorites') {
+      list = list.filter((s) => isFavorite(s.id))
+    }
+
+    if (ordering === 'favorites' || ordering === 'name') {
       return [...list].sort((a, b) => (a.name || '').localeCompare(b.name || ''))
     }
     if (ordering === '-name') {
@@ -155,7 +162,7 @@ export default function Stores() {
       return [...list].sort((a, b) => (b.id || 0) - (a.id || 0))
     }
     return list
-  }, [stores, activeCategoryId, searchQuery, ordering])
+  }, [stores, activeCategoryId, searchQuery, ordering, isFavorite])
 
 
   const activeCategoryObj = activeCategoryId ? getCategoryById(activeCategoryId) : null
@@ -232,6 +239,7 @@ export default function Stores() {
               <option value="name">Nombre (A - Z)</option>
               <option value="-name">Nombre (Z - A)</option>
               <option value="recent">Más recientes</option>
+              <option value="favorites">❤️ Mis favoritas</option>
             </select>
           </div>
         </div>
@@ -297,7 +305,8 @@ export default function Stores() {
           <h2 className="h5 fw-bold text-dark mb-2">No encontramos comercios</h2>
           <p className="text-secondary mb-4 mx-auto" style={{ maxWidth: '420px' }}>
             No hay resultados que coincidan con los filtros aplicados
-            {searchQuery ? ` para "${searchQuery}"` : ''}.
+            {searchQuery ? ` para "${searchQuery}"` : ''}
+            {ordering === 'favorites' ? ' entre tus tiendas favoritas' : ''}.
           </p>
           <button
             type="button"

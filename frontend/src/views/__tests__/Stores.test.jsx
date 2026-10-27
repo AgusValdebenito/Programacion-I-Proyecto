@@ -3,6 +3,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import Stores from '../Stores'
 import { storeService } from '../../services/storeService'
+import * as FavoritesHook from '../../hooks/useFavorites'
 
 vi.mock('../../services/storeService', () => ({
   storeService: {
@@ -250,5 +251,30 @@ describe('Stores View Component (TP9 TDD - Issue #38)', () => {
     const cafeIdx = storeHeadings.findIndex((t) => t.includes('Café Central'))
     expect(pizzaIdx).toBeLessThan(cafeIdx)
   })
-})
 
+  it('filters to only favorites when selecting "favorites" in the dropdown', async () => {
+    vi.spyOn(FavoritesHook, 'useFavorites').mockReturnValue({
+      isFavorite: (id) => id === 5,
+      favorites: [{ id: 5, name: 'Crazy Burgers' }],
+      toggleFavorite: vi.fn(),
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/tiendas']}>
+        <Stores />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Crazy Burgers')).toBeInTheDocument()
+      expect(screen.getByText('Pizza Planet')).toBeInTheDocument()
+    })
+
+    const orderSelect = screen.getByLabelText(/ordenar tiendas/i)
+    fireEvent.change(orderSelect, { target: { value: 'favorites' } })
+
+    expect(screen.getByText('Crazy Burgers')).toBeInTheDocument()
+    expect(screen.queryByText('Pizza Planet')).not.toBeInTheDocument()
+    expect(screen.queryByText('Café Central')).not.toBeInTheDocument()
+  })
+})
