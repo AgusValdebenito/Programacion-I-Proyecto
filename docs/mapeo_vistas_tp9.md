@@ -19,7 +19,8 @@ Este documento define la arquitectura y el mapeo integral entre los endpoints RE
 | **Autenticada** | `Orders` | `/pedidos` | Autenticado (`cliente`, `admin`) | `GET /api/orders/`<br>`PATCH /api/orders/:id/` | Historial cronológico de pedidos del usuario, estado de preparación y desglose de items. | ✅ Implementada & Testeada (M2 / #18) |
 | **Autenticada** | `Profile` | `/perfil` | Autenticado (`cliente`, `vendedor`, `admin`) | `GET /api/profile/`<br>`PATCH /api/profile/` | Información de cuenta, actualización de nombre/teléfono y gestión de direcciones múltiples guardadas. | ✅ Implementada & Testeada (M2 / #18) |
 | **Vendedor / Admin** | `PanelTienda` | `/panel-tienda` | Roles: `vendedor`, `admin` | `GET, POST, PATCH /api/stores/`<br>`GET, POST, PATCH, DELETE /api/products/`<br>`GET, PATCH /api/orders/?store=:id` | Panel integral del vendedor: Onboarding de comercio, edición de datos de tienda, CRUD de productos con toggle de disponibilidad (`is_available`) y monitor de comandas en cocina. | ✅ Implementada & Testeada (M3 / #19, #20, #21) |
-| **Admin** | `AdminUsers` | `/admin/usuarios` | Rol exclusivo: `admin` | `GET, PATCH /api/users/` | Panel de moderación de usuarios, cambio de roles y control de acceso. | ⏳ Planificada (Milestone 5 / #25) |
+| **Autenticada** | `FavoriteStores` | `/favoritos` | Autenticado (`cliente`, `vendedor`, `admin`) | `GET /api/stores/favorites/`<br>`POST /api/stores/:id/toggle-favorite/` | Listado y acceso directo a comercios gastronómicos guardados en favoritos. | ✅ Implementada & Testeada (M6 / #42) |
+| **Admin** | `ModerationPanel` | `/admin/moderacion` | Rol exclusivo: `admin` | `GET, PATCH /api/stores/`<br>`GET, PATCH /api/products/` | Panel de moderación integral: suspensión de tiendas, desactivación de platos e historial de auditoría. | ✅ Implementada & Testeada (M5 / #26) |
 
 ---
 
@@ -46,7 +47,7 @@ Para cumplir los criterios de aprobación de TP9, cada vista debe implementar:
 
 ## 🧪 Métricas de Verificación de TP9 (Milestones 1, 2 y 3)
 
-* **Tests Frontend:** 154 tests unitarios e integrados pasando al 100% en Vitest (26 suites de pruebas).
-* **Tests Backend:** 65 tests automatizados pasando al 100% en Django REST Framework.
+* **Tests Frontend:** 198 tests unitarios e integrados pasando al 100% en Vitest (31 suites de pruebas).
+* **Tests Backend:** 97 tests automatizados pasando al 100% en Django REST Framework.
 * **ESLint:** 0 errores y 0 warnings en todo el código fuente de `frontend/`.
 * **Milestones Cerrados:** Milestones 1, 2 y 3 cerrados formalmente en GitHub con todos sus issues y criterios de aceptación cumplidos.

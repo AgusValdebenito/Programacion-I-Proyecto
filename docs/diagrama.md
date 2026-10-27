@@ -33,7 +33,7 @@ flowchart LR
 ```mermaid
 flowchart TD
     App[App - Router & Layout]
-    Providers["Providers: AuthProvider · CartProvider · AddressProvider"]
+    Providers["Providers: AuthProvider · CartProvider · AddressProvider · FavoritesProvider"]
     
     App --> Providers
     Providers --> Navbar[Navbar]
@@ -99,6 +99,10 @@ flowchart TD
 | `PanelTienda` | Portal administrativo para tiendas: onboarding, métricas, CRUD de productos, toggle `is_available` y monitor de cocina. |
 | `EditarTiendaModal` | Modal de edición de datos, descripción y logo del comercio gastronómico. |
 | `ProductoModal` | Modal de alta y edición de productos de la carta con precio, stock, descripción e imagen. |
+| `RatingModal` | Modal interactivo de 5 estrellas y tags para calificar pedidos entregados (Issue #44). |
+| `NotificationDropdown` | Desplegable de notificaciones en Navbar con alertas contextuales para cliente y cocina (Issue #40). |
+| `FavoriteButton` | Botón interactivo de corazón para agregar o quitar comercios de favoritos (Issue #42). |
+| `ModerationPanel` | Panel administrativo para suspender tiendas, pausar productos y auditar eventos (Issue #26). |
 | `BottomNav` | Navegación fija inferior para dispositivos móviles (< 768px). |
 
 ## 4. Matriz de Rutas Client-Side
@@ -112,7 +116,9 @@ flowchart TD
 | `/checkout` | Confirmación y Pago | Autenticado | `Checkout.jsx` |
 | `/perfil` | Perfil y Direcciones | Autenticado | `Profile.jsx` (tab perfil) |
 | `/pedidos` | Historial de Pedidos | Autenticado | `Profile.jsx` (tab pedidos) |
+| `/favoritos` | Tiendas Favoritas | Autenticado | `Profile.jsx` (tab favoritos) |
 | `/panel-tienda` | Panel de Vendedor y Cocina | Autenticado (`vendedor`, `admin`, `cliente`) | `PanelTienda.jsx` |
+| `/admin/moderacion` | Panel de Moderación | Rol Admin | `ModerationPanel.jsx` |
 | `/login` | Iniciar Sesión | Solo Invitados | `Login.jsx` |
 | `/register` | Crear Cuenta | Solo Invitados | `Register.jsx` |
 
@@ -153,4 +159,4 @@ flowchart TD
 - [x] **Milestone 2 Completado:** Checkout transaccional, historial de pedidos y perfil con direcciones (TP9 - M2)
 - [x] **Milestone 3 Completado:** Panel de vendedor, onboarding, menú con toggle `is_available` y monitor de cocina (TP9 - M3)
 - [x] **Assets Multimedia:** Aprovisionamiento de imágenes reales para 6 tiendas y 29 productos con fallback
-- [x] **Aseguramiento de Calidad:** 139 tests unitarios e integrados pasando con Vitest y 60 tests en backend Django
+- [x] **Aseguramiento de Calidad:** 198 tests unitarios e integrados pasando con Vitest y 97 tests en backend Django
