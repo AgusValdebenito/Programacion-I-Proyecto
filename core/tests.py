@@ -1051,3 +1051,50 @@ class Milestone5SearchOrderingAndModerationTests(APITestCase):
         res_favs = self.client.get(reverse("stores-favorites"))
         self.assertEqual(res_favs.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res_favs.data), 0)
+
+    def test_order_rating_workflow(self):
+        order = Order.objects.create(
+            user=self.cliente,
+            store=self.store_a,
+            total=Decimal("450.00"),
+            status=Order.StatusChoices.PENDING,
+        )
+
+        url_rate = reverse("orders-rate", args=[order.id])
+
+        # 1. No se puede calificar si no está 'delivered'
+        self.client.force_authenticate(user=self.cliente)
+        res_pending = self.client.post(url_rate, {"rating": 5, "tags": ["Rico"]})
+        self.assertEqual(res_pending.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # 2. Transicionar a delivered
+        order.status = Order.StatusChoices.DELIVERED
+        order.save()
+
+        # 3. Otro usuario no puede calificar el pedido
+        self.client.force_authenticate(user=self.vendedor)
+        res_forbidden = self.client.post(url_rate, {"rating": 5})
+        self.assertEqual(res_forbidden.status_code, status.HTTP_403_FORBIDDEN)
+
+        # 4. El cliente dueño califica exitosamente
+        self.client.force_authenticate(user=self.cliente)
+        rating_payload = {
+            "rating": 5,
+            "tags": ["Comida caliente", "Entrega rápida"],
+            "comment": "Todo impecable!",
+        }
+        res_ok = self.client.post(url_rate, rating_payload, format="json")
+        self.assertEqual(res_ok.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res_ok.data["rating"], 5)
+        self.assertEqual(len(res_ok.data["tags"]), 2)
+        self.assertEqual(res_ok.data["comment"], "Todo impecable!")
+
+        # 5. No se puede calificar dos veces el mismo pedido
+        res_duplicate = self.client.post(url_rate, rating_payload, format="json")
+        self.assertEqual(res_duplicate.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # 6. El GET del pedido ahora incluye el objeto nested 'rating'
+        res_order = self.client.get(reverse("orders-detail", args=[order.id]))
+        self.assertEqual(res_order.status_code, status.HTTP_200_OK)
+        self.assertIsNotNone(res_order.data["rating"])
+        self.assertEqual(res_order.data["rating"]["rating"], 5)

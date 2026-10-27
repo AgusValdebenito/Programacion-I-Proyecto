@@ -109,4 +109,32 @@ export const orderService = {
       return { success: false, error: 'Error de conexión con el servicio de pedidos' }
     }
   },
+
+  /**
+   * Califica un pedido entregado con puntuación, motivos y comentario (Issue #44).
+   *
+   * @param {number|string} orderId
+   * @param {Object} ratingPayload - { rating: number, tags?: string[], comment?: string }
+   * @param {string} token
+   * @returns {Promise<{ success: boolean, data?: any, error?: string }>}
+   */
+  async rateOrder(orderId, ratingPayload, token) {
+    try {
+      const response = await fetch(`${API_URL}/orders/${orderId}/rate/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(ratingPayload),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        return { success: false, error: data.detail || 'Error al calificar el pedido' }
+      }
+      return { success: true, data }
+    } catch {
+      return { success: false, error: 'Error de conexión al enviar la calificación' }
+    }
+  },
 }

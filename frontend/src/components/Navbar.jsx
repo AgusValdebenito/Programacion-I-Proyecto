@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useCart } from '../hooks/useCart'
 import { useAddress } from '../hooks/useAddress'
 import Logo from './Logo'
+import NotificationDropdown from './NotificationDropdown'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
@@ -112,9 +113,7 @@ export default function Navbar() {
                   <i className="bi bi-person-fill me-1 text-primary"></i>
                   {user.name || user.username || user.email}
                 </span>
-                <button type="button" className="fr-icon-btn" aria-label="Notificaciones">
-                  <i className="bi bi-bell" />
-                </button>
+                <NotificationDropdown />
                 <Link
                   to="/carrito"
                   className="fr-icon-btn position-relative"

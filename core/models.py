@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from django.conf import settings
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
@@ -245,3 +245,34 @@ class FavoriteStore(models.Model):
 
     def __str__(self):
         return f"{self.user} -> {self.store.name}"
+
+
+class OrderRating(models.Model):
+    order = models.OneToOneField(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="rating",
+        verbose_name="pedido",
+    )
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        verbose_name="puntuacion",
+    )
+    tags = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name="motivos seleccionados",
+    )
+    comment = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="comentario opcional",
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="fecha de calificacion")
+
+    class Meta:
+        verbose_name = "calificacion de pedido"
+        verbose_name_plural = "calificaciones de pedidos"
+
+    def __str__(self):
+        return f"Calificacion {self.rating}★ para Pedido #{self.order_id}"

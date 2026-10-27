@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from users.models import Usuario
 
-from .models import Cart, CartItem, FavoriteStore, Order, OrderItem, Product, Store
+from .models import Cart, CartItem, FavoriteStore, Order, OrderItem, OrderRating, Product, Store
 from .permissions import (
     IsAdminOrVendedor,
     IsClienteOrAdmin,
@@ -18,6 +18,7 @@ from .serializers import (
     CartItemSerializer,
     CartSerializer,
     OrderItemSerializer,
+    OrderRatingSerializer,
     OrderSerializer,
     ProductSerializer,
     StoreSerializer,
@@ -340,6 +341,25 @@ class OrderViewSet(viewsets.ModelViewSet):
             cancelled_product=cancelled_product,
         )
         serializer.instance = order
+
+    @action(detail=True, methods=["post"], url_path="rate", permission_classes=[permissions.IsAuthenticated])
+    def rate(self, request, pk=None):
+        order = self.get_object()
+
+        if order.user != request.user and not is_admin_user(request.user):
+            raise PermissionDenied("Solo el cliente que realizó el pedido puede calificarlo.")
+
+        if order.status != Order.StatusChoices.DELIVERED:
+            raise ValidationError({"detail": "Solo se pueden calificar pedidos que hayan sido entregados."})
+
+        if hasattr(order, "rating") and order.rating is not None:
+            raise ValidationError({"detail": "Este pedido ya ha sido calificado previamente."})
+
+        serializer = OrderRatingSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        rating_obj = serializer.save(order=order)
+
+        return Response(OrderRatingSerializer(rating_obj).data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
         raise ValidationError({"detail": "Los pedidos no pueden ser eliminados. Use la cancelación de pedidos."})

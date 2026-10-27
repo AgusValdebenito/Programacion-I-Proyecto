@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Cart, CartItem, FavoriteStore, Order, OrderItem, Product, Store
+from .models import Cart, CartItem, FavoriteStore, Order, OrderItem, OrderRating, Product, Store
 
 
 class StoreSerializer(serializers.ModelSerializer):
@@ -20,7 +20,7 @@ class StoreSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["owner", "is_favorite", "created_at"]
 
-    def get_is_favorite(self, obj):
+    def get_is_favorite(self, obj) -> bool:
         request = self.context.get("request")
         if request and request.user and request.user.is_authenticated:
             return obj.favorites.filter(user=request.user).exists()
@@ -104,8 +104,17 @@ class OrderItemSerializer(serializers.ModelSerializer):
         read_only_fields = ["unit_price"]
 
 
+
+class OrderRatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderRating
+        fields = ["id", "rating", "tags", "comment", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
+    rating = OrderRatingSerializer(read_only=True)
     store_name = serializers.CharField(source="store.name", read_only=True)
     cancelled_product_name = serializers.CharField(source="cancelled_product.name", read_only=True)
 
@@ -126,6 +135,7 @@ class OrderSerializer(serializers.ModelSerializer):
             "cancellation_reason",
             "cancelled_product",
             "cancelled_product_name",
+            "rating",
             "created_at",
         ]
         read_only_fields = [

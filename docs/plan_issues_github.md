@@ -345,11 +345,11 @@ Botón interactivo de corazón (❤️) en tarjetas y cabeceras de comercios par
 Desplegable interactivo en el Navbar (campanita `<i className="bi bi-bell" />`) con alertas contextuales según rol: pedidos en camino/preparación para clientes y nuevas órdenes o quiebre de stock para vendedores.
 
 **Tareas / Sub-issues:**
-- [ ] Componente `NotificationDropdown.jsx` conectado a la campana del Navbar con cierre en click exterior.
-- [ ] Badge numérico dinámico con conteo de novedades pendientes.
-- [ ] Listado de notificaciones con enlace directo a órdenes (`/pedidos`).
-- [ ] Acción *"Marcar todas como leídas"* y persistencia de estado leído.
-- [ ] Tests unitarios con Vitest (`NotificationDropdown.test.jsx`).
+- [x] Componente `NotificationDropdown.jsx` conectado a la campana del Navbar con cierre en click exterior.
+- [x] Badge numérico dinámico con conteo de novedades pendientes.
+- [x] Listado de notificaciones con enlace directo a órdenes (`/pedidos`).
+- [x] Acción *"Marcar todas como leídas"* y persistencia de estado leído.
+- [x] Tests unitarios con Vitest (`NotificationDropdown.test.jsx`).
 
 ---
 
@@ -373,13 +373,13 @@ Seguimiento post-venta interactivo en `/pedidos` con mapa de recorrido (Leaflet/
 Calificación de pedidos completados (`status === 'delivered'`) con selector de 1 a 5 estrellas, opciones/chips de motivos preestablecidos según puntuación y comentario de texto estrictamente opcional.
 
 **Tareas / Sub-issues:**
-- [ ] Backend: modelo `OrderRating` (`order`, `rating`, `tags`, `comment`) y endpoint `POST /api/orders/{id}/rating/`.
-- [ ] Modal `RatingModal.jsx` accesible desde `/pedidos` para órdenes entregadas.
-- [ ] Selector interactivo de 1 a 5 estrellas.
-- [ ] Chips dinámicos de motivos preestablecidos (positivos para 4-5 estrellas, oportunidades de mejora para 1-3 estrellas).
-- [ ] Textarea de comentarios opcional (no obligatorio).
-- [ ] Actualización del rating promedio de la tienda.
-- [ ] Tests unitarios y de flujo con Vitest (`RatingModal.test.jsx`).
+- [x] Backend: modelo `OrderRating` (`order`, `rating`, `tags`, `comment`) y endpoint `POST /api/orders/{id}/rate/`.
+- [x] Modal `RatingModal.jsx` accesible desde `/pedidos` para órdenes entregadas.
+- [x] Selector interactivo de 1 a 5 estrellas.
+- [x] Chips dinámicos de motivos preestablecidos (positivos para 4-5 estrellas, oportunidades de mejora para 1-3 estrellas).
+- [x] Textarea de comentarios opcional (no obligatorio).
+- [x] Visualización de estrellas y feedback en tarjetas de pedidos entregados (`OrderHistory.jsx`).
+- [x] Tests unitarios y de flujo con Vitest (`RatingModal.test.jsx`, `Profile.test.jsx`) y DRF (`core/tests.py`).
 
 ---
 

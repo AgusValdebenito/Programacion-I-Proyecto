@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { orderService } from '../services/orderService'
+import RatingModal from './RatingModal'
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('es-AR', {
@@ -44,6 +45,7 @@ export default function OrderHistory() {
   const [cancellingId, setCancellingId] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)
   const [reloadKey, setReloadKey] = useState(0)
+  const [ratingModalOrder, setRatingModalOrder] = useState(null)
 
   const reloadOrders = () => {
     setLoading(true)
@@ -113,6 +115,18 @@ export default function OrderHistory() {
     } finally {
       setCancellingId(null)
     }
+  }
+
+  const handleRatingSubmitted = (newRating) => {
+    if (!ratingModalOrder) return
+    setOrders((prev) =>
+      prev.map((ord) =>
+        ord.id === ratingModalOrder.id ? { ...ord, rating: newRating } : ord
+      )
+    )
+    setSuccessMessage('¡Muchas gracias por calificar tu pedido!')
+    setTimeout(() => setSuccessMessage(null), 4000)
+    setRatingModalOrder(null)
   }
 
   if (loading) {
@@ -232,28 +246,68 @@ export default function OrderHistory() {
               </div>
             )}
 
-            {/* Acciones */}
-            <div className="pt-2 d-flex justify-content-between align-items-center border-top">
+            {/* Acciones y Calificación */}
+            <div className="pt-2 d-flex flex-wrap justify-content-between align-items-center gap-2 border-top">
               <span className="small text-muted">
                 {isPending ? 'En cola para ser aceptado por la cocina' : 'Actualización automática'}
               </span>
 
-              {isPending && (
-                <button
-                  type="button"
-                  className="btn btn-outline-danger btn-sm rounded-pill px-3"
-                  onClick={() => handleCancelOrder(order.id)}
-                  disabled={isCancelling}
-                  aria-label={`Cancelar pedido #${order.id}`}
-                >
-                  <i className="bi bi-x-circle me-1" />
-                  {isCancelling ? 'Cancelando...' : 'Cancelar pedido'}
-                </button>
-              )}
+              <div className="d-flex align-items-center gap-2 flex-wrap">
+                {isPending && (
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger btn-sm rounded-pill px-3"
+                    onClick={() => handleCancelOrder(order.id)}
+                    disabled={isCancelling}
+                    aria-label={`Cancelar pedido #${order.id}`}
+                  >
+                    <i className="bi bi-x-circle me-1" />
+                    {isCancelling ? 'Cancelando...' : 'Cancelar pedido'}
+                  </button>
+                )}
+
+                {order.status === 'delivered' && order.rating && (
+                  <div className="d-flex align-items-center gap-2 flex-wrap" data-testid={`rating-display-${order.id}`}>
+                    <span className="badge bg-warning text-dark px-3 py-1 rounded-pill fw-semibold">
+                      ⭐ {order.rating.rating}/5
+                    </span>
+                    {Array.isArray(order.rating.tags) && order.rating.tags.map((tag) => (
+                      <span key={tag} className="badge bg-light text-secondary border rounded-pill small">
+                        {tag}
+                      </span>
+                    ))}
+                    {order.rating.comment && (
+                      <span className="text-muted small fst-italic">
+                        &ldquo;{order.rating.comment}&rdquo;
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {order.status === 'delivered' && !order.rating && (
+                  <button
+                    type="button"
+                    className="btn btn-outline-warning btn-sm rounded-pill px-3 fw-semibold text-dark shadow-sm"
+                    onClick={() => setRatingModalOrder(order)}
+                    aria-label={`Calificar pedido #${order.id}`}
+                  >
+                    <i className="bi bi-star-fill text-warning me-1" />
+                    Calificar pedido
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )
       })}
+
+      {/* Modal de Calificación */}
+      <RatingModal
+        order={ratingModalOrder}
+        isOpen={Boolean(ratingModalOrder)}
+        onClose={() => setRatingModalOrder(null)}
+        onRatingSubmitted={handleRatingSubmitted}
+      />
     </div>
   )
 }
