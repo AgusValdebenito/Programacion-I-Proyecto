@@ -1,4 +1,6 @@
-from django.db import models
+from decimal import Decimal
+
+from django.db import models, transaction
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -54,6 +56,9 @@ class StoreViewSet(viewsets.ModelViewSet):
                     queryset = queryset.filter(is_active=True)
                 elif is_active.lower() in ("false", "0"):
                     queryset = queryset.filter(is_active=False)
+
+        if self.request.user and self.request.user.is_authenticated:
+            queryset = queryset.prefetch_related("favorites")
 
         return queryset
 
@@ -123,7 +128,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     ordering_fields = ["name", "price", "stock", "id", "created_at"]
 
     def get_queryset(self):
-        from decimal import Decimal
+
 
         queryset = super().get_queryset()
         store_id = self.request.query_params.get("store")
@@ -306,7 +311,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         if store_id:
             queryset = queryset.filter(store_id=store_id)
 
-        return queryset
+        return queryset.select_related("store", "cancelled_product", "rating").prefetch_related("items__product")
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -380,7 +385,7 @@ class OrderItemViewSet(viewsets.ModelViewSet):
         ).distinct()
 
     def perform_create(self, serializer):
-        from django.db import transaction
+
 
         user = self.request.user
         if not (is_admin_user(user) or getattr(user, "role", None) == Usuario.RoleChoices.CLIENTE):

@@ -23,6 +23,8 @@ class StoreSerializer(serializers.ModelSerializer):
     def get_is_favorite(self, obj) -> bool:
         request = self.context.get("request")
         if request and request.user and request.user.is_authenticated:
+            if hasattr(obj, "_prefetched_objects_cache") and "favorites" in obj._prefetched_objects_cache:
+                return any(fav.user_id == request.user.id for fav in obj.favorites.all())
             return obj.favorites.filter(user=request.user).exists()
         return False
 

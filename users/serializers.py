@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password as django_validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -69,11 +71,8 @@ class UsuarioSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "created_at"]
 
     def validate_password(self, value):
-        from django.contrib.auth.password_validation import validate_password
-        from django.core.exceptions import ValidationError as DjangoValidationError
-
         try:
-            validate_password(value, user=self.instance)
+            django_validate_password(value, user=self.instance)
         except DjangoValidationError as err:
             raise serializers.ValidationError(list(err.messages))
         return value

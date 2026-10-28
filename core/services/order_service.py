@@ -1,6 +1,6 @@
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from core.models import Order
+from core.models import Order, Product
 from core.permissions import is_admin_user
 from users.models import Usuario
 
@@ -51,10 +51,12 @@ class OrderService:
 
         prod_id = None
         if out_of_stock_product is not None:
-            from core.models import Product
-
             if isinstance(out_of_stock_product, Product):
                 prod = out_of_stock_product
+                if prod.store_id != order.store_id:
+                    raise ValidationError({
+                        "out_of_stock_product": "El producto especificado no pertenece a la tienda de este pedido."
+                    })
             else:
                 prod = Product.objects.filter(id=out_of_stock_product, store=order.store).first()
                 if not prod:

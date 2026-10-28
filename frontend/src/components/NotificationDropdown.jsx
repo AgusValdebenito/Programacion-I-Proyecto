@@ -1,138 +1,21 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { orderService } from '../services/orderService'
-import { storeService } from '../services/storeService'
+import { useNotifications } from '../hooks/useNotifications'
 
 /**
  * Componente interactivo desplegable de notificaciones para el Navbar (Milestone 7 - Issue #40).
  *
- * Muestra alertas contextuales según rol:
- * - Clientes: pedidos en preparación, en reparto o entregados pendientes de calificación.
- * - Vendedores: nuevos pedidos en cocina (status === 'pending') y alertas de stock.
- *
- * Incluye badge numérico reactivo, "Marcar todas como leídas" y persistencia en localStorage.
+ * Muestra alertas contextuales según rol consumiendo el hook desacoplado `useNotifications`.
  */
 export default function NotificationDropdown({ customNotifications = null }) {
-  const { user, getValidToken } = useAuth()
+  const { user } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
-  const [internalNotifications, setInternalNotifications] = useState([])
-  const notifications = customNotifications || internalNotifications
-
-  const [readIds, setReadIds] = useState(() => {
-    if (!user?.id) return []
-    try {
-      const stored = localStorage.getItem(`foodrush_read_notifications_${user.id}`)
-      return stored ? JSON.parse(stored) : []
-    } catch {
-      return []
-    }
-  })
   const dropdownRef = useRef(null)
   const navigate = useNavigate()
 
-  // Sincronizar storage key cuando cambia el usuario
-  const storageKey = user?.id ? `foodrush_read_notifications_${user.id}` : null
-
-  // Cargar notificaciones dinámicas de manera asíncrona
-  useEffect(() => {
-    if (customNotifications) return
-    let isMounted = true
-
-    const loadNotifications = async () => {
-      if (!user || !getValidToken) return
-
-      try {
-        const token = await getValidToken()
-        if (!token || !isMounted) return
-
-        const notifs = []
-
-        // 1. Notificaciones como cliente (órdenes activas o entregadas recientes)
-        const ordersRes = await orderService.getOrders(token)
-        if (!isMounted) return
-
-        if (ordersRes.success && Array.isArray(ordersRes.data)) {
-          for (const order of ordersRes.data) {
-            if (order.status === 'preparing') {
-              notifs.push({
-                id: `client-preparing-${order.id}`,
-                type: 'order_preparing',
-                title: `Pedido #${order.id} en preparación`,
-                message: `Tu pedido en ${order.store_name || 'el local'} se está cocinando.`,
-                icon: 'bi-fire',
-                iconBgClass: 'bg-warning-subtle text-warning',
-                link: '/pedidos',
-                orderId: order.id,
-              })
-            } else if (order.status === 'delivering') {
-              notifs.push({
-                id: `client-delivering-${order.id}`,
-                type: 'order_delivering',
-                title: `¡Pedido #${order.id} en camino!`,
-                message: `El repartidor va hacia tu domicilio con tu orden.`,
-                icon: 'bi-bicycle',
-                iconBgClass: 'bg-primary-subtle text-primary',
-                link: '/pedidos',
-                orderId: order.id,
-              })
-            } else if (order.status === 'delivered' && !order.rating) {
-              notifs.push({
-                id: `client-delivered-${order.id}`,
-                type: 'order_delivered',
-                title: `Pedido #${order.id} entregado`,
-                message: `¿Qué tal estuvo tu pedido en ${order.store_name || 'el local'}? ¡Calificá tu experiencia!`,
-                icon: 'bi-star-fill',
-                iconBgClass: 'bg-warning-subtle text-warning',
-                link: '/pedidos',
-                orderId: order.id,
-              })
-            }
-          }
-        }
-
-        // 2. Notificaciones para vendedores (órdenes pendientes en cocina)
-        if (user.role === 'vendedor' || user.role === 'admin') {
-          const storeRes = await storeService.getMyStore(token)
-          if (!isMounted) return
-
-          if (storeRes.success && storeRes.data?.id) {
-            const storeId = storeRes.data.id
-            const kitchenOrdersRes = await orderService.getStoreOrders(storeId, token)
-            if (!isMounted) return
-
-            if (kitchenOrdersRes.success && Array.isArray(kitchenOrdersRes.data)) {
-              const pendingOrders = kitchenOrdersRes.data.filter((o) => o.status === 'pending')
-              for (const pOrder of pendingOrders) {
-                notifs.push({
-                  id: `vendor-pending-${pOrder.id}`,
-                  type: 'kitchen_order',
-                  title: `Nuevo pedido entrante #${pOrder.id}`,
-                  message: `Tenés una nueva comanda esperando confirmación en cocina.`,
-                  icon: 'bi-bell-fill',
-                  iconBgClass: 'bg-danger-subtle text-danger',
-                  link: '/panel-tienda',
-                  orderId: pOrder.id,
-                })
-              }
-            }
-          }
-        }
-
-        if (isMounted) {
-          setInternalNotifications(notifs)
-        }
-      } catch {
-        // Ignorar fallas silenciosas en la barra de notificaciones
-      }
-    }
-
-    loadNotifications()
-
-    return () => {
-      isMounted = false
-    }
-  }, [user, getValidToken, customNotifications])
+  const { notifications, unreadCount, readIds, markAllAsRead, markAsRead } =
+    useNotifications(customNotifications)
 
   // Cierre al hacer click afuera o presionar Escape
   useEffect(() => {
@@ -159,41 +42,19 @@ export default function NotificationDropdown({ customNotifications = null }) {
     }
   }, [isOpen])
 
-  // Marcar todas como leídas
-  const handleMarkAllAsRead = (e) => {
-    e.stopPropagation()
-    const allIds = notifications.map((n) => n.id)
-    const updated = Array.from(new Set([...readIds, ...allIds]))
-    setReadIds(updated)
-    if (storageKey) {
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(updated))
-      } catch {
-        // Ignorar errores de quota de almacenamiento
-      }
-    }
-  }
-
   // Click en una notificación individual
   const handleNotificationClick = (notif) => {
-    if (!readIds.includes(notif.id)) {
-      const updated = [...readIds, notif.id]
-      setReadIds(updated)
-      if (storageKey) {
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(updated))
-        } catch {
-          // Ignorar
-        }
-      }
-    }
+    markAsRead(notif.id)
     setIsOpen(false)
     if (notif.link) {
       navigate(notif.link)
     }
   }
 
-  const unreadCount = notifications.filter((n) => !readIds.includes(n.id)).length
+  const handleMarkAll = (e) => {
+    e.stopPropagation()
+    markAllAsRead()
+  }
 
   return (
     <div className="position-relative" ref={dropdownRef}>
@@ -239,7 +100,7 @@ export default function NotificationDropdown({ customNotifications = null }) {
                 type="button"
                 className="btn btn-link btn-sm text-decoration-none p-0 text-muted"
                 style={{ fontSize: '0.78rem' }}
-                onClick={handleMarkAllAsRead}
+                onClick={handleMarkAll}
               >
                 Marcar todas leídas
               </button>
