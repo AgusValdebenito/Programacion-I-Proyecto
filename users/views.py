@@ -35,6 +35,23 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save()
 
+    def perform_update(self, serializer):
+        user = self.get_object()
+        old_is_active = user.is_active
+        updated_user = serializer.save()
+        new_is_active = updated_user.is_active
+
+        if old_is_active and not new_is_active:
+            from core.models import Store
+            from core.services import NotificationService, OrderService
+
+            store = Store.objects.filter(owner=updated_user).first()
+            if store and store.is_active:
+                store.is_active = False
+                store.save(update_fields=["is_active"])
+                OrderService.cancel_pending_orders_for_store(store)
+                NotificationService.notify_store_moderation(store, action="suspended")
+
     @action(detail=False, methods=["get", "patch"], permission_classes=[permissions.IsAuthenticated])
     def profile(self, request):
         if request.method == "GET":

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from './useAuth'
 import { orderService } from '../services/orderService'
 import { storeService } from '../services/storeService'
+import { notificationService } from '../services/notificationService'
 
 /**
  * Custom hook desacoplado para la gestión de notificaciones y alertas (Milestone 7 - Issue #40).
@@ -86,6 +87,17 @@ export function useNotifications(customNotifications = null) {
                 link: '/pedidos',
                 orderId: order.id,
               })
+            } else if (order.status === 'cancelled') {
+              notifs.push({
+                id: `client-cancelled-${order.id}`,
+                type: 'order_cancelled',
+                title: `Pedido #${order.id} cancelado`,
+                message: order.cancellation_reason || 'El pedido ha sido cancelado.',
+                icon: 'bi-x-circle-fill',
+                iconBgClass: 'bg-danger-subtle text-danger',
+                link: '/pedidos',
+                orderId: order.id,
+              })
             }
           }
         }
@@ -118,6 +130,38 @@ export function useNotifications(customNotifications = null) {
           }
         }
 
+        // 3. Notificaciones persistentes del backend (moderación, cancelaciones automáticas, carrito)
+        const backendRes = await notificationService.getNotifications(token)
+        if (!isMounted) return
+
+        if (backendRes.success && Array.isArray(backendRes.data)) {
+          for (const bNotif of backendRes.data) {
+            let icon = 'bi-bell-fill'
+            let iconBgClass = 'bg-info-subtle text-info'
+
+            if (bNotif.notification_type === 'store_moderation' || bNotif.notification_type === 'order_cancelled') {
+              icon = 'bi-shield-exclamation'
+              iconBgClass = 'bg-danger-subtle text-danger'
+            } else if (bNotif.notification_type === 'product_moderation' || bNotif.notification_type === 'cart_update') {
+              icon = 'bi-exclamation-triangle-fill'
+              iconBgClass = 'bg-warning-subtle text-warning'
+            }
+
+            notifs.push({
+              id: `backend-${bNotif.id}`,
+              backendId: bNotif.id,
+              type: bNotif.notification_type,
+              title: bNotif.title,
+              message: bNotif.message,
+              icon,
+              iconBgClass,
+              link: bNotif.link || '/pedidos',
+              isRead: bNotif.is_read,
+              createdAt: bNotif.created_at,
+            })
+          }
+        }
+
         if (isMounted) {
           setInternalNotifications(notifs)
         }
@@ -133,7 +177,7 @@ export function useNotifications(customNotifications = null) {
     }
   }, [user, getValidToken, customNotifications])
 
-  const markAllAsRead = useCallback(() => {
+  const markAllAsRead = useCallback(async () => {
     const allIds = notifications.map((n) => n.id)
     const updated = Array.from(new Set([...readIds, ...allIds]))
     setReadIds(updated)
@@ -144,10 +188,16 @@ export function useNotifications(customNotifications = null) {
         // Ignorar errores de quota de almacenamiento
       }
     }
-  }, [notifications, readIds, storageKey])
+    if (getValidToken) {
+      const token = await getValidToken()
+      if (token) {
+        notificationService.markAllAsRead(token).catch(() => {})
+      }
+    }
+  }, [notifications, readIds, storageKey, getValidToken])
 
   const markAsRead = useCallback(
-    (id) => {
+    async (id) => {
       if (!readIds.includes(id)) {
         const updated = [...readIds, id]
         setReadIds(updated)
@@ -159,11 +209,18 @@ export function useNotifications(customNotifications = null) {
           }
         }
       }
+      if (typeof id === 'string' && id.startsWith('backend-') && getValidToken) {
+        const backendId = id.replace('backend-', '')
+        const token = await getValidToken()
+        if (token) {
+          notificationService.markAsRead(backendId, token).catch(() => {})
+        }
+      }
     },
-    [readIds, storageKey]
+    [readIds, storageKey, getValidToken]
   )
 
-  const unreadCount = notifications.filter((n) => !readIds.includes(n.id)).length
+  const unreadCount = notifications.filter((n) => !n.isRead && !readIds.includes(n.id)).length
 
   return {
     notifications,

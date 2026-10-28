@@ -60,6 +60,11 @@ class Product(models.Model):
         null=True,
         verbose_name="imagen del producto",
     )
+    is_deleted = models.BooleanField(
+        default=False,
+        verbose_name="eliminado",
+        help_text="Soft-delete para proteger la integridad del historial de pedidos.",
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="fecha de creacion")
 
     class Meta:
@@ -205,6 +210,12 @@ class OrderItem(models.Model):
         related_name="order_items",
         verbose_name="producto",
     )
+    product_name = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name="nombre del producto al comprar",
+    )
     quantity = models.PositiveIntegerField(verbose_name="cantidad")
     unit_price = models.DecimalField(
         max_digits=10,
@@ -276,3 +287,40 @@ class OrderRating(models.Model):
 
     def __str__(self):
         return f"Calificacion {self.rating}★ para Pedido #{self.order_id}"
+
+
+class Notification(models.Model):
+    class NotificationType(models.TextChoices):
+        ORDER_STATUS = "order_status", "Estado de Pedido"
+        ORDER_CANCELLED = "order_cancelled", "Pedido Cancelado"
+        PRODUCT_UNAVAILABLE = "product_unavailable", "Producto No Disponible"
+        STORE_MODERATION = "store_moderation", "Moderacion de Tienda"
+        PRODUCT_MODERATION = "product_moderation", "Moderacion de Producto"
+        CART_UPDATE = "cart_update", "Actualizacion de Carrito"
+        SYSTEM = "system", "Sistema"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+        verbose_name="usuario",
+    )
+    title = models.CharField(max_length=255, verbose_name="titulo")
+    message = models.TextField(verbose_name="mensaje")
+    notification_type = models.CharField(
+        max_length=30,
+        choices=NotificationType.choices,
+        default=NotificationType.SYSTEM,
+        verbose_name="tipo",
+    )
+    is_read = models.BooleanField(default=False, verbose_name="leida")
+    link = models.CharField(max_length=255, blank=True, null=True, verbose_name="enlace")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="fecha de creacion")
+
+    class Meta:
+        verbose_name = "notificacion"
+        verbose_name_plural = "notificaciones"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user} - {self.title}"

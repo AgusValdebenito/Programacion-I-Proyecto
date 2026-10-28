@@ -112,6 +112,26 @@ class OrderService:
         if is_client and not is_vendor:
             raise PermissionDenied("Los clientes solo pueden consultar o cancelar sus pedidos pendientes.")
 
+        if is_vendor or is_admin:
+            if new_status == Order.StatusChoices.PREPARING:
+                if not order.store.is_active:
+                    raise ValidationError({
+                        "detail": "No podés aceptar pedidos porque la tienda se encuentra actualmente suspendida."
+                    })
+                unavailable_items = [
+                    item.product.name if item.product else item.product_name
+                    for item in order.items.select_related("product").all()
+                    if not item.product or not item.product.is_available or getattr(item.product, "is_deleted", False)
+                ]
+                if unavailable_items:
+                    items_str = ", ".join(f"'{name}'" for name in unavailable_items)
+                    raise ValidationError({
+                        "detail": (
+                            f"No podés aceptar este pedido porque incluye productos no disponibles actualmente: {items_str}. "
+                            "Rechazá el pedido o reactivá el producto si volvés a tener disponibilidad."
+                        )
+                    })
+
         if is_vendor:
             allowed = cls.ALLOWED_TRANSITIONS.get(order.status, [])
             if new_status not in allowed:
@@ -205,7 +225,7 @@ class OrderService:
             unavailable_products = []
             for item in cart_items:
                 product = locked_products.get(item.product.id)
-                if not product or not product.is_available:
+                if not product or not product.is_available or getattr(product, "is_deleted", False):
                     unavailable_products.append(item.product)
 
             if unavailable_products:
@@ -254,6 +274,7 @@ class OrderService:
                 OrderItem.objects.create(
                     order=order,
                     product=product,
+                    product_name=product.name,
                     quantity=item.quantity,
                     unit_price=product.price,
                 )
@@ -262,3 +283,38 @@ class OrderService:
             cart.items.all().delete()
 
             return order
+
+    @classmethod
+    def cancel_pending_orders_for_store(cls, store, reason=None):
+        """Cancela automáticamente todos los pedidos pendientes de una tienda suspendida/eliminada y reintegra stock."""
+        from core.services.notification_service import NotificationService
+        pending_orders = Order.objects.filter(store=store, status=Order.StatusChoices.PENDING)
+        cancelled_count = 0
+        reason_text = reason or "Cancelado automáticamente: la tienda fue suspendida por administración."
+        for order in pending_orders:
+            cls.restore_order_stock(order)
+            order.status = Order.StatusChoices.CANCELLED
+            order.cancellation_reason = reason_text
+            order.save(update_fields=["status", "cancellation_reason"])
+            NotificationService.notify_order_cancelled(order, reason_text)
+            cancelled_count += 1
+        return cancelled_count
+
+    @classmethod
+    def cancel_pending_orders_for_product(cls, product, reason=None):
+        """Cancela automáticamente pedidos pendientes que incluyan un producto desactivado/eliminado."""
+        from core.services.notification_service import NotificationService
+        pending_orders = Order.objects.filter(
+            items__product=product, status=Order.StatusChoices.PENDING
+        ).distinct()
+        cancelled_count = 0
+        reason_text = reason or f"Cancelado automáticamente: el producto '{product.name}' fue dado de baja o suspendido."
+        for order in pending_orders:
+            cls.restore_order_stock(order, excluded_product_id=product.id)
+            order.status = Order.StatusChoices.CANCELLED
+            order.cancelled_product = product
+            order.cancellation_reason = reason_text
+            order.save(update_fields=["status", "cancellation_reason", "cancelled_product"])
+            NotificationService.notify_order_cancelled(order, reason_text)
+            cancelled_count += 1
+        return cancelled_count
