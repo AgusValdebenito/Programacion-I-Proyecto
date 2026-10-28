@@ -56,7 +56,7 @@ export default function Navbar() {
         <div className="d-flex align-items-center justify-content-between py-2">
           <div className="d-flex align-items-center flex-grow-1 flex-md-grow-0 me-md-3">
             <Logo />
-            {!isExcludedPath && (
+            {!isExcludedPath && !isVendorOnly && (
               <form
                 className="d-none d-lg-flex position-relative ms-3"
                 onSubmit={handleSearchSubmit}
@@ -79,57 +79,71 @@ export default function Navbar() {
             )}
           </div>
           <div className="d-flex align-items-center">
-            <nav className="d-none d-md-flex align-items-center gap-4 me-4" aria-label="Navegación principal">
-              <Link className="fr-nav-link" to="/">
-                Inicio
-              </Link>
-              <Link className="fr-nav-link" to="/explorar">
-                Explorar
-              </Link>
-              <Link className="fr-nav-link" to="/tiendas">
-                Tiendas
-              </Link>
-              {user && (
-                <Link className="fr-nav-link" to="/perfil">
-                  Mi perfil
-                </Link>
-              )}
-              {user && (
+            {isVendorOnly ? (
+              <nav className="d-none d-md-flex align-items-center gap-3 me-4" aria-label="Navegación de comercio">
                 <Link className="fr-nav-link text-primary fw-semibold" to="/panel-tienda">
                   <i className="bi bi-shop me-1"></i>
-                  {user.role === 'vendedor' || user.role === 'admin' ? 'Mi Tienda' : 'Abrir Tienda'}
+                  Mi Tienda
                 </Link>
-              )}
-              {user && (user.role === 'admin' || Boolean(user.is_staff)) && (
-                <Link className="fr-nav-link text-danger fw-semibold" to="/admin/moderacion">
-                  <i className="bi bi-shield-lock me-1"></i>
-                  Moderación
+                <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                  Modo Comercio
+                </span>
+              </nav>
+            ) : (
+              <nav className="d-none d-md-flex align-items-center gap-4 me-4" aria-label="Navegación principal">
+                <Link className="fr-nav-link" to="/">
+                  Inicio
                 </Link>
-              )}
-            </nav>
+                <Link className="fr-nav-link" to="/explorar">
+                  Explorar
+                </Link>
+                <Link className="fr-nav-link" to="/tiendas">
+                  Tiendas
+                </Link>
+                {user && (
+                  <Link className="fr-nav-link" to="/perfil">
+                    Mi perfil
+                  </Link>
+                )}
+                {user && (
+                  <Link className="fr-nav-link text-primary fw-semibold" to="/panel-tienda">
+                    <i className="bi bi-shop me-1"></i>
+                    {user.role === 'vendedor' || user.role === 'admin' ? 'Mi Tienda' : 'Abrir Tienda'}
+                  </Link>
+                )}
+                {user && (user.role === 'admin' || Boolean(user.is_staff)) && (
+                  <Link className="fr-nav-link text-danger fw-semibold" to="/admin/moderacion">
+                    <i className="bi bi-shield-lock me-1"></i>
+                    Moderación
+                  </Link>
+                )}
+              </nav>
+            )}
             {user ? (
               <div className="d-flex align-items-center gap-2">
                 <span className="badge bg-light text-dark border d-none d-sm-inline-block">
-                  <i className="bi bi-person-fill me-1 text-primary"></i>
+                  <i className={`bi ${isVendorOnly ? 'bi-shop text-primary' : 'bi-person-fill text-primary'} me-1`}></i>
                   {user.name || user.username || user.email}
                 </span>
                 <NotificationDropdown />
-                <Link
-                  to="/carrito"
-                  className="fr-icon-btn position-relative"
-                  aria-label="Carrito"
-                >
-                  <i className="bi bi-cart3" />
-                  {itemCount > 0 && (
-                    <span
-                      className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                      style={{ fontSize: '0.65rem' }}
-                    >
-                      {itemCount}
-                      <span className="visually-hidden">productos en el carrito</span>
-                    </span>
-                  )}
-                </Link>
+                {!isVendorOnly && (
+                  <Link
+                    to="/carrito"
+                    className="fr-icon-btn position-relative"
+                    aria-label="Carrito"
+                  >
+                    <i className="bi bi-cart3" />
+                    {itemCount > 0 && (
+                      <span
+                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                        style={{ fontSize: '0.65rem' }}
+                      >
+                        {itemCount}
+                        <span className="visually-hidden">productos en el carrito</span>
+                      </span>
+                    )}
+                  </Link>
+                )}
                 <button
                   type="button"
                   className="btn btn-sm btn-outline-danger ms-1"

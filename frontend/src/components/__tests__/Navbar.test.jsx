@@ -6,7 +6,7 @@ import * as AuthHook from '../../hooks/useAuth'
 import * as AddressHook from '../../hooks/useAddress'
 import * as CartHook from '../../hooks/useCart'
 
-describe('Navbar Component - Delivery Location Visibility', () => {
+describe('Navbar Component - Delivery Location Visibility & Roles', () => {
   const mockAddress = {
     id: 'addr-1',
     label: 'Casa',
@@ -117,7 +117,7 @@ describe('Navbar Component - Delivery Location Visibility', () => {
     expect(screen.getByLabelText(/seleccionar dirección de entrega/i)).toBeInTheDocument()
   })
 
-  it('renders quick search input and navigates on search submit', () => {
+  it('renders quick search input and navigates on search submit for clients', () => {
     vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
       user: { id: 1, role: 'cliente', name: 'Juan Cliente' },
       logout: vi.fn(),
@@ -161,5 +161,55 @@ describe('Navbar Component - Delivery Location Visibility', () => {
 
     expect(screen.queryByRole('link', { name: /moderación/i })).not.toBeInTheDocument()
   })
-})
 
+  it('renders dedicated vendor navbar with FoodRush Stores and hides client links for pure vendor', () => {
+    vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
+      user: { id: 2, role: 'vendedor', name: 'Dueño Pizzería' },
+      logout: vi.fn(),
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/panel-tienda']}>
+        <Navbar />
+      </MemoryRouter>
+    )
+
+    // Logo says FoodRush Stores
+    expect(screen.getByLabelText(/foodrush stores/i)).toBeInTheDocument()
+    expect(screen.getByText(/stores/i)).toBeInTheDocument()
+
+    // Shows Mi Tienda and Modo Comercio
+    expect(screen.getByRole('link', { name: /mi tienda/i })).toBeInTheDocument()
+    expect(screen.getByText(/modo comercio/i)).toBeInTheDocument()
+
+    // Hides client links & cart & search
+    expect(screen.queryByRole('link', { name: /^inicio$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /^explorar$/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /^tiendas$/i })).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/carrito/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/buscar en foodrush/i)).not.toBeInTheDocument()
+  })
+
+  it('keeps dual access (client links + store + moderation) for admin users', () => {
+    vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
+      user: { id: 1, role: 'admin', is_staff: true, name: 'Admin Test' },
+      logout: vi.fn(),
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Navbar />
+      </MemoryRouter>
+    )
+
+    // Admin has client links
+    expect(screen.getByRole('link', { name: /^inicio$/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /^explorar$/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /^tiendas$/i })).toBeInTheDocument()
+    expect(screen.getByLabelText(/carrito/i)).toBeInTheDocument()
+
+    // And store / moderation management
+    expect(screen.getByRole('link', { name: /mi tienda/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /moderación/i })).toBeInTheDocument()
+  })
+})

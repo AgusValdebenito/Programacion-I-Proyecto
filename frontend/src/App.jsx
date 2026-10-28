@@ -13,7 +13,7 @@ import Checkout from './views/Checkout.jsx'
 import Profile from './views/Profile.jsx'
 import PanelTienda from './views/PanelTienda.jsx'
 import ModerationPanel from './views/ModerationPanel.jsx'
-import { ProtectedRoute } from './components/ProtectedRoute'
+import { ProtectedRoute, ClientRoute } from './components/ProtectedRoute'
 
 function App() {
   return (
@@ -23,18 +23,67 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/tiendas" element={<Stores />} />
-          <Route path="/explorar" element={<Stores />} />
-          <Route path="/tiendas/:id" element={<StoreDetail />} />
-          <Route path="/productos/:id" element={<ProductDetail />} />
-          <Route path="/carrito" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-          <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-          <Route path="/perfil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/pedidos" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/favoritos" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/panel-tienda" element={<ProtectedRoute allowedRoles={['vendedor', 'admin']}><PanelTienda /></ProtectedRoute>} />
-          <Route path="/admin/moderacion" element={<ProtectedRoute allowedRoles={['admin']}><ModerationPanel /></ProtectedRoute>} />
+          <Route path="/" element={<ClientRoute><Home /></ClientRoute>} />
+          <Route path="/tiendas" element={<ClientRoute><Stores /></ClientRoute>} />
+          <Route path="/explorar" element={<ClientRoute><Stores /></ClientRoute>} />
+          <Route path="/tiendas/:id" element={<ClientRoute><StoreDetail /></ClientRoute>} />
+          <Route path="/productos/:id" element={<ClientRoute><ProductDetail /></ClientRoute>} />
+          <Route
+            path="/carrito"
+            element={
+              <ProtectedRoute disallowedRoles={['vendedor']} redirectTo="/panel-tienda">
+                <Cart />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/checkout"
+            element={
+              <ProtectedRoute disallowedRoles={['vendedor']} redirectTo="/panel-tienda">
+                <Checkout />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/perfil"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pedidos"
+            element={
+              <ProtectedRoute disallowedRoles={['vendedor']} redirectTo="/panel-tienda">
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/favoritos"
+            element={
+              <ProtectedRoute disallowedRoles={['vendedor']} redirectTo="/panel-tienda">
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/panel-tienda"
+            element={
+              <ProtectedRoute allowedRoles={['vendedor', 'admin']}>
+                <PanelTienda />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/moderacion"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <ModerationPanel />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
 
