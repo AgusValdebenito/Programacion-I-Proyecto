@@ -41,6 +41,22 @@ describe('Navbar Component - Delivery Location Visibility & Roles', () => {
     expect(screen.getByText(/Av\. Corrientes 1234/)).toBeInTheDocument()
   })
 
+  it('hides delivery location pill for unauthenticated visitors on catalog routes', () => {
+    vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
+      user: null,
+      logout: vi.fn(),
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Navbar />
+      </MemoryRouter>
+    )
+
+    expect(screen.queryByLabelText(/seleccionar dirección de entrega/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Av\. Corrientes 1234/)).not.toBeInTheDocument()
+  })
+
   it('hides delivery location pill on /login', () => {
     vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
       user: null,

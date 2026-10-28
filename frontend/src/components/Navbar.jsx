@@ -24,7 +24,7 @@ export default function Navbar() {
     user?.role === 'vendedor' &&
     !(user?.role === 'admin' || Boolean(user?.is_staff) || Boolean(user?.is_superuser))
 
-  const showDeliveryLocation = !isExcludedPath && !isVendorOnly
+  const showDeliveryLocation = Boolean(user) && !isExcludedPath && !isVendorOnly
 
   const handleSearchSubmit = (e) => {
     e.preventDefault()
