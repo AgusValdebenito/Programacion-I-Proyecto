@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Cart, CartItem, FavoriteStore, Order, OrderItem, OrderRating, Product, Store
+from .models import Cart, CartItem, FavoriteStore, Notification, Order, OrderItem, OrderRating, Product, Store
 
 
 class StoreSerializer(serializers.ModelSerializer):
@@ -23,6 +23,8 @@ class StoreSerializer(serializers.ModelSerializer):
     def get_is_favorite(self, obj) -> bool:
         request = self.context.get("request")
         if request and request.user and request.user.is_authenticated:
+            if hasattr(obj, "_prefetched_objects_cache") and "favorites" in obj._prefetched_objects_cache:
+                return any(fav.user_id == request.user.id for fav in obj.favorites.all())
             return obj.favorites.filter(user=request.user).exists()
         return False
 
@@ -52,9 +54,10 @@ class ProductSerializer(serializers.ModelSerializer):
             "stock",
             "track_stock",
             "image",
+            "is_deleted",
             "created_at",
         ]
-        read_only_fields = ["created_at"]
+        read_only_fields = ["created_at", "is_deleted"]
 
     def to_internal_value(self, data):
         if isinstance(data, dict) and "image" in data:
@@ -96,12 +99,19 @@ class CartSerializer(serializers.ModelSerializer):
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source="product.name", read_only=True)
+    product_name = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderItem
         fields = ["id", "order", "product", "product_name", "quantity", "unit_price"]
         read_only_fields = ["unit_price"]
+
+    def get_product_name(self, obj) -> str:
+        if obj.product_name:
+            return obj.product_name
+        if obj.product:
+            return obj.product.name
+        return "Producto no disponible" 
 
 
 
@@ -146,3 +156,19 @@ class OrderSerializer(serializers.ModelSerializer):
             "status",
             "cancelled_product_name",
         ]
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = [
+            "id",
+            "user",
+            "title",
+            "message",
+            "notification_type",
+            "is_read",
+            "link",
+            "created_at",
+        ]
+        read_only_fields = ["id", "user", "created_at"]

@@ -31,6 +31,51 @@ El objetivo es representar el flujo completo de una aplicación de pedidos, sin 
 ---
 
 
+## 💡 Casos de uso de ejemplo (¿Cómo funciona la aplicación?)
+
+Para entender la dinámica de FoodRush en la práctica, a continuación se describen los principales flujos y recorridos de los distintos roles:
+
+### 🛵 Caso 1: El Cliente realiza un pedido (Flujo de compra de punta a punta)
+1. **Registro y exploración:** Juan se registra en la plataforma. Desde la Home explora categorías gastronómicas (Pizzas, Hamburguesas, Empanadas), busca tiendas en su zona o filtra por sus **tiendas favoritas** guardadas con un clic en el corazón.
+2. **Selección de platos y regla mono-tienda:** Juan entra a *"Pizzería Central"* y agrega 2 porciones de Fugazzeta al carrito. Si intenta agregar una hamburguesa de otro local, el sistema le advierte que el carrito es mono-tienda para asegurar un único envío eficiente.
+3. **Checkout seguro:** En el checkout, Juan selecciona su dirección de entrega guardada (o crea una nueva como *"Casa de mamá"*), elige método de pago simulado (Efectivo o Tarjeta) y agrega notas de entrega. Al confirmar, el stock se descuenta atómicamente y se congela el precio pactado.
+4. **Seguimiento en vivo:** El pedido entra en estado `pending` (Pendiente). Juan recibe notificaciones en la campanita de navegación mientras la cocina lo acepta (`preparing`), lo despacha (`delivering`) y el repartidor lo entrega (`delivered`). Si Juan se arrepiente antes de que la cocina empiece a preparar, puede cancelarlo con reintegro automático de stock.
+5. **Calificación:** Al recibir su comida, Juan califica la experiencia con estrellas (1 a 5), selecciona etiquetas dinámicas (*"Comida caliente"*, *"Envío rápido"*) y deja un comentario opcional para ayudar a la comunidad.
+
+---
+
+### 🍳 Caso 2: El Comerciante gestiona su local (Catálogo, Menú y Cocina)
+1. **Onboarding express:** Sofía tiene una cuenta y decide registrar su negocio desde *"Abrir Tienda"*. Completa el nombre de su local, descripción e imagen. El sistema promueve automáticamente su rol a `vendedor`.
+2. **Gestión del catálogo con stock híbrido:** Sofía publica sus platos. Puede elegir entre:
+   - *Gastronomía estándar:* solo rige la disponibilidad activa/pausada (`is_available`).
+   - *Control numérico estricto:* activa `track_stock` con unidades limitadas (ej. 15 postres del día). Al llegar a 0 unidades, el plato se pausa automáticamente.
+3. **Soft-delete para proteger la historia:** Si Sofía decide retirar un plato que ya vendió semanas atrás, el sistema aplica un *borrado lógico* (`is_deleted = True`): desaparece de la carta pública pero permanece intacto en los pedidos históricos y estadísticas contables sin arrojar errores.
+4. **Monitor de comanda y Cocina en vivo:** En la pestaña *"Cocina"* de su panel, Sofía ve ingresar los pedidos en tiempo real. 
+   - Si todos los ingredientes están listos, presiona *"Aceptar y Preparar"* para comenzar a cocinar.
+   - Si un producto quedó no disponible o sin stock, el sistema bloquea preventivamente la aceptación del pedido para no comprometer al local con algo que no puede entregar.
+5. **Rechazo reactivo por falta de insumos:** Si se le acaba la muzzarella durante el turno, Sofía puede rechazar el pedido indicando *"Falta de ingrediente / Sin stock"* y seleccionar la pizza agotada. Automáticamente, el sistema cancela el pedido, devuelve el stock a los demás ítems y apaga la pizza en el menú público para que nadie más la pida por error.
+
+---
+
+### 🛡️ Caso 3: Moderación y Auditoría por parte del Administrador
+1. **Panel de control centralizado:** El Administrador accede a `/admin/moderacion`, donde visualiza métricas de la plataforma, lista completa de comercios y auditoría de acciones en tiempo real.
+2. **Suspensión preventiva de tiendas:** Si un local incumple las normas de calidad o higiene, el admin puede suspender la tienda con un solo clic. El sistema:
+   - Oculta la tienda del catálogo público.
+   - Cancela automáticamente todos sus pedidos en estado `pending` pendientes de preparación.
+   - Reintegra el stock de los productos a los clientes.
+   - Envía una notificación explicativa tanto al cliente como al dueño del comercio.
+3. **Moderación de platos individuales:** Si un producto tiene un precio erróneo o imagen inapropiada, el admin puede pausarlo o eliminarlo preventivamente.
+4. **Limpieza de carritos en curso:** Si un cliente tenía en su carrito un producto de una tienda que acaba de ser suspendida o un plato pausado, el ítem se remueve de inmediato y el cliente recibe un aviso en su campanita informándole lo sucedido antes de que intente pagarlo.
+
+---
+
+### ⚙️ Caso 4: Protección de integridad ante eventos inesperados
+- **¿Qué pasa si un producto cambia de precio después de que compré?** Tu pedido no se altera; los precios unitarios y el total quedan congelados con un snapshot inmutable al momento del checkout.
+- **¿Qué pasa si el comercio le cambia el nombre a una pizza o la elimina?** El cliente siempre verá en su historial el nombre original con el que compró el plato (`OrderItem.product_name`), evitando nombres vacíos o ítems huérfanos.
+- **¿Qué pasa si intentan ingresar a rutas no autorizadas?** Las rutas están blindadas con `ProtectedRoute` y guards en el backend con permisos estrictos basados en roles (`cliente`, `vendedor`, `admin`).
+
+---
+
 ## 🧱 Estructura de la base de datos
 
 El sistema utiliza las siguientes tablas principales:
@@ -81,7 +126,9 @@ Productos asociados a cada tienda.
 * description
 * price
 * is_available
+* is_deleted (borrado logico para preservar historial de pedidos)
 * stock
+* track_stock (booleano para control numerico estricto vs gastronomia)
 * image
 * store_id (FK -> stores.id)
 * created_at
@@ -154,6 +201,7 @@ Productos incluidos en cada pedido.
 * id (PK)
 * order_id (FK -> orders.id)
 * product_id (FK -> products.id)
+* product_name (snapshot inmutable del nombre al momento de compra)
 * quantity
 * unit_price
 
@@ -195,6 +243,21 @@ Restricciones recomendadas:
 
 * Sólo aplicable a órdenes en estado `delivered`.
 * Unicidad: un pedido sólo puede ser calificado una única vez.
+
+---
+
+### 🔔 notifications
+
+Notificaciones y alertas del sistema en tiempo real para clientes y comercios.
+
+* id (PK)
+* user_id (FK -> users.id)
+* title
+* message
+* notification_type (`order_status`, `order_cancelled`, `product_unavailable`, `store_moderation`, `product_moderation`, `cart_update`, `system`)
+* is_read (booleano de lectura)
+* link (ruta interna hacia pedidos, panel o carrito)
+* created_at
 
 ---
 
@@ -406,6 +469,7 @@ Rutas client-side principales:
 * `/login` / `/register`: Autenticación y registro con JWT.
 
 El bosquejo de diseno y arquitectura de componentes esta en `docs/diagrama.md`.
+El registro de deuda técnica y mejoras recomendadas en revisiones de código para el TP10 se encuentra en [`docs/deuda_tecnica_y_mejoras_tp10.md`](docs/deuda_tecnica_y_mejoras_tp10.md).
 
 ---
 
@@ -455,6 +519,12 @@ PATCH  /api/orders/:id/                # Actualizar estado de despacho (tienda/a
 POST   /api/orders/:id/rate/           # Calificar pedido entregado con 1-5 estrellas y tags (Issue #44)
 GET    /api/order-items/
 POST   /api/order-items/
+
+### Notificaciones
+
+GET    /api/notifications/             # Listar notificaciones del usuario autenticado
+POST   /api/notifications/:id/read/    # Marcar una notificación como leída
+POST   /api/notifications/mark-all-read/ # Marcar todas como leídas
 
 ### Documentación
 

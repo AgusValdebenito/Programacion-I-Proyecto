@@ -1,7 +1,17 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
 
 export default function BottomNav() {
   const { pathname } = useLocation()
+  const { user } = useAuth()
+
+  const isPureVendor =
+    user?.role === 'vendedor' &&
+    !(user?.role === 'admin' || Boolean(user?.is_staff) || Boolean(user?.is_superuser))
+
+  if (isPureVendor || pathname.startsWith('/panel-tienda')) {
+    return null
+  }
 
   const items = [
     { icon: 'bi-house-door-fill', label: 'Inicio', to: '/' },

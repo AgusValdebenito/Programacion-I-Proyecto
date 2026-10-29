@@ -1,4 +1,6 @@
-from django.db import models
+from decimal import Decimal
+
+from django.db import models, transaction
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -6,7 +8,7 @@ from rest_framework.response import Response
 
 from users.models import Usuario
 
-from .models import Cart, CartItem, FavoriteStore, Order, OrderItem, OrderRating, Product, Store
+from .models import Cart, CartItem, FavoriteStore, Notification, Order, OrderItem, OrderRating, Product, Store
 from .permissions import (
     IsAdminOrVendedor,
     IsClienteOrAdmin,
@@ -17,13 +19,14 @@ from .permissions import (
 from .serializers import (
     CartItemSerializer,
     CartSerializer,
+    NotificationSerializer,
     OrderItemSerializer,
     OrderRatingSerializer,
     OrderSerializer,
     ProductSerializer,
     StoreSerializer,
 )
-from .services import CartService, OrderService
+from .services import CartService, NotificationService, OrderService
 
 
 class StoreViewSet(viewsets.ModelViewSet):
@@ -54,6 +57,9 @@ class StoreViewSet(viewsets.ModelViewSet):
                     queryset = queryset.filter(is_active=True)
                 elif is_active.lower() in ("false", "0"):
                     queryset = queryset.filter(is_active=False)
+
+        if self.request.user and self.request.user.is_authenticated:
+            queryset = queryset.prefetch_related("favorites")
 
         return queryset
 
@@ -109,9 +115,39 @@ class StoreViewSet(viewsets.ModelViewSet):
             user.save(update_fields=["role"])
 
     def perform_update(self, serializer):
+        instance = self.get_object()
+        old_is_active = instance.is_active
+
         if "is_active" in serializer.validated_data and not is_admin_user(self.request.user):
             raise PermissionDenied("Solo los administradores pueden suspender o reactivar tiendas.")
-        serializer.save()
+
+        store = serializer.save()
+        new_is_active = store.is_active
+
+        if old_is_active and not new_is_active:
+            # 1. Cancelar pedidos pendientes de la tienda y reintegrar stock
+            OrderService.cancel_pending_orders_for_store(store)
+            # 2. Notificar y vaciar carritos que contengan productos de esta tienda
+            cart_items = CartItem.objects.filter(product__store=store).select_related("cart__user", "product")
+            for c_item in cart_items:
+                NotificationService.notify_cart_item_removed(
+                    user=c_item.cart.user,
+                    product=c_item.product,
+                    reason=f"La tienda '{store.name}' fue suspendida preventivamente por administración."
+                )
+                c_item.delete()
+            # 3. Notificar al dueño del comercio
+            NotificationService.notify_store_moderation(store, action="suspended")
+        elif not old_is_active and new_is_active:
+            NotificationService.notify_store_moderation(store, action="reactivated")
+
+    def perform_destroy(self, instance):
+        if instance.orders.exists():
+            raise ValidationError({
+                "detail": "No podés eliminar una tienda que posee un historial de pedidos. Podés suspenderla para archivarla."
+            })
+        NotificationService.notify_store_moderation(instance, action="deleted")
+        instance.delete()
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -123,9 +159,10 @@ class ProductViewSet(viewsets.ModelViewSet):
     ordering_fields = ["name", "price", "stock", "id", "created_at"]
 
     def get_queryset(self):
-        from decimal import Decimal
-
         queryset = super().get_queryset()
+        # Excluir productos eliminados lógicamente (soft-deleted)
+        queryset = queryset.filter(is_deleted=False)
+
         store_id = self.request.query_params.get("store")
         if store_id:
             queryset = queryset.filter(store_id=store_id)
@@ -171,10 +208,61 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         instance = self.get_object()
+        old_available = instance.is_available
         new_store = serializer.validated_data.get("store", instance.store)
         if new_store != instance.store and not is_admin_user(self.request.user):
             raise ValidationError({"store": "No podés reasignar un producto a otra tienda."})
-        serializer.save()
+
+        product = serializer.save()
+        new_available = product.is_available
+
+        # Si se desactivó la disponibilidad
+        if old_available and not new_available:
+            # 1. Cancelar pedidos pendientes con este producto y reintegrar stock del resto
+            OrderService.cancel_pending_orders_for_product(
+                product,
+                reason=f"Cancelado automáticamente: el producto '{product.name}' ya no se encuentra disponible."
+            )
+            # 2. Notificar y remover de carritos activos de clientes
+            cart_items = CartItem.objects.filter(product=product).select_related("cart__user")
+            for c_item in cart_items:
+                NotificationService.notify_cart_item_removed(
+                    user=c_item.cart.user,
+                    product=product,
+                    reason=f"El producto '{product.name}' ya no se encuentra disponible."
+                )
+                c_item.delete()
+            # 3. Si fue moderado por un admin que no es el dueño, avisar a la tienda
+            if is_admin_user(self.request.user) and product.store.owner != self.request.user:
+                NotificationService.notify_product_moderation(product, action="suspended")
+
+    def perform_destroy(self, instance):
+        # 1. Cancelar pedidos pendientes con este producto
+        OrderService.cancel_pending_orders_for_product(
+            instance,
+            reason=f"Cancelado automáticamente: el producto '{instance.name}' fue eliminado."
+        )
+        # 2. Notificar y remover de carritos activos
+        cart_items = CartItem.objects.filter(product=instance).select_related("cart__user")
+        for c_item in cart_items:
+            NotificationService.notify_cart_item_removed(
+                user=c_item.cart.user,
+                product=instance,
+                reason=f"El producto '{instance.name}' fue retirado del menú."
+            )
+            c_item.delete()
+
+        # 3. Si fue un admin distinto del dueño, notificar a la tienda
+        if is_admin_user(self.request.user) and instance.store.owner != self.request.user:
+            NotificationService.notify_product_moderation(instance, action="deleted")
+
+        # 4. Soft-delete si el producto fue comprado en pedidos históricos (evita ProtectedError 500)
+        if instance.order_items.exists():
+            instance.is_deleted = True
+            instance.is_available = False
+            instance.save(update_fields=["is_deleted", "is_available"])
+        else:
+            instance.delete()
 
 
 
@@ -306,7 +394,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         if store_id:
             queryset = queryset.filter(store_id=store_id)
 
-        return queryset
+        return queryset.select_related("store", "cancelled_product", "rating").prefetch_related("items__product")
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -380,7 +468,7 @@ class OrderItemViewSet(viewsets.ModelViewSet):
         ).distinct()
 
     def perform_create(self, serializer):
-        from django.db import transaction
+
 
         user = self.request.user
         if not (is_admin_user(user) or getattr(user, "role", None) == Usuario.RoleChoices.CLIENTE):
@@ -414,3 +502,24 @@ class OrderItemViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         raise ValidationError({"detail": "Los ítems de pedido no pueden ser eliminados individualmente."})
+
+
+class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Notification.objects.all().order_by("-created_at")
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user).order_by("-created_at")
+
+    @action(detail=True, methods=["post"], url_path="read")
+    def mark_as_read(self, request, pk=None):
+        notification = self.get_object()
+        notification.is_read = True
+        notification.save(update_fields=["is_read"])
+        return Response({"detail": "Notificación marcada como leída.", "is_read": True}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["post"], url_path="mark-all-read")
+    def mark_all_as_read(self, request):
+        updated = Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+        return Response({"detail": f"{updated} notificaciones marcadas como leídas."}, status=status.HTTP_200_OK)
