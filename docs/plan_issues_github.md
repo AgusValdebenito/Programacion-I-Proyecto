@@ -231,10 +231,10 @@ Interfaz para que el restaurante vea las órdenes entrantes y controle las trans
 Migrar el sistema hacia un modelo adaptado a gastronomía: stock numérico opcional (`track_stock`) y desactivación automática de platos ante quiebre de insumos.
 
 **Tareas / Sub-issues:**
-- [ ] **Migración de Modelos:** `track_stock = BooleanField` en `Product`, `cancellation_reason` y `cancelled_product` en `Order`.
-- [ ] **Lógica en Servicios (`core/services/`):** `CartService` validando stock solo si `track_stock == True`, y `OrderService.reject_order_by_vendor(...)` con apagado automático.
-- [ ] **Endpoints:** extender `PATCH /api/orders/{id}/` para recibir motivo y producto causante.
-- [ ] **Suite de Pruebas:** test completo de pedido -> rechazo -> producto pausado -> bloqueo a nuevos compradores.
+- [x] **Migración de Modelos:** `track_stock = BooleanField` en `Product`, `cancellation_reason` y `cancelled_product` en `Order`.
+- [x] **Lógica en Servicios (`core/services/`):** `CartService` validando stock solo si `track_stock == True`, y `OrderService.reject_order_by_vendor(...)` con apagado automático.
+- [x] **Endpoints:** extender `PATCH /api/orders/{id}/` para recibir motivo y producto causante.
+- [x] **Suite de Pruebas:** test completo de pedido -> rechazo -> producto pausado -> bloqueo a nuevos compradores.
 
 ---
 
@@ -244,14 +244,14 @@ Migrar el sistema hacia un modelo adaptado a gastronomía: stock numérico opcio
 Evitar compras de productos pausados mientras el cliente los tenía en el carrito, y limitar cantidades máximas por producto en carritos gastronómicos.
 
 **Tareas / Sub-issues:**
-- [ ] Limitar cantidad máxima por item en el carrito (ej. máx. 10 unidades por plato).
-- [ ] Validación en checkout ante productos que cambiaron a `is_available = False`.
-- [ ] Código de error `PRODUCT_UNAVAILABLE` con lista de IDs afectados.
-- [ ] Alertar en frontend resaltando el producto agotado y ofreciendo removerlo en 1 clic.
+- [x] Limitar cantidad máxima por item en el carrito (ej. máx. 10 unidades por plato).
+- [x] Validación en checkout ante productos que cambiaron a `is_available = False`.
+- [x] Código de error `PRODUCT_UNAVAILABLE` con lista de IDs afectados.
+- [x] Alertar en frontend resaltando el producto agotado y ofreciendo removerlo en 1 clic.
 
 ---
 
-## 🛡️ Milestone 5: Calidad, Moderación y DevOps
+## 🛡️ Milestone 5: Calidad, Moderación y DevOps (✅ COMPLETADO Y CERRADO)
 
 ### Issue [#24](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/24): [DevOps] Pipeline de CI/CD para Frontend en GitHub Actions
 **Labels:** `devops`, `enhancement` | **Milestone:** `M5: Calidad, Moderación y DevOps`  
@@ -259,9 +259,9 @@ Evitar compras de productos pausados mientras el cliente los tenía en el carrit
 Completar la integración continua sumando un workflow que ejecute linters, tests unitarios y build del frontend en cada Pull Request a `main`.
 
 **Tareas / Sub-issues:**
-- [ ] Crear `.github/workflows/frontend-ci.yml`.
-- [ ] Configurar job con Node.js 22.x: `npm ci`, `npm run lint`, `npm test -- --run`, `npm run build`.
-- [ ] Asegurar que el pipeline de Django y el de Vite corran en paralelo.
+- [x] Crear `.github/workflows/frontend-ci.yml`.
+- [x] Configurar job con Node.js 22.x: `npm ci`, `npm run lint`, `npm test`, `npm run build`.
+- [x] Asegurar que el pipeline de Django y el de Vite corran en paralelo.
 
 ---
 
@@ -271,10 +271,10 @@ Completar la integración continua sumando un workflow que ejecute linters, test
 Permitir a los clientes buscar productos y filtrar comercios por texto y categoría desde la barra de búsqueda del Navbar.
 
 **Tareas / Sub-issues:**
-- [ ] Backend: configurar `SearchFilter` y `OrderingFilter` en DRF para `StoreViewSet` y `ProductViewSet`.
-- [ ] Backend: filtro por categoría o rango de precios.
-- [ ] Frontend: vincular el input de búsqueda del `Navbar.jsx` a la vista de resultados o filtro en la Home.
-- [ ] Debounce en el input de búsqueda (300ms).
+- [x] Backend: configurar `SearchFilter` y `OrderingFilter` en DRF para `StoreViewSet` y `ProductViewSet`.
+- [x] Backend: filtro por categoría o rango de precios (`min_price`, `max_price`).
+- [x] Frontend: vincular el input de búsqueda del `Navbar.jsx` a la vista de resultados y catálogo de tiendas.
+- [x] Debounce en el input de búsqueda (300ms) y selector de ordenamiento A-Z, Z-A y recientes.
 
 ---
 
@@ -284,10 +284,120 @@ Permitir a los clientes buscar productos y filtrar comercios por texto y categor
 Dotar a usuarios con rol `admin` de herramientas para moderar contenido abusivo sin depender exclusivamente del Django Admin tradicional.
 
 **Tareas / Sub-issues:**
-- [ ] Backend: permisos globales de eliminación y suspensión en ViewSets correspondientes.
-- [ ] Frontend: vista `/admin/moderacion` protegida para `role === 'admin'`.
-- [ ] Listado de tiendas y productos con opción de baja preventiva (*"Suspender tienda"* / *"Pausar producto"*).
-- [ ] Registro de auditoría o motivo de moderación.
+- [x] Backend: permisos globales de eliminación y suspensión en ViewSets correspondientes (`IsResourceOwnerOrReadOnly` con soporte `is_admin_user`, acción `toggle_active`).
+- [x] Frontend: vista `/admin/moderacion` protegida para `role === 'admin'`.
+- [x] Listado de tiendas y productos con opción de baja preventiva (*"Suspender tienda"* / *"Pausar producto"*).
+- [x] Registro de auditoría con historial de acciones y motivo de moderación.
+
+
+---
+
+## 🚀 Milestone 6: Descubrimiento, Publicidad y Fidelización
+
+### Issue [#39](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/39): [Feature] Diferenciar navegación: Vista Explorar con buscador global de productos, filtro por rango de precios y comparación entre locales
+**Labels:** `frontend`, `feature`, `role:cliente` | **Milestone:** `M6: Descubrimiento, Publicidad y Fidelización`  
+**Descripción:**  
+Diferenciar funcionalmente la vista `/explorar` de `/tiendas`, convirtiéndola en un buscador transversal de productos individuales que permita comparar precios entre diferentes comercios y filtrar por rango de precios.
+
+**Tareas / Sub-issues:**
+- [ ] Crear vista dedicada `Explore.jsx` vinculada a la ruta `/explorar`.
+- [ ] Buscador global reactivo de productos entre todas las tiendas con debounce (300ms).
+- [ ] Slider o selector de rango de precios (mínimo - máximo) con filtrado en tiempo real.
+- [ ] Grilla de productos encontrados con tarjeta comparativa (foto, precio, nombre y comercio emisor).
+- [ ] Acceso directo al comercio o agregado al carrito desde el buscador global.
+- [ ] Tests de interacción con Vitest (`Explore.test.jsx`).
+
+---
+
+### Issue [#41](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/41): [Feature] Carrusel Automático de Locales Destacados y Publicidad en Home
+**Labels:** `frontend`, `feature`, `role:cliente`, `role:vendedor` | **Milestone:** `M6: Descubrimiento, Publicidad y Fidelización`  
+**Descripción:**  
+Carrusel rotativo automático de imágenes de locales destacados/patrocinados con banners publicitarios en la Home, desplazándose de derecha a izquierda y redirigiendo a la carta del comercio al hacer clic.
+
+**Tareas / Sub-issues:**
+- [ ] Crear componente `FeaturedStoresCarousel.jsx` con autoplay, bucle infinito y controles accesibles.
+- [ ] Integrar el carrusel en la Home complementando la sección existente de descuentos y promociones.
+- [ ] Redirección a `/tiendas/:id` al tocar cualquier slide del carrusel.
+- [ ] Soporte de comercios promocionados (`is_promoted` y `banner_image`).
+- [ ] Tests de renderizado e interacción con Vitest (`FeaturedStoresCarousel.test.jsx`).
+
+---
+
+### Issue [#42](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/42): [Feature] Sistema de Tiendas Favoritas y Lista de Guardados (✅ IMPLEMENTADO Y TESTEADO)
+**Labels:** `frontend`, `backend`, `feature`, `role:cliente` | **Milestone:** `M6: Descubrimiento, Publicidad y Fidelización`  
+**Descripción:**  
+Botón interactivo de corazón (❤️) en tarjetas y cabeceras de comercios para guardar tiendas favoritas, con sección dedicada en el perfil del cliente y persistencia por usuario.
+
+**Tareas / Sub-issues:**
+- [x] Crear contexto/hook `useFavorites` para gestión centralizada de locales guardados.
+- [x] Botón interactivo `FavoriteButton.jsx` con animación de corazón en cards y cabecera de comercio.
+- [x] Pestaña/sección *"Favoritos"* en `/perfil` y ruta `/favoritos` con estado vacío amigable.
+- [x] Persistencia reactiva sincronizada por usuario (modelo `FavoriteStore`, endpoints DRF y cache localStorage).
+- [x] Tests unitarios y de interacción con Vitest (`FavoriteButton.test.jsx`, `FavoritesContext.test.jsx`) y DRF (`core.tests`).
+
+---
+
+## 🎯 Milestone 7: Tracking en Tiempo Real, Alertas y Calificaciones
+
+### Issue [#40](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/40): [Feature] Sistema de Notificaciones en Navbar y Alertas de Pedidos
+**Labels:** `frontend`, `feature`, `role:cliente`, `role:vendedor` | **Milestone:** `M7: Tracking en Tiempo Real, Alertas y Calificaciones`  
+**Descripción:**  
+Desplegable interactivo en el Navbar (campanita `<i className="bi bi-bell" />`) con alertas contextuales según rol: pedidos en camino/preparación para clientes y nuevas órdenes o quiebre de stock para vendedores.
+
+**Tareas / Sub-issues:**
+- [x] Componente `NotificationDropdown.jsx` conectado a la campana del Navbar con cierre en click exterior.
+- [x] Badge numérico dinámico con conteo de novedades pendientes.
+- [x] Listado de notificaciones con enlace directo a órdenes (`/pedidos`).
+- [x] Acción *"Marcar todas como leídas"* y persistencia de estado leído.
+- [x] Tests unitarios con Vitest (`NotificationDropdown.test.jsx`).
+
+---
+
+### Issue [#43](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/43): [Feature] Seguimiento de Pedido con Mapa Interactivo, Barra de Progreso y Tiempo Estimado (ETA)
+**Labels:** `frontend`, `feature`, `role:cliente` | **Milestone:** `M7: Tracking en Tiempo Real, Alertas y Calificaciones`  
+**Descripción:**  
+Seguimiento post-venta interactivo en `/pedidos` con mapa de recorrido (Leaflet/OSM), barra de progreso por etapas (`Recibido` -> `En preparación` -> `En reparto` -> `Entregado`) y cálculo de tiempo estimado de entrega (ETA).
+
+**Tareas / Sub-issues:**
+- [ ] Componente `OrderProgressBar.jsx` representando los 4 estados del pedido.
+- [ ] Componente `OrderETA.jsx` con cálculo dinámico del tiempo restante.
+- [ ] Componente `OrderTrackingMap.jsx` con mapa Leaflet/OSM, pines de origen/destino y moto de reparto.
+- [ ] Integración en la vista de detalle del pedido y post-checkout.
+- [ ] Tests unitarios con Vitest (`OrderProgressBar.test.jsx`).
+
+---
+
+### Issue [#44](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/44): [Feature] Calificación de Pedidos con Estrellas, Motivos Preestablecidos y Reseña Opcional
+**Labels:** `frontend`, `backend`, `feature`, `role:cliente` | **Milestone:** `M7: Tracking en Tiempo Real, Alertas y Calificaciones`  
+**Descripción:**  
+Calificación de pedidos completados (`status === 'delivered'`) con selector de 1 a 5 estrellas, opciones/chips de motivos preestablecidos según puntuación y comentario de texto estrictamente opcional.
+
+**Tareas / Sub-issues:**
+- [x] Backend: modelo `OrderRating` (`order`, `rating`, `tags`, `comment`) y endpoint `POST /api/orders/{id}/rate/`.
+- [x] Modal `RatingModal.jsx` accesible desde `/pedidos` para órdenes entregadas.
+- [x] Selector interactivo de 1 a 5 estrellas.
+- [x] Chips dinámicos de motivos preestablecidos (positivos para 4-5 estrellas, oportunidades de mejora para 1-3 estrellas).
+- [x] Textarea de comentarios opcional (no obligatorio).
+- [x] Visualización de estrellas y feedback en tarjetas de pedidos entregados (`OrderHistory.jsx`).
+- [x] Tests unitarios y de flujo con Vitest (`RatingModal.test.jsx`, `Profile.test.jsx`) y DRF (`core/tests.py`).
+
+---
+
+## ☁️ Milestone 8: Despliegue en Producción, Pruebas UAT y Entrega Final
+
+### Issue [#45](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/45): [QA / Testing] Pruebas de Aceptación de Usuario en la Nube (UAT & Bug Bash)
+**Labels:** `enhancement`, `devops`, `role:cliente`, `role:vendedor` | **Milestone:** `M8: Despliegue en Producción, Pruebas UAT y Entrega Final`  
+**Descripción:**  
+Ejecutar una sesión integral de pruebas de aceptación con usuarios reales (UAT / Bug Bash) sobre la aplicación desplegada en la nube en el TP10, testeando la plataforma en dispositivos reales (móviles Android/iOS, notebooks y tablets) con flujos no técnicos para detectar bugs de borde antes de la entrega final.
+
+**Tareas / Sub-issues:**
+- [ ] Validar despliegue cloud público y HTTPS (frontend + backend + PostgreSQL).
+- [ ] Misión 1 (Cliente): Registro, login y gestión de múltiples direcciones guardadas.
+- [ ] Misión 2 (Cliente): Navegación por catálogo, regla mono-tienda y checkout completo.
+- [ ] Misión 3 (Cliente): Seguimiento de orden con mapa, progreso, ETA y calificación por estrellas con tags.
+- [ ] Misión 4 (Vendedor): Onboarding de tienda, publicación de platos y despacho en monitor de cocina.
+- [ ] Misión 5 (Stress & Edge cases): Clics rápidos, botón atrás del navegador y conexiones móviles.
+- [ ] Recolección de feedback, clasificación de hallazgos y correcciones finales previas a la defensa.
 
 ---
 

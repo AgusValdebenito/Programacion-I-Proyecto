@@ -20,7 +20,7 @@ function formatCurrency(value) {
 }
 
 export default function Checkout() {
-  const { items, itemCount, totalAmount, checkout, loading } = useCart()
+  const { items, itemCount, totalAmount, checkout, removeItem, loading } = useCart()
   const { user } = useAuth()
   const { activeAddress } = useAddress()
 
@@ -35,6 +35,7 @@ export default function Checkout() {
   const [fieldErrors, setFieldErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
   const [checkoutError, setCheckoutError] = useState(null)
+  const [unavailableIds, setUnavailableIds] = useState([])
   const [completedOrder, setCompletedOrder] = useState(null)
 
   if (!hasUserEditedAddress && activeAddress?.address && activeAddress.address !== prevActiveAddress) {
@@ -87,14 +88,29 @@ export default function Checkout() {
       })
       if (res && res.success) {
         setCompletedOrder(res.data)
+        setUnavailableIds([])
       } else {
         setCheckoutError(res?.error || 'No se pudo completar el pedido. Intentá nuevamente.')
+        if (res?.unavailableProductIds && res.unavailableProductIds.length > 0) {
+          setUnavailableIds(res.unavailableProductIds)
+        }
       }
     } catch {
       setCheckoutError('Error de conexión al procesar el pedido.')
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const handleRemoveUnavailable = async () => {
+    for (const item of items) {
+      const prodId = item.product || item.product_details?.id
+      if (unavailableIds.includes(Number(prodId))) {
+        await removeItem(item.id)
+      }
+    }
+    setUnavailableIds([])
+    setCheckoutError(null)
   }
 
   // Pantalla de Confirmación Exitosa
@@ -237,9 +253,26 @@ export default function Checkout() {
       <h1 className="h3 fw-bold text-dark mb-4">Finalizar compra</h1>
 
       {checkoutError && (
-        <div className="alert alert-danger rounded-3 d-flex align-items-center mb-4" role="alert">
-          <i className="bi bi-exclamation-triangle-fill me-2 fs-5 flex-shrink-0" />
-          <div>{checkoutError}</div>
+        <div className="alert alert-danger rounded-3 d-flex flex-column gap-2 mb-4" role="alert">
+          <div className="d-flex align-items-center">
+            <i className="bi bi-exclamation-triangle-fill me-2 fs-5 flex-shrink-0" />
+            <div>{checkoutError}</div>
+          </div>
+          {unavailableIds.length > 0 && (
+            <div className="mt-2 pt-2 border-top border-danger-subtle d-flex flex-wrap align-items-center justify-content-between gap-2">
+              <span className="small fw-semibold">
+                Podés remover los ítems no disponibles para poder continuar con tu pedido:
+              </span>
+              <button
+                type="button"
+                className="btn btn-sm btn-danger rounded-pill px-3"
+                onClick={handleRemoveUnavailable}
+              >
+                <i className="bi bi-trash3 me-1" />
+                Remover productos agotados
+              </button>
+            </div>
+          )}
         </div>
       )}
 

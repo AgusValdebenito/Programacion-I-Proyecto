@@ -245,7 +245,12 @@ export function CartProvider({ children }) {
       await refreshCart()
       return { success: true, data: res.data }
     }
-    return { success: false, error: res.error }
+    return {
+      success: false,
+      error: res.error,
+      errorCode: res.errorCode,
+      unavailableProductIds: res.unavailableProductIds || [],
+    }
   }
 
   return (

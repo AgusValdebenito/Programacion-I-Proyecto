@@ -13,6 +13,7 @@ export default function Home() {
   const { user, setUser, getValidToken } = useAuth()
   const [profile, setProfile] = useState(user)
   const [stores, setStores] = useState([])
+  const [featuredStores, setFeaturedStores] = useState([])
   const [loadingStores, setLoadingStores] = useState(true)
   const [storesError, setStoresError] = useState(null)
 
@@ -22,7 +23,10 @@ export default function Home() {
     try {
       const res = await storeService.getStores()
       if (res && res.success) {
-        setStores(res.data || [])
+        const list = res.data || []
+        setStores(list)
+        const shuffled = [...list].sort(() => 0.5 - Math.random())
+        setFeaturedStores(shuffled.slice(0, 6))
         setStoresError(null)
       } else {
         setStoresError(res?.error || 'Error al obtener las tiendas disponibles')
@@ -59,7 +63,10 @@ export default function Home() {
         const res = await storeService.getStores()
         if (!isMounted) return
         if (res && res.success) {
-          setStores(res.data || [])
+          const list = res.data || []
+          setStores(list)
+          const shuffled = [...list].sort(() => 0.5 - Math.random())
+          setFeaturedStores(shuffled.slice(0, 6))
           setStoresError(null)
         } else {
           setStoresError(res?.error || 'Error al obtener las tiendas disponibles')
@@ -140,13 +147,13 @@ export default function Home() {
         ) : (
           <>
             <div className="d-flex overflow-auto gap-4 pb-2 d-md-none">
-              {stores.map((store) => (
+              {featuredStores.map((store) => (
                 <StoreLogo key={store.id || store.name} store={store} />
               ))}
             </div>
 
-            <div className="row g-4 d-none d-md-flex">
-              {stores.map((store) => (
+            <div className="row g-4 d-none d-md-flex row-cols-2 row-cols-sm-3 row-cols-md-6 justify-content-center">
+              {featuredStores.map((store) => (
                 <div className="col" key={store.id || store.name}>
                   <StoreLogo store={store} />
                 </div>

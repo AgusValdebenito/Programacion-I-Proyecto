@@ -42,8 +42,8 @@ El TP9 (Vistas Completas y Funcionalidad Full-Stack) se encuentra en desarrollo 
 * Manejo de multimedia y estáticos configurado en Django (`MEDIA_URL = '/media/'`, `MEDIA_ROOT = BASE_DIR / 'media'`)
 * Catálogo visual completo: imágenes reales para las 6 tiendas y 29 productos descargadas y vinculadas
 * Helper `imageUrl.js` en frontend con resolución dinámica de URLs de backend y fallbacks ante error (`onError`)
-* 139 tests unitarios e integrados pasando en frontend con Vitest y React Testing Library (0 errores ESLint)
-* 60 tests automatizados pasando en backend con Django REST Framework y PostgreSQL/SQLite de testing
+* 198 tests unitarios e integrados pasando en frontend con Vitest y React Testing Library (0 errores ESLint)
+* 97 tests automatizados pasando en backend con Django REST Framework y PostgreSQL/SQLite de testing
 * Milestones 1, 2 y 3 formalmente completados y cerrados en GitHub (#13 al #21, #38)
 
 ## Modelos implementados
@@ -57,6 +57,8 @@ Actualmente existen estos modelos:
 * `core.CartItem`
 * `core.Order`
 * `core.OrderItem`
+* `core.FavoriteStore`
+* `core.OrderRating`
 
 ## Modelado definido hasta ahora
 
@@ -76,13 +78,16 @@ Decisiones tomadas en el modelo y logica de negocio:
 
 ## Pendiente de implementación (Backlog y Roadmap)
 
-Todas las tareas y funcionalidades se encuentran organizadas y registradas como **GitHub Issues (#13 al #26, #38)** agrupadas en 5 Milestones temáticos:
+Todas las tareas y funcionalidades se encuentran organizadas y registradas como **GitHub Issues (#13 al #26, #38 al #45)** agrupadas en Milestones temáticos:
 
 * **M1: Catálogo Real y Carrito en Frontend:** [COMPLETADO Y CERRADO] Issues [#13](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/13), [#14](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/14) y [#15](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/15).
 * **M2: Checkout Transaccional y Gestión de Pedidos:** [COMPLETADO Y CERRADO] Issues [#16](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/16), [#17](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/17), [#18](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/18) y [#38](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/38).
 * **M3: Panel de Vendedor y Gestión de Tienda:** [COMPLETADO Y CERRADO] Issues [#19](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/19), [#20](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/20) y [#21](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/21).
-* **M4: Reglas Gastronómicas y Stock Híbrido:** Issues [#22](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/22) y [#23](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/23) (especificado en `docs/propuesta_disponibilidad_gastronomica.md`).
-* **M5: Calidad, Moderación y DevOps:** Issues [#24](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/24), [#25](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/25) y [#26](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/26).
+* **M4: Reglas Gastronómicas y Stock Híbrido:** [COMPLETADO Y CERRADO] Issues [#22](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/22) y [#23](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/23) (especificado en `docs/propuesta_disponibilidad_gastronomica.md`).
+* **M5: Calidad, Moderación y DevOps:** [COMPLETADO Y CERRADO] Issues [#24](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/24), [#25](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/25) y [#26](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/26).
+* **M6: Descubrimiento, Publicidad y Fidelización:** En desarrollo en `feature/roadmap-tp10`. Issue [#42](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/42) (Tiendas Favoritas) [COMPLETADO Y TESTEADO]; Issues [#39](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/39) (Vista Explorar) y [#41](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/41) (Carrusel de Destacados) pospuestos según decisión de roadmap.
+* **M7: Tracking en Tiempo Real, Alertas y Calificaciones:** En desarrollo en `feature/roadmap-tp10`. Issues [#40](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/40) (Notificaciones en Navbar) y [#44](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/44) (Calificaciones por Estrellas y Motivos) [COMPLETADOS Y TESTEADOS]; Issue [#43](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/43) (Seguimiento de Pedido con Mapa, Barra y ETA) pendiente según decisión de roadmap.
+* **M8: Despliegue en Producción, Pruebas UAT y Entrega Final:** Issue [#45](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/45) (Pruebas de Aceptación UAT y Bug Bash en la nube).
 
 Asimismo, los trabajos prácticos y refactorizaciones ya entregadas fueron formalizados como **Issues Históricas Cerradas ([#27 al #36](https://github.com/AgusValdebenito/Programacion-I-Proyecto/milestone/6?closed=1))** vinculadas a sus respectivos PRs (#1 al #12).
 
@@ -111,12 +116,14 @@ Para dejar el repositorio mas prolijo:
 * TP6: implementado y mergeado a `main` (PR #8) (Suites de tests unitarios de componentes UI: CategoryCard, StoreLogo, Hero, BottomNav)
 * TP7: autenticación y rutas con React Router y mock data mergeado a `main` (PR #9) (Módulo puro `token.js` con tests unitarios y ProtectedRoute testeado)
 * TP8: implementado completamente y desacoplado (capa `authService.js`, `Home.jsx` refactorizado, 38 tests frontend y 49 tests backend pasando al 100%)
-* TP9: implementado y activo en rama `TP9` (PR #37). Milestones 1, 2 y 3 completados al 100% bajo TDD estricto. Vistas completas de catálogo, detalle de tienda, carrito mono-tienda, checkout transaccional, historial de pedidos, perfil con direcciones guardadas y panel de administración del vendedor (onboarding de tienda, gestión de catálogo y monitor de cocina/despacho). 139 tests frontend y 60 tests backend pasando al 100%.
+* TP9: implementado y activo en rama `TP9` (PR #37). Milestones 1, 2, 3, 4 y 5 completados al 100% bajo TDD estricto. Vistas completas de catálogo, detalle de tienda, carrito mono-tienda, checkout transaccional, historial de pedidos, perfil con direcciones guardadas, panel de administración del vendedor (onboarding de tienda, gestión de catálogo y monitor de cocina/despacho), stock híbrido gastronómico, búsqueda/ordenamiento reactivo con debounce y panel de moderación para administradores.
+* TP10: Preparación de infraestructura con pipeline de CI/CD para frontend (`frontend-ci.yml`) y backend (`repository-checks.yml`) en GitHub Actions.
 
 ### Métricas de Calidad y Tests del Proyecto
-* **Backend:** 60 tests automatizados pasando en verde (`python manage.py test`). Thin controllers (Service Layer desacoplado con `CartService` y `OrderService`), permisos centralizados, señales blindadas y configuración limpia.
-* **Frontend:** 139 tests unitarios e integrados pasando en verde (`npm test` con Vitest en 24 suites). 0 errores de ESLint (`npm run lint`), build de producción optimizado (`npm run build`). Contextos desacoplados (`AuthContext`, `CartContext`, `AddressContext`) y utilidades puras (`token.js`, `imageUrl.js`).
+* **Backend:** 79 tests automatizados pasando en verde (`python manage.py test`). Thin controllers (Service Layer desacoplado con `CartService` y `OrderService`), permisos centralizados, señales blindadas, `SearchFilter`, `OrderingFilter` y moderación admin.
+* **Frontend:** 166 tests unitarios e integrados pasando en verde (`npm test` con Vitest en 27 suites). 0 errores de ESLint (`npm run lint`), build de producción optimizado (`npm run build`). Contextos desacoplados (`AuthContext`, `CartContext`, `AddressContext`), utilidades puras y panel de moderación `/admin/moderacion`.
 * **Documentación:** Propuesta arquitectónica de disponibilidad gastronómica documentada en `docs/propuesta_disponibilidad_gastronomica.md` y consignas oficiales en `tps/`.
+
 
 Puntos cubiertos del TP2:
 

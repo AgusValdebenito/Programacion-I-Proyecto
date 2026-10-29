@@ -130,4 +130,48 @@ describe('storeService (TP9 Service Layer & TDD)', () => {
     expect(result.success).toBe(true)
     expect(result.data.name).toBe('Pizzeria Don Juan Modificada')
   })
+
+  it('toggleFavorite sends POST to toggle favorite status', async () => {
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ favorited: true, store_id: 10 }),
+    })
+
+    const result = await storeService.toggleFavorite(10, 'fake-token')
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/stores/10/toggle-favorite/'),
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer fake-token',
+        }),
+      })
+    )
+    expect(result.success).toBe(true)
+    expect(result.favorited).toBe(true)
+    expect(result.store_id).toBe(10)
+  })
+
+  it('getFavoriteStores fetches list of favorited stores with Bearer token', async () => {
+    const mockFavs = [{ id: 10, name: 'Burger Queen' }]
+    globalThis.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockFavs,
+    })
+
+    const result = await storeService.getFavoriteStores('fake-token')
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/stores/favorites/'),
+      expect.objectContaining({
+        method: 'GET',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer fake-token',
+        }),
+      })
+    )
+    expect(result.success).toBe(true)
+    expect(result.data).toEqual(mockFavs)
+  })
 })

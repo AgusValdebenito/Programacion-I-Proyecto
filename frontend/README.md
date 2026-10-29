@@ -26,7 +26,7 @@ npm run dev      # dev server en http://localhost:3000
 
 ### Scripts de prueba y construcción
 
-* `npm test` - ejecuta la suite completa de 139 tests unitarios e integrados con Vitest (24 suites)
+* `npm test` - ejecuta la suite completa de 198 tests unitarios e integrados con Vitest (31 suites)
 * `npm run lint` - valida reglas de Clean Code con ESLint (0 errores, 0 warnings)
 * `npm run build` - compila el bundle optimizado para producción
 * `npm run preview` - previsualiza localmente el build compilado
@@ -53,8 +53,10 @@ El detalle exhaustivo y diagramas de arquitectura se encuentran en:
 | `/carrito` | `Cart.jsx` | Autenticado | Carrito mono-tienda, incremento/decremento de cantidades (+ / -) y subtotal en tiempo real. |
 | `/checkout` | `Checkout.jsx` | Autenticado | Formulario transaccional con dirección y teléfono prellenados, pago simulado y confirmación. |
 | `/perfil` | `Profile.jsx` (tab perfil) | Autenticado | Edición de datos personales y gestión de direcciones múltiples guardadas. |
-| `/pedidos` | `Profile.jsx` (tab pedidos) | Autenticado | Historial cronológico de órdenes, desglose de items y seguimiento de estado. |
+| `/pedidos` | `Profile.jsx` (tab pedidos) | Autenticado | Historial cronológico de órdenes, desglose de items, seguimiento de estado y calificación con estrellas. |
+| `/favoritos` | `Profile.jsx` (tab favoritos) | Autenticado | Acceso directo a comercios guardados como favoritos por el usuario. |
 | `/panel-tienda` | `PanelTienda.jsx` | Autenticado (`vendedor`, `admin`, `cliente`) | Portal del vendedor: onboarding de comercio, edición de perfil de tienda, catálogo de menú y monitor de cocina. |
+| `/admin/moderacion` | `ModerationPanel.jsx` | Rol `admin` | Panel de supervisión, auditoría de eventos y moderación de comercios/productos activos. |
 | `/login` | `Login.jsx` | Invitados | Autenticación JWT por email y contraseña. |
 | `/register` | `Register.jsx` | Invitados | Registro público de usuario cliente. |
 
@@ -71,6 +73,9 @@ El detalle exhaustivo y diagramas de arquitectura se encuentran en:
 3. **`AddressContext.jsx`:**
    - Gestión integral de direcciones guardadas (`Casa`, `Hotel`, `Trabajo`, etc.).
    - Selección de dirección activa que se refleja en el Navbar y autocompleta el formulario de Checkout.
+4. **`FavoritesContext.jsx` (`useFavorites`):**
+   - Gestión centralizada de comercios guardados como favoritos (Issue #42).
+   - Sincronización reactiva con backend DRF (`/api/stores/favorites/`, `/toggle-favorite/`) y cache local persistido por usuario.
 
 ## Servicios Desacoplados (`src/services/`)
 
@@ -78,7 +83,8 @@ El detalle exhaustivo y diagramas de arquitectura se encuentran en:
 * `storeService.js`: consulta de tiendas, categorías gastronómicas, creación y actualización de comercios, y consulta de tienda propia (`getMyStore`).
 * `productService.js`: búsqueda y consulta de productos por comercio, creación, edición, actualización de disponibilidad y eliminación.
 * `cartService.js`: mutaciones del carrito mono-tienda.
-* `orderService.js`: creación transaccional de órdenes, historial de pedidos de cliente, monitor de pedidos de tienda (`getStoreOrders`) y actualización de estado de despacho (`updateOrderStatus`).
+* `orderService.js`: creación transaccional de órdenes, historial de pedidos de cliente, monitor de pedidos de tienda (`getStoreOrders`), actualización de estado de despacho (`updateOrderStatus`) y calificación de órdenes entregadas (`rateOrder`).
+* `storeService.js`: consulta de tiendas, categorías gastronómicas, creación y actualización de comercios, consulta de tienda propia (`getMyStore`), alternancia de favoritos (`toggleFavorite`) y obtención de favoritos (`getFavoriteStores`).
 * `profileService.js`: lectura y actualización de datos de usuario.
 
 ## Componentes de Tienda (`src/components/tienda/`)

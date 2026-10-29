@@ -4,12 +4,14 @@ import { useAuth } from '../hooks/useAuth'
 import { useCart } from '../hooks/useCart'
 import { useAddress } from '../hooks/useAddress'
 import Logo from './Logo'
+import NotificationDropdown from './NotificationDropdown'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
   const { itemCount } = useCart()
   const { addresses, activeAddress, selectAddress } = useAddress()
   const [showLocationMenu, setShowLocationMenu] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
   const locationMenuRef = useRef(null)
   const navigate = useNavigate()
   const location = useLocation()
@@ -23,6 +25,15 @@ export default function Navbar() {
     !(user?.role === 'admin' || Boolean(user?.is_staff) || Boolean(user?.is_superuser))
 
   const showDeliveryLocation = !isExcludedPath && !isVendorOnly
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    if (searchTerm.trim()) {
+      navigate(`/tiendas?buscar=${encodeURIComponent(searchTerm.trim())}`)
+    } else {
+      navigate('/tiendas')
+    }
+  }
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -43,7 +54,30 @@ export default function Navbar() {
     <header className="fr-navbar">
       <div className="container">
         <div className="d-flex align-items-center justify-content-between py-2">
-          <Logo />
+          <div className="d-flex align-items-center flex-grow-1 flex-md-grow-0 me-md-3">
+            <Logo />
+            {!isExcludedPath && (
+              <form
+                className="d-none d-lg-flex position-relative ms-3"
+                onSubmit={handleSearchSubmit}
+                role="search"
+                style={{ width: '240px' }}
+              >
+                <i
+                  className="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"
+                  style={{ fontSize: '0.85rem' }}
+                />
+                <input
+                  type="search"
+                  className="form-control form-control-sm rounded-pill ps-5 pe-3 bg-light border"
+                  placeholder="Buscar tiendas o platos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  aria-label="Buscar en FoodRush"
+                />
+              </form>
+            )}
+          </div>
           <div className="d-flex align-items-center">
             <nav className="d-none d-md-flex align-items-center gap-4 me-4" aria-label="Navegación principal">
               <Link className="fr-nav-link" to="/">
@@ -66,6 +100,12 @@ export default function Navbar() {
                   {user.role === 'vendedor' || user.role === 'admin' ? 'Mi Tienda' : 'Abrir Tienda'}
                 </Link>
               )}
+              {user && (user.role === 'admin' || Boolean(user.is_staff)) && (
+                <Link className="fr-nav-link text-danger fw-semibold" to="/admin/moderacion">
+                  <i className="bi bi-shield-lock me-1"></i>
+                  Moderación
+                </Link>
+              )}
             </nav>
             {user ? (
               <div className="d-flex align-items-center gap-2">
@@ -73,9 +113,7 @@ export default function Navbar() {
                   <i className="bi bi-person-fill me-1 text-primary"></i>
                   {user.name || user.username || user.email}
                 </span>
-                <button type="button" className="fr-icon-btn" aria-label="Notificaciones">
-                  <i className="bi bi-bell" />
-                </button>
+                <NotificationDropdown />
                 <Link
                   to="/carrito"
                   className="fr-icon-btn position-relative"

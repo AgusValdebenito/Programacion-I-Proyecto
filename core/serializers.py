@@ -1,9 +1,11 @@
 from rest_framework import serializers
 
-from .models import Cart, CartItem, Order, OrderItem, Product, Store
+from .models import Cart, CartItem, FavoriteStore, Order, OrderItem, OrderRating, Product, Store
 
 
 class StoreSerializer(serializers.ModelSerializer):
+    is_favorite = serializers.SerializerMethodField()
+
     class Meta:
         model = Store
         fields = [
@@ -12,9 +14,17 @@ class StoreSerializer(serializers.ModelSerializer):
             "name",
             "description",
             "image",
+            "is_active",
+            "is_favorite",
             "created_at",
         ]
-        read_only_fields = ["owner", "created_at"]
+        read_only_fields = ["owner", "is_favorite", "created_at"]
+
+    def get_is_favorite(self, obj) -> bool:
+        request = self.context.get("request")
+        if request and request.user and request.user.is_authenticated:
+            return obj.favorites.filter(user=request.user).exists()
+        return False
 
     def to_internal_value(self, data):
         if isinstance(data, dict) and "image" in data:
@@ -40,6 +50,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "price",
             "is_available",
             "stock",
+            "track_stock",
             "image",
             "created_at",
         ]
@@ -93,9 +104,19 @@ class OrderItemSerializer(serializers.ModelSerializer):
         read_only_fields = ["unit_price"]
 
 
+
+class OrderRatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderRating
+        fields = ["id", "rating", "tags", "comment", "created_at"]
+        read_only_fields = ["id", "created_at"]
+
+
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
+    rating = OrderRatingSerializer(read_only=True)
     store_name = serializers.CharField(source="store.name", read_only=True)
+    cancelled_product_name = serializers.CharField(source="cancelled_product.name", read_only=True)
 
     class Meta:
         model = Order
@@ -111,6 +132,17 @@ class OrderSerializer(serializers.ModelSerializer):
             "delivery_phone",
             "delivery_notes",
             "payment_method",
+            "cancellation_reason",
+            "cancelled_product",
+            "cancelled_product_name",
+            "rating",
             "created_at",
         ]
-        read_only_fields = ["user", "created_at", "store", "total", "status"]
+        read_only_fields = [
+            "user",
+            "created_at",
+            "store",
+            "total",
+            "status",
+            "cancelled_product_name",
+        ]

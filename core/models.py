@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from django.conf import settings
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
@@ -20,7 +20,9 @@ class Store(models.Model):
         null=True,
         verbose_name="imagen de la tienda",
     )
+    is_active = models.BooleanField(default=True, verbose_name="activa")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="fecha de creacion")
+
 
     class Meta:
         verbose_name = "tienda"
@@ -47,6 +49,11 @@ class Product(models.Model):
     )
     is_available = models.BooleanField(default=True, verbose_name="disponible")
     stock = models.PositiveIntegerField(default=0, verbose_name="stock")
+    track_stock = models.BooleanField(
+        default=False,
+        verbose_name="controlar stock numerico",
+        help_text="Si es False, rige solo is_available (gastronomia). Si es True, descuenta stock y se pausa al llegar a 0.",
+    )
     image = models.ImageField(
         upload_to="products/",
         blank=True,
@@ -161,6 +168,20 @@ class Order(models.Model):
         null=True,
         verbose_name="metodo de pago",
     )
+    cancellation_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="motivo de cancelacion",
+    )
+    cancelled_product = models.ForeignKey(
+        Product,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="cancelled_orders",
+        verbose_name="producto causante de cancelacion",
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="fecha de creacion")
 
     class Meta:
@@ -198,3 +219,60 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
+
+
+class FavoriteStore(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="favorite_stores",
+        verbose_name="usuario",
+    )
+    store = models.ForeignKey(
+        Store,
+        on_delete=models.CASCADE,
+        related_name="favorites",
+        verbose_name="tienda",
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="fecha de guardado")
+
+    class Meta:
+        verbose_name = "tienda favorita"
+        verbose_name_plural = "tiendas favoritas"
+        constraints = [
+            models.UniqueConstraint(fields=["user", "store"], name="unique_user_favorite_store")
+        ]
+
+    def __str__(self):
+        return f"{self.user} -> {self.store.name}"
+
+
+class OrderRating(models.Model):
+    order = models.OneToOneField(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="rating",
+        verbose_name="pedido",
+    )
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        verbose_name="puntuacion",
+    )
+    tags = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name="motivos seleccionados",
+    )
+    comment = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="comentario opcional",
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="fecha de calificacion")
+
+    class Meta:
+        verbose_name = "calificacion de pedido"
+        verbose_name_plural = "calificaciones de pedidos"
+
+    def __str__(self):
+        return f"Calificacion {self.rating}★ para Pedido #{self.order_id}"

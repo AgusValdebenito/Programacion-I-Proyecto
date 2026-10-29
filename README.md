@@ -165,6 +165,39 @@ Restricciones recomendadas:
 
 ---
 
+### ❤️ favorite_stores
+
+Tiendas gastronómicas guardadas como favoritas por los usuarios (Issue #42).
+
+* id (PK)
+* user_id (FK -> users.id)
+* store_id (FK -> stores.id)
+* created_at
+
+Restricciones recomendadas:
+
+* Unicidad compuesta: `(user_id, store_id)` (un usuario no puede duplicar la misma tienda en favoritos).
+
+---
+
+### ⭐ order_ratings
+
+Calificaciones y reseñas de pedidos entregados (Issue #44).
+
+* id (PK)
+* order_id (OneToOne -> orders.id)
+* rating (entero entre 1 y 5 estrellas)
+* tags (JSON con motivos seleccionados)
+* comment (texto opcional de reseña, máx. 300 caracteres)
+* created_at
+
+Restricciones recomendadas:
+
+* Sólo aplicable a órdenes en estado `delivered`.
+* Unicidad: un pedido sólo puede ser calificado una única vez.
+
+---
+
 ## 🔗 Relaciones
 
 * Una tienda tiene muchos productos
@@ -355,7 +388,7 @@ cd frontend
 npm install        # primera vez
 npm run dev        # http://localhost:3000
 npm run lint       # ESLint (0 errores, 0 warnings)
-npm test           # Tests con Vitest (139 tests pasando)
+npm test           # Tests con Vitest (198 tests pasando)
 npm run build      # Build para producción
 ```
 
@@ -366,8 +399,10 @@ Rutas client-side principales:
 * `/carrito`: Carrito reactivo mono-tienda con control de cantidades.
 * `/checkout`: Confirmación de pedido, dirección prellenada y simulación de pago.
 * `/perfil`: Edición de datos personales y gestión de direcciones guardadas.
-* `/pedidos`: Historial cronológico de órdenes y seguimiento de estado.
+* `/pedidos`: Historial cronológico de órdenes, seguimiento de estado y calificación con estrellas.
+* `/favoritos`: Colección de tiendas guardadas como favoritas por el usuario.
 * `/panel-tienda`: Panel del vendedor (onboarding de comercio, gestión de catálogo/disponibilidad y monitor de cocina/despacho).
+* `/admin/moderacion`: Panel de moderación y auditoría de comercios y productos para administradores.
 * `/login` / `/register`: Autenticación y registro con JWT.
 
 El bosquejo de diseno y arquitectura de componentes esta en `docs/diagrama.md`.
@@ -393,10 +428,12 @@ POST   /api/users/
 
 ### Tiendas y Productos
 
-GET    /api/stores/
+GET    /api/stores/                    # Listar comercios (soporta ?search=, ?ordering= y filtros)
 POST   /api/stores/
 GET    /api/stores/my-store/           # Obtener mi tienda (vendedor autenticado)
 GET    /api/stores/?owner=<id>         # Filtrar tienda por propietario
+POST   /api/stores/:id/toggle-favorite/ # Alternar favorito del usuario autenticado (Issue #42)
+GET    /api/stores/favorites/          # Listar tiendas favoritas del usuario autenticado
 GET    /api/products/
 POST   /api/products/                  # Solo ADMIN o VENDEDOR
 PATCH  /api/products/:id/              # Editar producto / disponibilidad (is_available)
@@ -415,6 +452,7 @@ GET    /api/orders/
 GET    /api/orders/?store=<id>         # Filtrar pedidos por tienda (para monitor de cocina)
 POST   /api/orders/
 PATCH  /api/orders/:id/                # Actualizar estado de despacho (tienda/admin)
+POST   /api/orders/:id/rate/           # Calificar pedido entregado con 1-5 estrellas y tags (Issue #44)
 GET    /api/order-items/
 POST   /api/order-items/
 
@@ -506,7 +544,7 @@ Principales ventajas que llevaron a elegir JWT en este proyecto:
 * TP6: maquetado de la Home con Bootstrap mergeado a `main` (PR #8)
 * TP7: autenticación y rutas con React Router y mock data mergeado a `main` (PR #9)
 * TP8: conexión de frontend React con backend Django REST (JWT, login, registro, logout y perfil) completado y mergeado a `main` (PR #11)
-* TP9: Vistas Completas y Funcionalidad Full-Stack en desarrollo activo en rama `TP9` (PR #37). Milestone 1 (Catálogo Real y Carrito), Milestone 2 (Checkout Transaccional y Gestión de Pedidos) y Milestone 3 (Panel de Vendedor, Menú y Cocina) 100% completados con TDD y cerrados en GitHub. 139 tests frontend y 60 tests backend pasando al 100%.
+* TP9: Vistas Completas y Funcionalidad Full-Stack en desarrollo activo en rama `TP9` (PR #37). Milestone 1 (Catálogo Real y Carrito), Milestone 2 (Checkout Transaccional y Gestión de Pedidos) y Milestone 3 (Panel de Vendedor, Menú y Cocina) 100% completados con TDD y cerrados en GitHub. 198 tests frontend y 97 tests backend pasando al 100%.
 
 ---
 

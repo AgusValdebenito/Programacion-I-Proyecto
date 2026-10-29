@@ -174,6 +174,7 @@ class CartItemViewSetTests(APITestCase):
             description="Muzza",
             price=Decimal("15.00"),
             stock=10,
+            track_stock=True,
             is_available=True,
         )
         self.cart = Cart.objects.create(user=self.user)
@@ -542,6 +543,7 @@ class OrderItemViewSetTests(APITestCase):
             name="Burger A",
             price=Decimal("20.00"),
             stock=5,
+            track_stock=True,
             is_available=True,
         )
         self.product_b = Product.objects.create(
@@ -672,3 +674,427 @@ class TiendaYPedidosVendedorFilterTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["id"], order1.id)
+
+
+class Milestone4HybridStockAndCancellationTests(APITestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.vendedor = user_model.objects.create_user(
+            username="cocinero_m4",
+            email="cocinero_m4@test.com",
+            password="password123",
+            role="vendedor",
+        )
+        self.cliente = user_model.objects.create_user(
+            username="comensal_m4",
+            email="comensal_m4@test.com",
+            password="password123",
+            role="cliente",
+        )
+        self.store = Store.objects.create(
+            owner=self.vendedor,
+            name="Hamburguesería Gourmet M4",
+            description="Hamburguesas caseras bajo demanda",
+        )
+        # Producto gastronómico (cocina bajo demanda, track_stock=False)
+        self.burger = Product.objects.create(
+            store=self.store,
+            name="Smash Burger Doble",
+            price=Decimal("4500.00"),
+            stock=0,
+            track_stock=False,
+            is_available=True,
+        )
+        # Producto envasado con control estricto de inventario (track_stock=True)
+        self.gaseosa = Product.objects.create(
+            store=self.store,
+            name="Gaseosa Cola Lata",
+            price=Decimal("1200.00"),
+            stock=2,
+            track_stock=True,
+            is_available=True,
+        )
+
+        # Carrito del cliente
+        self.cart = Cart.objects.create(user=self.cliente)
+
+    def test_gastronomic_dish_no_track_stock_allows_checkout_without_stock_reduction(self):
+        """Platos con track_stock=False permiten compra aunque stock=0 y no descuentan unidades."""
+        self.client.force_authenticate(user=self.cliente)
+        # Agregar al carrito
+        res_cart = self.client.post(
+            reverse("cart-items-list"),
+            {"cart": self.cart.id, "product": self.burger.id, "quantity": 3},
+            format="json",
+        )
+        self.assertEqual(res_cart.status_code, status.HTTP_201_CREATED)
+
+        # Checkout
+        res_checkout = self.client.post(
+            reverse("carts-checkout"),
+            {"delivery_address": "Calle Falsa 123", "delivery_phone": "1122334455"},
+            format="json",
+        )
+        self.assertEqual(res_checkout.status_code, status.HTTP_201_CREATED)
+        self.burger.refresh_from_db()
+        self.assertTrue(self.burger.is_available)
+        self.assertEqual(self.burger.stock, 0)  # No se redujo ni bloqueó
+
+    def test_retail_product_track_stock_reduces_stock_and_auto_pauses_when_zero(self):
+        """Productos con track_stock=True descuentan y pasan automáticamente a is_available=False al llegar a 0."""
+        self.client.force_authenticate(user=self.cliente)
+        # Agregar 2 gaseosas (stock exacto)
+        res_cart = self.client.post(
+            reverse("cart-items-list"),
+            {"cart": self.cart.id, "product": self.gaseosa.id, "quantity": 2},
+            format="json",
+        )
+        self.assertEqual(res_cart.status_code, status.HTTP_201_CREATED)
+
+        res_checkout = self.client.post(
+            reverse("carts-checkout"),
+            {"delivery_address": "Av. Libertador 500"},
+            format="json",
+        )
+        self.assertEqual(res_checkout.status_code, status.HTTP_201_CREATED)
+        self.gaseosa.refresh_from_db()
+        self.assertEqual(self.gaseosa.stock, 0)
+        self.assertFalse(self.gaseosa.is_available)  # Apagado automático
+
+    def test_vendor_reject_order_with_cancellation_reason_and_product_pauses_dish(self):
+        """El comercio puede cancelar un pedido con motivo y plato causante, apagándolo reactivamente."""
+        order = Order.objects.create(
+            user=self.cliente,
+            store=self.store,
+            total=Decimal("4500.00"),
+            status=Order.StatusChoices.PENDING,
+        )
+        self.client.force_authenticate(user=self.vendedor)
+        url = reverse("orders-detail", args=[order.id])
+        res = self.client.patch(
+            url,
+            {
+                "status": "cancelled",
+                "cancellation_reason": "Se agotó la carne madurada",
+                "cancelled_product": self.burger.id,
+            },
+            format="json",
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        order.refresh_from_db()
+        self.assertEqual(order.status, Order.StatusChoices.CANCELLED)
+        self.assertEqual(order.cancellation_reason, "Se agotó la carne madurada")
+        self.assertEqual(order.cancelled_product_id, self.burger.id)
+
+        # Verificar apagado reactivo del plato
+        self.burger.refresh_from_db()
+        self.assertFalse(self.burger.is_available)
+
+    def test_checkout_cart_blocks_with_product_unavailable_if_product_paused(self):
+        """Si un producto en el carrito fue pausado en caliente, el checkout falla con PRODUCT_UNAVAILABLE."""
+        self.client.force_authenticate(user=self.cliente)
+        res_cart = self.client.post(
+            reverse("cart-items-list"),
+            {"cart": self.cart.id, "product": self.burger.id, "quantity": 1},
+            format="json",
+        )
+        self.assertEqual(res_cart.status_code, status.HTTP_201_CREATED)
+
+        # El cocinero pausa la hamburguesa mientras el cliente tenía el carrito abierto
+        self.burger.is_available = False
+        self.burger.save(update_fields=["is_available"])
+
+        res = self.client.post(
+            reverse("carts-checkout"),
+            {"delivery_address": "Corrientes 800"},
+            format="json",
+        )
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("PRODUCT_UNAVAILABLE", str(res.data))
+        self.assertEqual([int(x) for x in res.json().get("unavailable_product_ids")], [self.burger.id])
+
+    def test_order_item_update_is_blocked(self):
+        """Los ítems de una orden no pueden ser modificados individualmente por PATCH/PUT."""
+        order = Order.objects.create(
+            user=self.cliente,
+            store=self.store,
+            total=Decimal("1200.00"),
+            status=Order.StatusChoices.PENDING,
+        )
+        item = OrderItem.objects.create(
+            order=order,
+            product=self.gaseosa,
+            quantity=1,
+            unit_price=self.gaseosa.price,
+        )
+        self.client.force_authenticate(user=self.cliente)
+        res = self.client.patch(
+            reverse("order-items-detail", args=[item.id]),
+            {"quantity": 50},
+            format="json",
+        )
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("individualmente", str(res.data))
+
+    def test_order_cancellation_restores_stock_for_tracked_products(self):
+        """Al cancelar un pedido pendiente, se reintegra el stock a los productos con control de stock."""
+        # Se compran las 2 gaseosas
+        self.client.force_authenticate(user=self.cliente)
+        self.client.post(
+            reverse("cart-items-list"),
+            {"cart": self.cart.id, "product": self.gaseosa.id, "quantity": 2},
+            format="json",
+        )
+        res_checkout = self.client.post(
+            reverse("carts-checkout"),
+            {"delivery_address": "Mitre 123"},
+            format="json",
+        )
+        self.assertEqual(res_checkout.status_code, status.HTTP_201_CREATED)
+        order_id = res_checkout.data["id"]
+
+        # Stock se fue a 0 y se apagó
+        self.gaseosa.refresh_from_db()
+        self.assertEqual(self.gaseosa.stock, 0)
+        self.assertFalse(self.gaseosa.is_available)
+
+        # Cliente cancela el pedido
+        res_cancel = self.client.patch(
+            reverse("orders-detail", args=[order_id]),
+            {"status": "cancelled", "cancellation_reason": "Me arrepentí"},
+            format="json",
+        )
+        self.assertEqual(res_cancel.status_code, status.HTTP_200_OK)
+
+        # Stock debe restaurarse a 2 y reactivarse is_available
+        self.gaseosa.refresh_from_db()
+        self.assertEqual(self.gaseosa.stock, 2)
+        self.assertTrue(self.gaseosa.is_available)
+
+
+class Milestone5SearchOrderingAndModerationTests(APITestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.admin = user_model.objects.create_user(
+            username="admin_m5",
+            email="admin_m5@test.com",
+            password="Password123!",
+            role="admin",
+            is_staff=True,
+        )
+        self.vendedor = user_model.objects.create_user(
+            username="vendedor_m5",
+            email="vendedor_m5@test.com",
+            password="Password123!",
+            role="vendedor",
+        )
+        self.cliente = user_model.objects.create_user(
+            username="cliente_m5",
+            email="cliente_m5@test.com",
+            password="Password123!",
+            role="cliente",
+        )
+        self.store_a = Store.objects.create(
+            owner=self.vendedor,
+            name="Pizzeria Don Luigi",
+            description="Las mejores pizzas napolitanas al horno de barro",
+        )
+        self.vendor_b = user_model.objects.create_user(
+            username="vendedor_b_m5",
+            email="vendedor_b_m5@test.com",
+            password="Password123!",
+            role="vendedor",
+        )
+
+        self.store_b = Store.objects.create(
+            owner=self.vendor_b,
+            name="Hamburguesas Gourmet",
+            description="Carne premium y papas fritas crocantes",
+        )
+        self.prod_cheap = Product.objects.create(
+            store=self.store_a,
+            name="Faina Tradicional",
+            description="Porcion clasica de faina dorada",
+            price=Decimal("450.00"),
+            stock=10,
+            track_stock=True,
+        )
+        self.prod_expensive = Product.objects.create(
+            store=self.store_b,
+            name="Combo Doble Smash con Papas",
+            description="Doble medallon smash y salsa secreta",
+            price=Decimal("3800.00"),
+            stock=5,
+            track_stock=True,
+        )
+
+    def test_search_stores_by_name_and_description(self):
+        res = self.client.get(reverse("stores-list"), {"search": "Luigi"})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        ids = [s["id"] for s in res.data]
+        self.assertIn(self.store_a.id, ids)
+        self.assertNotIn(self.store_b.id, ids)
+
+        res_desc = self.client.get(reverse("stores-list"), {"search": "crocantes"})
+        self.assertEqual(res_desc.status_code, status.HTTP_200_OK)
+        ids_desc = [s["id"] for s in res_desc.data]
+        self.assertIn(self.store_b.id, ids_desc)
+        self.assertNotIn(self.store_a.id, ids_desc)
+
+    def test_ordering_stores_by_name(self):
+        res_asc = self.client.get(reverse("stores-list"), {"ordering": "name"})
+        self.assertEqual(res_asc.status_code, status.HTTP_200_OK)
+        names = [s["name"] for s in res_asc.data]
+        self.assertTrue(names.index("Hamburguesas Gourmet") < names.index("Pizzeria Don Luigi"))
+
+    def test_search_and_price_filtering_products(self):
+        res = self.client.get(reverse("products-list"), {"search": "Smash"})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), 1)
+        self.assertEqual(res.data[0]["id"], self.prod_expensive.id)
+
+        res_price = self.client.get(reverse("products-list"), {"max_price": "1000.00"})
+        self.assertEqual(res_price.status_code, status.HTTP_200_OK)
+        ids = [p["id"] for p in res_price.data]
+        self.assertIn(self.prod_cheap.id, ids)
+        self.assertNotIn(self.prod_expensive.id, ids)
+
+        res_order = self.client.get(reverse("products-list"), {"ordering": "-price"})
+        self.assertEqual(res_order.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_order.data[0]["id"], self.prod_expensive.id)
+
+    def test_admin_can_toggle_store_active_status(self):
+        self.client.force_authenticate(user=self.admin)
+        res = self.client.post(reverse("stores-toggle-active", args=[self.store_a.id]))
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.store_a.refresh_from_db()
+        self.assertFalse(self.store_a.is_active)
+
+        self.client.force_authenticate(user=self.cliente)
+        res_client = self.client.get(reverse("stores-list"))
+        ids = [s["id"] for s in res_client.data]
+        self.assertNotIn(self.store_a.id, ids)
+
+        res_prod = self.client.get(reverse("products-list"))
+        prod_ids = [p["id"] for p in res_prod.data]
+        self.assertNotIn(self.prod_cheap.id, prod_ids)
+
+    def test_non_admin_cannot_toggle_store_active_status(self):
+        self.client.force_authenticate(user=self.vendedor)
+        res = self.client.post(reverse("stores-toggle-active", args=[self.store_a.id]))
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_pause_and_delete_any_product(self):
+        self.client.force_authenticate(user=self.admin)
+        res_pause = self.client.patch(
+            reverse("products-detail", args=[self.prod_cheap.id]),
+            {"is_available": False},
+            format="json",
+        )
+        self.assertEqual(res_pause.status_code, status.HTTP_200_OK)
+        self.prod_cheap.refresh_from_db()
+        self.assertFalse(self.prod_cheap.is_available)
+
+        res_del = self.client.delete(reverse("products-detail", args=[self.prod_expensive.id]))
+        self.assertEqual(res_del.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Product.objects.filter(id=self.prod_expensive.id).exists())
+
+
+    def test_anonymous_cannot_toggle_favorite_or_list_favorites(self):
+        url_toggle = reverse("stores-toggle-favorite", args=[self.store_a.id])
+        res_toggle = self.client.post(url_toggle)
+        self.assertEqual(res_toggle.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        url_favs = reverse("stores-favorites")
+        res_favs = self.client.get(url_favs)
+        self.assertEqual(res_favs.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_authenticated_user_can_toggle_favorite_and_list_favorites(self):
+        self.client.force_authenticate(user=self.cliente)
+        url_toggle = reverse("stores-toggle-favorite", args=[self.store_a.id])
+
+        # 1. Marcar como favorita
+        res_add = self.client.post(url_toggle)
+        self.assertEqual(res_add.status_code, status.HTTP_200_OK)
+        self.assertTrue(res_add.data["favorited"])
+        self.assertEqual(res_add.data["store_id"], self.store_a.id)
+
+        # 2. Verificar que stores-list devuelva is_favorite=True
+        res_list = self.client.get(reverse("stores-list"))
+        store_a_data = next(s for s in res_list.data if s["id"] == self.store_a.id)
+        self.assertTrue(store_a_data["is_favorite"])
+
+        # 3. Listar favoritas
+        res_favs = self.client.get(reverse("stores-favorites"))
+        self.assertEqual(res_favs.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res_favs.data), 1)
+        self.assertEqual(res_favs.data[0]["id"], self.store_a.id)
+
+        # 4. Quitar de favoritas (segundo toggle)
+        res_remove = self.client.post(url_toggle)
+        self.assertEqual(res_remove.status_code, status.HTTP_200_OK)
+        self.assertFalse(res_remove.data["favorited"])
+
+        # 5. Listar favoritas nuevamente (debe estar vacio)
+        res_favs_empty = self.client.get(reverse("stores-favorites"))
+        self.assertEqual(res_favs_empty.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res_favs_empty.data), 0)
+
+    def test_suspended_store_is_excluded_from_favorites_list(self):
+        self.client.force_authenticate(user=self.cliente)
+        self.client.post(reverse("stores-toggle-favorite", args=[self.store_a.id]))
+
+        # Suspender la tienda
+        self.store_a.is_active = False
+        self.store_a.save()
+
+        res_favs = self.client.get(reverse("stores-favorites"))
+        self.assertEqual(res_favs.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res_favs.data), 0)
+
+    def test_order_rating_workflow(self):
+        order = Order.objects.create(
+            user=self.cliente,
+            store=self.store_a,
+            total=Decimal("450.00"),
+            status=Order.StatusChoices.PENDING,
+        )
+
+        url_rate = reverse("orders-rate", args=[order.id])
+
+        # 1. No se puede calificar si no está 'delivered'
+        self.client.force_authenticate(user=self.cliente)
+        res_pending = self.client.post(url_rate, {"rating": 5, "tags": ["Rico"]})
+        self.assertEqual(res_pending.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # 2. Transicionar a delivered
+        order.status = Order.StatusChoices.DELIVERED
+        order.save()
+
+        # 3. Otro usuario no puede calificar el pedido
+        self.client.force_authenticate(user=self.vendedor)
+        res_forbidden = self.client.post(url_rate, {"rating": 5})
+        self.assertEqual(res_forbidden.status_code, status.HTTP_403_FORBIDDEN)
+
+        # 4. El cliente dueño califica exitosamente
+        self.client.force_authenticate(user=self.cliente)
+        rating_payload = {
+            "rating": 5,
+            "tags": ["Comida caliente", "Entrega rápida"],
+            "comment": "Todo impecable!",
+        }
+        res_ok = self.client.post(url_rate, rating_payload, format="json")
+        self.assertEqual(res_ok.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res_ok.data["rating"], 5)
+        self.assertEqual(len(res_ok.data["tags"]), 2)
+        self.assertEqual(res_ok.data["comment"], "Todo impecable!")
+
+        # 5. No se puede calificar dos veces el mismo pedido
+        res_duplicate = self.client.post(url_rate, rating_payload, format="json")
+        self.assertEqual(res_duplicate.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # 6. El GET del pedido ahora incluye el objeto nested 'rating'
+        res_order = self.client.get(reverse("orders-detail", args=[order.id]))
+        self.assertEqual(res_order.status_code, status.HTTP_200_OK)
+        self.assertIsNotNone(res_order.data["rating"])
+        self.assertEqual(res_order.data["rating"]["rating"], 5)

@@ -4,6 +4,7 @@ import { storeService } from '../services/storeService'
 import { productService } from '../services/productService'
 import { useCart } from '../hooks/useCart'
 import ProductCard from '../components/ProductCard'
+import FavoriteButton from '../components/FavoriteButton'
 import { getImageUrl } from '../utils/imageUrl'
 
 /**
@@ -252,7 +253,10 @@ export default function StoreDetail() {
           </div>
 
           <div className="text-center text-sm-start flex-grow-1">
-            <h1 className="h3 fw-bold mb-1 text-dark">{store.name}</h1>
+            <div className="d-flex align-items-center justify-content-between mb-1 gap-2 flex-wrap">
+              <h1 className="h3 fw-bold mb-0 text-dark">{store.name}</h1>
+              <FavoriteButton store={store} size="md" showLabel />
+            </div>
             <p className="text-muted mb-2">
               {store.description || 'Comercio gastronómico adherido a FoodRush.'}
             </p>

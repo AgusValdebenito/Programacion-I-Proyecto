@@ -35,8 +35,12 @@ export const productService = {
     if (params.search) query.append('search', params.search)
     if (params.store) query.append('store', params.store)
     if (params.is_available !== undefined) query.append('is_available', params.is_available)
+    if (params.ordering) query.append('ordering', params.ordering)
+    if (params.min_price !== undefined) query.append('min_price', params.min_price)
+    if (params.max_price !== undefined) query.append('max_price', params.max_price)
 
     const queryString = query.toString() ? `?${query.toString()}` : ''
+
 
     try {
       const response = await fetch(`${API_URL}/products/${queryString}`, {

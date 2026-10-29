@@ -65,6 +65,8 @@ Usuario con privilegios globales de supervision, moderacion y mantenimiento de l
 | `/api/stores/` | `GET` | Publico | Publico | Total |
 | `/api/stores/` | `POST` | Si no tiene tienda previa | Denegado (ya tiene tienda) | Total |
 | `/api/stores/{id}/` | `PATCH`/`PUT`/`DELETE` | Solo si es el dueno | Solo su propia tienda | Total |
+| `/api/stores/{id}/toggle-favorite/` | `POST` | Autenticado (su coleccion) | Autenticado (su coleccion) | Total |
+| `/api/stores/favorites/` | `GET` | Autenticado (su coleccion) | Autenticado (su coleccion) | Total |
 | `/api/products/` | `GET` | Publico | Publico | Total |
 | `/api/products/` | `POST`/`PUT`/`DELETE` | Denegado | Solo productos de su tienda | Total |
 | `/api/carts/` | `GET`/`POST` | Su propio carrito | Su propio carrito | Total |
@@ -72,6 +74,7 @@ Usuario con privilegios globales de supervision, moderacion y mantenimiento de l
 | `/api/orders/` | `GET` | Solo sus pedidos | Sus compras y pedidos de su tienda | Total |
 | `/api/orders/` | `POST` | Requiere `store` obligatorio | Requiere `store` obligatorio | Total |
 | `/api/orders/{id}/` | `PATCH` | Solo `cancelled` si esta `pending` | Transicion `preparing` -> `delivering` -> `delivered` | Total |
+| `/api/orders/{id}/rate/` | `POST` | Solo dueno si esta `delivered` | Solo dueno si esta `delivered` | Total |
 
 ---
 

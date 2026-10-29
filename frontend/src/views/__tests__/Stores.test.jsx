@@ -3,6 +3,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import Stores from '../Stores'
 import { storeService } from '../../services/storeService'
+import * as FavoritesHook from '../../hooks/useFavorites'
 
 vi.mock('../../services/storeService', () => ({
   storeService: {
@@ -107,7 +108,7 @@ describe('Stores View Component (TP9 TDD - Issue #38)', () => {
     expect(screen.getByRole('button', { name: /súper y kioscos/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /cafeterías/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /helados/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /farmacia/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /farmacia$/i })).toBeInTheDocument()
   })
 
   it('filters stores when a category chip is clicked', async () => {
@@ -122,7 +123,7 @@ describe('Stores View Component (TP9 TDD - Issue #38)', () => {
     })
 
     // Click Farmacia category chip
-    const farmaciaChip = screen.getByRole('button', { name: /farmacia/i })
+    const farmaciaChip = screen.getByRole('button', { name: /farmacia$/i })
     fireEvent.click(farmaciaChip)
 
     // Should only show Farmacia
@@ -214,5 +215,66 @@ describe('Stores View Component (TP9 TDD - Issue #38)', () => {
 
     const storeLink = screen.getByRole('link', { name: /crazy burgers/i })
     expect(storeLink).toHaveAttribute('href', '/tiendas/5')
+  })
+
+  it('initializes search filter from URL query param ?buscar=', async () => {
+    render(
+      <MemoryRouter initialEntries={['/tiendas?buscar=Gelato']}>
+        <Stores />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Heladería Gelato Real')).toBeInTheDocument()
+      expect(screen.queryByText('Crazy Burgers')).not.toBeInTheDocument()
+    })
+  })
+
+  it('sorts stores alphabetically when ordering is changed', async () => {
+    render(
+      <MemoryRouter initialEntries={['/tiendas']}>
+        <Stores />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Crazy Burgers')).toBeInTheDocument()
+    })
+
+    const orderSelect = screen.getByLabelText(/ordenar tiendas/i)
+    fireEvent.change(orderSelect, { target: { value: '-name' } })
+
+    const headings = screen.getAllByRole('heading', { level: 2 })
+    // With Z-A, Pizza Planet comes before Café Central
+    const storeHeadings = headings.map((h) => h.textContent).filter(Boolean)
+    const pizzaIdx = storeHeadings.findIndex((t) => t.includes('Pizza Planet'))
+    const cafeIdx = storeHeadings.findIndex((t) => t.includes('Café Central'))
+    expect(pizzaIdx).toBeLessThan(cafeIdx)
+  })
+
+  it('filters to only favorites when selecting "favorites" in the dropdown', async () => {
+    vi.spyOn(FavoritesHook, 'useFavorites').mockReturnValue({
+      isFavorite: (id) => id === 5,
+      favorites: [{ id: 5, name: 'Crazy Burgers' }],
+      toggleFavorite: vi.fn(),
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/tiendas']}>
+        <Stores />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Crazy Burgers')).toBeInTheDocument()
+      expect(screen.getByText('Pizza Planet')).toBeInTheDocument()
+    })
+
+    const orderSelect = screen.getByLabelText(/ordenar tiendas/i)
+    fireEvent.change(orderSelect, { target: { value: 'favorites' } })
+
+    expect(screen.getByText('Crazy Burgers')).toBeInTheDocument()
+    expect(screen.queryByText('Pizza Planet')).not.toBeInTheDocument()
+    expect(screen.queryByText('Café Central')).not.toBeInTheDocument()
   })
 })

@@ -11,6 +11,7 @@ vi.mock('../../services/orderService', () => ({
   orderService: {
     getOrders: vi.fn(),
     updateOrderStatus: vi.fn(),
+    rateOrder: vi.fn(),
   },
 }))
 
@@ -257,5 +258,38 @@ describe('Profile View & Components (TP9 TDD - Issue #18)', () => {
     await waitFor(() => {
       expect(screen.getByDisplayValue('Juan Perez')).toBeInTheDocument()
     })
+  })
+
+  it('directly shows favorites tab when navigating to /favoritos', async () => {
+    render(
+      <MemoryRouter initialEntries={['/favoritos']}>
+        <Profile />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /mis tiendas favoritas/i })).toBeInTheDocument()
+      expect(screen.getByText(/todavía no tenés tiendas favoritas/i)).toBeInTheDocument()
+    })
+  })
+
+  it('renders rating button on delivered orders and opens rating modal', async () => {
+    render(
+      <MemoryRouter initialEntries={['/pedidos']}>
+        <Profile />
+      </MemoryRouter>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText(/pedido #102/i)).toBeInTheDocument()
+    })
+
+    const rateBtn = screen.getByRole('button', { name: /calificar pedido #102/i })
+    expect(rateBtn).toBeInTheDocument()
+
+    fireEvent.click(rateBtn)
+
+    expect(screen.getByRole('heading', { name: /¿cómo estuvo tu pedido\?/i })).toBeInTheDocument()
+    expect(screen.getAllByText('Pizza Planet').length).toBeGreaterThanOrEqual(2)
   })
 })

@@ -76,8 +76,9 @@ class IsResourceOwnerOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        if request.user.is_staff:
+        if is_admin_user(request.user):
             return True
+
 
         owner = None
         if isinstance(obj, Store):
