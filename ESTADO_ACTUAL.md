@@ -92,6 +92,17 @@ Todas las tareas y funcionalidades se encuentran organizadas y registradas como 
 Asimismo, los trabajos prácticos y refactorizaciones ya entregadas fueron formalizados como **Issues Históricas Cerradas ([#27 al #36](https://github.com/AgusValdebenito/Programacion-I-Proyecto/milestone/6?closed=1))** vinculadas a sus respectivos PRs (#1 al #12).
 
 > 📌 Para consultar el desglose técnico detallado con checklists, ver [`docs/plan_issues_github.md`](docs/plan_issues_github.md).
+> 📋 Para consultar las recomendaciones técnicas y deuda técnica relevadas en code review (PR #46 y PR #47), ver [`docs/deuda_tecnica_y_mejoras_tp10.md`](docs/deuda_tecnica_y_mejoras_tp10.md).
+
+## Deuda Técnica y Recomendaciones de Code Review (PR #46 y PR #47)
+
+Durante las revisiones técnicas de los PRs #46 y #47 por parte del equipo senior (`@HIKKEN17JZ`), se aprobaron e integraron las funcionalidades troncales del TP9 y se registraron las siguientes recomendaciones a resolver durante el ciclo del **TP10 (Cloud & Optimización)**:
+
+1. **Modularización de `PanelTienda.jsx`**: Descomponer el componente de 1.150 líneas en pestañas (`StoreOverviewTab`, `StoreMenuTab`, `StoreOrdersTab`) y desacoplar la lógica en el hook `useStoreDashboard`.
+2. **Ciclo de Vida React en `Checkout.jsx` y `Stores.jsx`**: Reemplazar setters de estado síncronos en el cuerpo del render por valores derivados o `useEffect` explícitos.
+3. **Atomicidad DB en `StoreViewSet`**: Asegurar que la suspensión de un comercio (cancelaciones en cascada y notificaciones) corra bajo `with transaction.atomic():`.
+4. **Optimización de Red en `useNotifications`**: Consolidar las 3-4 llamadas REST en paralelo del Navbar en un único endpoint de resumen `GET /api/notifications/summary/`.
+5. **Storage de Imágenes en Producción**: Delegar el almacenamiento de `media/` a Cloudinary o S3 para el despliegue en la nube.
 
 
 ## Limpieza realizada

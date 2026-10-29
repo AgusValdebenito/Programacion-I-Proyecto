@@ -469,6 +469,7 @@ Rutas client-side principales:
 * `/login` / `/register`: Autenticación y registro con JWT.
 
 El bosquejo de diseno y arquitectura de componentes esta en `docs/diagrama.md`.
+El registro de deuda técnica y mejoras recomendadas en revisiones de código para el TP10 se encuentra en [`docs/deuda_tecnica_y_mejoras_tp10.md`](docs/deuda_tecnica_y_mejoras_tp10.md).
 
 ---
 
