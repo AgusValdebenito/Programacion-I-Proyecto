@@ -13,6 +13,10 @@ import { AuthProvider } from './contexts/AuthContext'
 import { AddressProvider } from './contexts/AddressContext'
 import { CartProvider } from './contexts/CartContext'
 import { FavoritesProvider } from './contexts/FavoritesContext'
+import { setupImageFallback } from './utils/imageUrl'
+
+// Registrar fallback global para garantizar visualización inmediata de imágenes
+setupImageFallback()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -541,3 +541,30 @@ class HealthCheckView(APIView):
     )
     def get(self, request, *args, **kwargs):
         return Response({"status": "ok", "service": "api"}, status=status.HTTP_200_OK)
+
+
+
+class MediaSyncView(APIView):
+    """
+    Endpoint de mantenimiento para sincronizar archivos locales con Cloudinary (TP10).
+    Permite disparar la sincronización en Render sin necesidad de consola interactiva.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(
+        summary="Sincronizar catálogo multimedia con Cloudinary",
+        description="Ejecuta la carga de imágenes locales hacia Cloudinary.",
+        responses={200: dict},
+    )
+    def get(self, request, *args, **kwargs):
+        from io import StringIO
+        from django.core.management import call_command
+        out = StringIO()
+        try:
+            call_command("upload_media_to_cloudinary", stdout=out)
+            return Response({"status": "ok", "output": out.getvalue()}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"status": "error", "detail": str(e), "output": out.getvalue()},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

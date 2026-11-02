@@ -34,3 +34,48 @@ export function getImageUrl(path) {
 
   return `/${path}`
 }
+
+/**
+ * Obtiene la URL de respaldo en el backend para una imagen que haya fallado en un CDN externo (ej. Cloudinary).
+ *
+ * @param {string} url - URL original que presentó error de carga
+ * @returns {string} URL alternativa en el backend
+ */
+export function getFallbackImageUrl(url) {
+  if (!url) return ''
+  if (url.includes('cloudinary.com') && url.includes('/media/')) {
+    const mediaPath = url.split('/media/').pop()
+    if (mediaPath) {
+      return `${BACKEND_BASE}/media/${mediaPath}`
+    }
+  }
+  return url
+}
+
+/**
+ * Registra un listener global (fase de captura) para capturar cualquier fallo de carga (404)
+ * en imágenes y redirigirlas automáticamente al backend directo en Render sin alterar la UI.
+ */
+export function setupImageFallback() {
+  if (typeof window === 'undefined') return
+
+  window.addEventListener(
+    'error',
+    (event) => {
+      const target = event.target
+      if (
+        target &&
+        target.tagName === 'IMG' &&
+        target.src &&
+        !target.dataset.triedFallback
+      ) {
+        target.dataset.triedFallback = 'true'
+        const fallbackUrl = getFallbackImageUrl(target.src)
+        if (fallbackUrl && fallbackUrl !== target.src) {
+          target.src = fallbackUrl
+        }
+      }
+    },
+    true
+  )
+}

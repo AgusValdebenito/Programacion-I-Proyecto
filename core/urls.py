@@ -5,6 +5,7 @@ from .views import (
     CartItemViewSet,
     CartViewSet,
     HealthCheckView,
+    MediaSyncView,
     NotificationViewSet,
     OrderItemViewSet,
     OrderViewSet,
@@ -23,5 +24,6 @@ router.register(r"notifications", NotificationViewSet, basename="notifications")
 
 urlpatterns = [
     path("health/", HealthCheckView.as_view(), name="health_check"),
+    path("media-sync/", MediaSyncView.as_view(), name="media_sync"),
     path("", include(router.urls)),
 ]
