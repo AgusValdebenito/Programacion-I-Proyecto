@@ -6,18 +6,18 @@ Documentación técnica del proceso de despliegue y puesta en producción de la 
 
 ## 🌐 URLs Públicas en Producción
 
-* **Frontend (Vercel):** `[PENDIENTE - configurar al conectar en Vercel]`
-* **API Backend (Railway):** `[PENDIENTE - configurar al conectar en Railway]`
-* **Swagger / OpenAPI:** `https://[RAILWAY_URL]/api/docs/`
-* **Health Check API:** `https://[RAILWAY_URL]/api/health/`
+* **Frontend (Vercel):** https://foodrush-nine-green.vercel.app/
+* **API Backend (Render):** https://programacion-i-proyecto.onrender.com/
+* **Swagger / OpenAPI:** https://programacion-i-proyecto.onrender.com/api/docs/
+* **Health Check API:** https://programacion-i-proyecto.onrender.com/api/health/
 * **Almacenamiento Multimedia:** Cloudinary (`res.cloudinary.com/...`)
 
 ---
 
 ## ☁️ Servicios Utilizados
 
-* **Backend / API:** Railway (PaaS con Nixpacks y Gunicorn)
-* **Base de Datos:** PostgreSQL en la nube (Railway Database Plugin)
+* **Backend / API:** Render (PaaS con Python 3 y Gunicorn)
+* **Base de Datos:** PostgreSQL en la nube (Render Managed Database)
 * **Frontend:** Vercel (Edge Network / CDN con Vite SPA)
 * **Almacenamiento de Media:** Cloudinary (`django-cloudinary-storage`)
 
