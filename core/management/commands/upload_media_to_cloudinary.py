@@ -1,4 +1,5 @@
 import os
+import requests
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
@@ -18,8 +19,9 @@ class Command(BaseCommand):
             import cloudinary
             import cloudinary.uploader
             cloudinary.reset_config()
-        except ImportError as e:
-            self.stdout.write(self.style.ERROR(f"Error importando cloudinary: {e}"))
+            cloud_name = cloudinary.config().cloud_name
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f"Error configurando cloudinary: {e}"))
             return
 
         media_root = str(settings.MEDIA_ROOT)
@@ -28,6 +30,7 @@ class Command(BaseCommand):
             return
 
         uploaded_count = 0
+        skipped_count = 0
         error_count = 0
 
         self.stdout.write("Sincronizando archivos multimedia locales con Cloudinary...")
@@ -40,9 +43,20 @@ class Command(BaseCommand):
                 full_path = os.path.join(root, file)
                 rel_path = os.path.relpath(full_path, media_root).replace("\\", "/")
 
-                # Cloudinary public_id utilizado por django-cloudinary-storage es: media/<ruta_sin_extension>
-                base_name, _ = os.path.splitext(rel_path)
+                # Cloudinary public_id: media/<ruta_sin_extension>
+                base_name, ext = os.path.splitext(rel_path)
                 public_id = f"media/{base_name}"
+
+                # Comprobación HEAD rápida: si ya existe en Cloudinary, se omite para ahorrar ancho de banda
+                if cloud_name:
+                    check_url = f"https://res.cloudinary.com/{cloud_name}/image/upload/{public_id}{ext}"
+                    try:
+                        res = requests.head(check_url, timeout=3)
+                        if res.status_code == 200:
+                            skipped_count += 1
+                            continue
+                    except Exception:
+                        pass
 
                 try:
                     with open(full_path, "rb") as f:
@@ -61,6 +75,6 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Sincronización Cloudinary completada: {uploaded_count} subidos, {error_count} errores."
+                f"Sincronización Cloudinary completada: {uploaded_count} subidos, {skipped_count} ya existentes, {error_count} errores."
             )
         )
