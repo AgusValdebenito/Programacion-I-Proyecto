@@ -6,6 +6,19 @@ Aplicacion web full-stack que simula una plataforma de pedidos online, donde las
 
 ---
 
+## 🌐 Despliegue en Producción (Cloud - TP10)
+
+La plataforma se encuentra completamente desplegada y operativa en la nube:
+
+* **🚀 Aplicación Web (Frontend en Vercel):** [https://foodrush-delivery.vercel.app/](https://foodrush-delivery.vercel.app/)
+* **⚙️ Backend API (Django REST en Render):** [https://programacion-i-proyecto.onrender.com/](https://programacion-i-proyecto.onrender.com/)
+* **📖 Documentación Interactiva Swagger / OpenAPI:** [https://programacion-i-proyecto.onrender.com/api/docs/](https://programacion-i-proyecto.onrender.com/api/docs/)
+* **🩺 Health Check API (Monitoreo):** [https://programacion-i-proyecto.onrender.com/api/health/](https://programacion-i-proyecto.onrender.com/api/health/)
+* **☁️ Almacenamiento Multimedia (Cloudinary CDN):** [Cloudinary Storage](https://res.cloudinary.com/ed4lhzzl/)
+* **📋 Informe Técnico de Despliegue:** [`docs/COMO_SE_SUBIO.md`](docs/COMO_SE_SUBIO.md)
+
+---
+
 ## 📌 Características principales
 
 * Registro e inicio de sesion de usuarios

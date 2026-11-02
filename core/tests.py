@@ -1098,3 +1098,9 @@ class Milestone5SearchOrderingAndModerationTests(APITestCase):
         self.assertEqual(res_order.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(res_order.data["rating"])
         self.assertEqual(res_order.data["rating"]["rating"], 5)
+
+    def test_health_check_endpoint(self):
+        url = reverse("health_check")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {"status": "ok", "service": "api"})
