@@ -193,6 +193,7 @@ STORAGES = {
 # Cloudinary Storage para archivos multimedia en producción (TP10)
 CLOUDINARY_URL = config('CLOUDINARY_URL', default=None)
 if CLOUDINARY_URL:
+    os.environ['CLOUDINARY_URL'] = CLOUDINARY_URL
     try:
         import cloudinary  # noqa: F401
         import cloudinary_storage  # noqa: F401

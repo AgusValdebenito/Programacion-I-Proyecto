@@ -12,45 +12,55 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("CLOUDINARY_URL no está configurado. Omitiendo subida a la nube."))
             return
 
+        os.environ["CLOUDINARY_URL"] = cloudinary_url
+
         try:
-            from cloudinary_storage.storage import MediaCloudinaryStorage
-            storage = MediaCloudinaryStorage()
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f"Error inicializando Cloudinary storage: {e}"))
+            import cloudinary
+            import cloudinary.uploader
+            cloudinary.reset_config()
+        except ImportError as e:
+            self.stdout.write(self.style.ERROR(f"Error importando cloudinary: {e}"))
             return
 
-        media_root = settings.MEDIA_ROOT
+        media_root = str(settings.MEDIA_ROOT)
         if not os.path.exists(media_root):
             self.stdout.write(self.style.WARNING(f"Directorio media no encontrado: {media_root}"))
             return
 
         uploaded_count = 0
-        skipped_count = 0
+        error_count = 0
 
         self.stdout.write("Sincronizando archivos multimedia locales con Cloudinary...")
 
         for root, _, files in os.walk(media_root):
             for file in files:
-                if not file.lower().endswith(('.jpg', '.jpeg', '.png', '.webp', '.svg')):
+                if not file.lower().endswith((".jpg", ".jpeg", ".png", ".webp", ".svg")):
                     continue
 
                 full_path = os.path.join(root, file)
-                rel_path = os.path.relpath(full_path, media_root).replace('\\', '/')
+                rel_path = os.path.relpath(full_path, media_root).replace("\\", "/")
+
+                # Cloudinary public_id utilizado por django-cloudinary-storage es: media/<ruta_sin_extension>
+                base_name, _ = os.path.splitext(rel_path)
+                public_id = f"media/{base_name}"
 
                 try:
-                    if storage.exists(rel_path):
-                        skipped_count += 1
-                        continue
-
-                    with open(full_path, 'rb') as f:
-                        storage.save(rel_path, f)
-                        uploaded_count += 1
-                        self.stdout.write(f"✓ Subido a Cloudinary: {rel_path}")
+                    with open(full_path, "rb") as f:
+                        cloudinary.uploader.upload(
+                            f,
+                            public_id=public_id,
+                            overwrite=True,
+                            resource_type="image",
+                            tags=["media"],
+                        )
+                    uploaded_count += 1
+                    self.stdout.write(f"✓ Subido a Cloudinary: {public_id}")
                 except Exception as err:
+                    error_count += 1
                     self.stdout.write(self.style.WARNING(f"⚠ Error al procesar {rel_path}: {err}"))
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Sincronización Cloudinary completada: {uploaded_count} subidos, {skipped_count} ya existentes."
+                f"Sincronización Cloudinary completada: {uploaded_count} subidos, {error_count} errores."
             )
         )

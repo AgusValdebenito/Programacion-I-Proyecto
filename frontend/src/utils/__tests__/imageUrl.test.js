@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getImageUrl } from '../imageUrl'
+import { getImageUrl, getFallbackImageUrl } from '../imageUrl'
 
 describe('imageUrl utility (TDD)', () => {
   it('returns empty string for null or undefined', () => {
@@ -30,5 +30,11 @@ describe('imageUrl utility (TDD)', () => {
 
   it('keeps relative paths starting with / as local frontend assets', () => {
     expect(getImageUrl('/images/restaurantes.png')).toBe('/images/restaurantes.png')
+  })
+
+  it('resolves fallback backend media URL when Cloudinary URL fails', () => {
+    const failedCdnUrl = 'https://res.cloudinary.com/ed4lhzzl/image/upload/v1/media/stores/parrilla_asador.jpg'
+    const fallback = getFallbackImageUrl(failedCdnUrl)
+    expect(fallback).toBe('http://localhost:8000/media/stores/parrilla_asador.jpg')
   })
 })
