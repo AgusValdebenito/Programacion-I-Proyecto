@@ -12,7 +12,8 @@ El TP4 esta completo en rama `TP4/refactor/business-logic`.
 El TP5 (frontend React con Vite) esta COMPLETO y mergeado a `main` (PR #6).
 El TP6 (maquetado de la Home con Bootstrap) esta COMPLETO y mergeado a `main` (PR #8).
 El TP8 (Conexión Frontend con Backend) esta COMPLETO en la rama `TP8/feat-connect-frontend-backend`.
-El TP9 (Vistas Completas y Funcionalidad Full-Stack) se encuentra en desarrollo activo en la rama `TP9` (PR #37), con el **Milestone 1** (Catálogo Real y Carrito), el **Milestone 2** (Checkout Transaccional y Gestión de Pedidos) y el **Milestone 3** (Panel de Vendedor, Menú y Cocina) 100% completados, probados bajo estricto TDD y formalmente cerrados en GitHub.
+El TP9 (Vistas Completas y Funcionalidad Full-Stack) esta COMPLETO y formalmente mergeado a `main` (PR #37, PR #46 y PR #47), con los Milestones 1 al 7 cerrados al 100% bajo TDD y Clean Code.
+El TP10 (Despliegue de la Aplicación en la Nube) esta COMPLETO y en producción: Frontend SPA en Vercel (`https://foodrush-delivery.vercel.app/`), Backend API REST en Render (`https://programacion-i-proyecto.onrender.com/`), PostgreSQL en Render y multimedia en Cloudinary CDN (documentado en `docs/COMO_SE_SUBIO.md`).
 
 ## Estado actual
 
@@ -85,9 +86,9 @@ Todas las tareas y funcionalidades se encuentran organizadas y registradas como 
 * **M3: Panel de Vendedor y Gestión de Tienda:** [COMPLETADO Y CERRADO] Issues [#19](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/19), [#20](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/20) y [#21](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/21).
 * **M4: Reglas Gastronómicas y Stock Híbrido:** [COMPLETADO Y CERRADO] Issues [#22](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/22) y [#23](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/23) (especificado en `docs/propuesta_disponibilidad_gastronomica.md`).
 * **M5: Calidad, Moderación y DevOps:** [COMPLETADO Y CERRADO] Issues [#24](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/24), [#25](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/25) y [#26](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/26).
-* **M6: Descubrimiento, Publicidad y Fidelización:** En desarrollo en `feature/roadmap-tp10`. Issue [#42](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/42) (Tiendas Favoritas) [COMPLETADO Y TESTEADO]; Issues [#39](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/39) (Vista Explorar) y [#41](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/41) (Carrusel de Destacados) pospuestos según decisión de roadmap.
-* **M7: Tracking en Tiempo Real, Alertas y Calificaciones:** En desarrollo en `feature/roadmap-tp10`. Issues [#40](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/40) (Notificaciones en Navbar) y [#44](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/44) (Calificaciones por Estrellas y Motivos) [COMPLETADOS Y TESTEADOS]; Issue [#43](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/43) (Seguimiento de Pedido con Mapa, Barra y ETA) pendiente según decisión de roadmap.
-* **M8: Despliegue en Producción, Pruebas UAT y Entrega Final:** Issue [#45](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/45) (Pruebas de Aceptación UAT y Bug Bash en la nube).
+* **M6: Descubrimiento, Publicidad y Fidelización:** [COMPLETADO Y TESTEADO] Issue [#42](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/42) (Tiendas Favoritas y persistencia multi-usuario).
+* **M7: Tracking en Tiempo Real, Alertas y Calificaciones:** [COMPLETADO Y TESTEADO] Issues [#40](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/40) (Notificaciones en Navbar) y [#44](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/44) (Calificaciones con Estrellas y Tags contextuales).
+* **M8: Despliegue en Producción, Pruebas UAT y Entrega Final (TP10):** [COMPLETADO] Issue [#45](https://github.com/AgusValdebenito/Programacion-I-Proyecto/issues/45) (Despliegue integral en Vercel, Render y Cloudinary con pipeline CI/CD). URLs: `https://foodrush-delivery.vercel.app/` y `https://programacion-i-proyecto.onrender.com/`.
 
 Asimismo, los trabajos prácticos y refactorizaciones ya entregadas fueron formalizados como **Issues Históricas Cerradas ([#27 al #36](https://github.com/AgusValdebenito/Programacion-I-Proyecto/milestone/6?closed=1))** vinculadas a sus respectivos PRs (#1 al #12).
 
