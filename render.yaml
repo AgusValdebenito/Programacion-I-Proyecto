@@ -3,7 +3,7 @@ services:
     name: foodrush-api
     env: python
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
-    startCommand: python manage.py migrate --noinput && gunicorn FoodRush.wsgi:application
+    startCommand: python manage.py migrate --noinput && python manage.py populate_extended_catalog && gunicorn FoodRush.wsgi:application
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.8
