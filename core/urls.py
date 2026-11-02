@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     CartItemViewSet,
     CartViewSet,
+    HealthCheckView,
     NotificationViewSet,
     OrderItemViewSet,
     OrderViewSet,
@@ -21,5 +22,6 @@ router.register(r"order-items", OrderItemViewSet, basename="order-items")
 router.register(r"notifications", NotificationViewSet, basename="notifications")
 
 urlpatterns = [
+    path("health/", HealthCheckView.as_view(), name="health_check"),
     path("", include(router.urls)),
 ]

@@ -1,7 +1,9 @@
 from decimal import Decimal
 
 from django.db import models, transaction
+from drf_spectacular.utils import extend_schema
 from rest_framework import filters, permissions, status, viewsets
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
@@ -523,3 +525,19 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     def mark_all_as_read(self, request):
         updated = Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
         return Response({"detail": f"{updated} notificaciones marcadas como leídas."}, status=status.HTTP_200_OK)
+
+
+class HealthCheckView(APIView):
+    """
+    Endpoint público de verificación de salud de la API (TP10).
+    Permite a Railway, Render, Vercel o monitores externos comprobar que el servicio está online.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(
+        summary="Health Check de la API",
+        description="Retorna el estado de operatividad de la API para servicios de cloud y orquestadores.",
+        responses={200: dict},
+    )
+    def get(self, request, *args, **kwargs):
+        return Response({"status": "ok", "service": "api"}, status=status.HTTP_200_OK)
