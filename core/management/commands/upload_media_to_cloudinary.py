@@ -13,9 +13,16 @@ class Command(BaseCommand):
             action="store_true",
             help="Fuerza la subida y sobrescritura de archivos aunque ya existan en Cloudinary.",
         )
+        parser.add_argument(
+            "--path",
+            type=str,
+            default=None,
+            help="Filtra la sincronización por nombre de archivo o subcarpeta específica.",
+        )
 
     def handle(self, *args, **options):
         force = options.get("force", False)
+        target_path = options.get("path", None)
         cloudinary_url = getattr(settings, "CLOUDINARY_URL", None) or os.environ.get("CLOUDINARY_URL")
         if not cloudinary_url:
             self.stdout.write(self.style.WARNING("CLOUDINARY_URL no está configurado. Omitiendo subida a la nube."))
@@ -51,6 +58,9 @@ class Command(BaseCommand):
                 full_path = os.path.join(root, file)
                 rel_path = os.path.relpath(full_path, media_root).replace("\\", "/")
 
+                if target_path and target_path.lower() not in rel_path.lower():
+                    continue
+
                 # Cloudinary public_id: media/<ruta_sin_extension>
                 base_name, ext = os.path.splitext(rel_path)
                 public_id = f"media/{base_name}"
@@ -72,6 +82,7 @@ class Command(BaseCommand):
                             f,
                             public_id=public_id,
                             overwrite=True,
+                            invalidate=True,
                             resource_type="image",
                             tags=["media"],
                         )
