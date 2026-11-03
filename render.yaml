@@ -2,8 +2,8 @@ services:
   - type: web
     name: foodrush-api
     env: python
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py upload_media_to_cloudinary
-    startCommand: python manage.py migrate --noinput && python manage.py populate_extended_catalog && python manage.py upload_media_to_cloudinary && gunicorn FoodRush.wsgi:application
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py upload_media_to_cloudinary --force
+    startCommand: python manage.py migrate --noinput && python manage.py populate_extended_catalog && python manage.py upload_media_to_cloudinary --force && gunicorn FoodRush.wsgi:application
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.8
