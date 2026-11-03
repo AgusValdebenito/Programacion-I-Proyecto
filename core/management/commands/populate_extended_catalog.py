@@ -25,8 +25,8 @@ class Command(BaseCommand):
                 "products": [
                     {"name": "Ojo de Bife con Papas Fritas", "description": "Corte premium a punto con papas fritas caseras.", "price": "9500.00", "stock": 20, "is_available": True, "image": "products/asado_carne.jpg"},
                     {"name": "Provoleta a la Parrilla", "description": "Queso provolone fundido con orégano y ají molido.", "price": "4200.00", "stock": 15, "is_available": True, "image": "products/provoleta.jpg"},
-                    {"name": "Vacío al Asador", "description": "Cocción lenta a las brasas, tierno y sabroso.", "price": "8900.00", "stock": 12, "is_available": True, "image": "products/asado_carne.jpg"},
-                    {"name": "Chinchulines Crocantes", "description": "Con limón natural y sal marina.", "price": "3800.00", "stock": 0, "is_available": False, "image": "products/asado_carne.jpg"},
+                    {"name": "Vacío al Asador", "description": "Cocción lenta a las brasas, tierno y sabroso.", "price": "8900.00", "stock": 12, "is_available": True, "image": "products/vacio_asador.jpg"},
+                    {"name": "Chinchulines Crocantes", "description": "Con limón natural y sal marina.", "price": "3800.00", "stock": 0, "is_available": False, "image": "products/chinchulines.jpg"},
                 ],
             },
             {
@@ -65,7 +65,7 @@ class Command(BaseCommand):
                     {"name": "Tacos al Pastor (x3)", "description": "Carne marinada con achiote, piña asada, cilantro y cebolla.", "price": "5400.00", "stock": 30, "is_available": True, "image": "products/tacos_al_pastor.jpg"},
                     {"name": "Nachos con Cheddar y Guacamole", "description": "Totopos crocantes con abundante queso y dip de palta.", "price": "4600.00", "stock": 20, "is_available": True, "image": "products/nachos_guacamole.jpg"},
                     {"name": "Burrito de Pollo Chipotle", "description": "Arroz, frijoles negros, queso y pollo desmenuzado.", "price": "5800.00", "stock": 15, "is_available": True, "image": "products/burrito.jpg"},
-                    {"name": "Quesadilla Doble Queso", "description": "Tortilla de trigo tostada rellena de blend de quesos.", "price": "4200.00", "stock": 10, "is_available": True, "image": "products/nachos_guacamole.jpg"},
+                    {"name": "Quesadilla Doble Queso", "description": "Tortilla de trigo tostada rellena de blend de quesos.", "price": "4200.00", "stock": 10, "is_available": True, "image": "products/quesadilla.jpg"},
                 ],
             },
             {
@@ -77,7 +77,7 @@ class Command(BaseCommand):
                 "products": [
                     {"name": "Sorrentinos de Jamón y Queso", "description": "Con salsa mixta de pomodoro y crema fresca.", "price": "6200.00", "stock": 25, "is_available": True, "image": "products/sorrentinos_pasta.jpg"},
                     {"name": "Lasagna Emiliana Gratinada", "description": "Capas de masa casera, bolognesa y bechamel.", "price": "7100.00", "stock": 10, "is_available": True, "image": "products/lasagna.jpg"},
-                    {"name": "Ravioles de Espinaca y Ricotta", "description": "Con salsa bolognesa tradicional.", "price": "5600.00", "stock": 18, "is_available": True, "image": "products/sorrentinos_pasta.jpg"},
+                    {"name": "Ravioles de Espinaca y Ricotta", "description": "Con salsa bolognesa tradicional.", "price": "5600.00", "stock": 18, "is_available": True, "image": "products/ravioles_espinaca.jpg"},
                     {"name": "Tiramisú Clásico", "description": "Con mascarpone y café expreso.", "price": "3200.00", "stock": 0, "is_available": False, "image": "products/tiramisu.jpg"},
                 ],
             },
@@ -153,9 +153,9 @@ class Command(BaseCommand):
                 "image": "stores/despensa_belgrano.jpg",
                 "products": [
                     {"name": "Tabla de Picada Clásica", "description": "Queso gouda, salame de colonia, jamón cocido y aceitunas.", "price": "8500.00", "stock": 15, "is_available": True, "image": "products/tabla_picada.jpg"},
-                    {"name": "Jamón Crudo Reserva 150g", "description": "Estacionado 12 meses, feteado fino.", "price": "3600.00", "stock": 20, "is_available": True, "image": "products/tabla_picada.jpg"},
-                    {"name": "Queso Parmesano Trozado 200g", "description": "Sabor intenso ideal para rallar o picar.", "price": "4200.00", "stock": 18, "is_available": True, "image": "products/tabla_picada.jpg"},
-                    {"name": "Aceitunas Rellenas 250g", "description": "Rellenas con morrón dulce.", "price": "2100.00", "stock": 3, "is_available": True, "image": "products/tabla_picada.jpg"},
+                    {"name": "Jamón Crudo Reserva 150g", "description": "Estacionado 12 meses, feteado fino.", "price": "3600.00", "stock": 20, "is_available": True, "image": "products/jamon_crudo.jpg"},
+                    {"name": "Queso Parmesano Trozado 200g", "description": "Sabor intenso ideal para rallar o picar.", "price": "4200.00", "stock": 18, "is_available": True, "image": "products/queso_parmesano.jpg"},
+                    {"name": "Aceitunas Rellenas 250g", "description": "Rellenas con morrón dulce.", "price": "2100.00", "stock": 3, "is_available": True, "image": "products/aceitunas.jpg"},
                 ],
             },
             {
@@ -242,7 +242,7 @@ class Command(BaseCommand):
                 "image": "stores/cafe_bonafide.jpg",
                 "products": [
                     {"name": "Café Espresso Doble", "description": "Extracción intensa con granos arábigos tostados.", "price": "2200.00", "stock": 50, "is_available": True, "image": "products/cafe_latte_doble.jpg"},
-                    {"name": "Cappuccino Italiano con Cacao", "description": "Espuma de leche cremosa con lluvia de cacao amargo.", "price": "2800.00", "stock": 40, "is_available": True, "image": "products/cafe_latte_doble.jpg"},
+                    {"name": "Cappuccino Italiano con Cacao", "description": "Espuma de leche cremosa con lluvia de cacao amargo.", "price": "2800.00", "stock": 40, "is_available": True, "image": "products/cappuccino_italiano.jpg"},
                     {"name": "Medialuna de Manteca Tradicional", "description": "Hojaldrada y con almíbar artesanal.", "price": "800.00", "stock": 60, "is_available": True, "image": "products/medialunas.jpg"},
                     {"name": "Tostado de Jamón y Queso", "description": "En pan árabe tostado bien crocante.", "price": "3900.00", "stock": 25, "is_available": True, "image": "products/tostado_clasico.jpg"},
                 ],
@@ -267,7 +267,7 @@ class Command(BaseCommand):
                 "description": "Cafetería moderna con filtrados V60, flat white, cookies neoyorquinas y brunch.",
                 "image": "stores/moka_coffee.jpg",
                 "products": [
-                    {"name": "Flat White Australiano", "description": "Doble ristretto con microespuma de leche aterciopelada.", "price": "3100.00", "stock": 30, "is_available": True, "image": "products/cafe_latte_doble.jpg"},
+                    {"name": "Flat White Australiano", "description": "Doble ristretto con microespuma de leche aterciopelada.", "price": "3100.00", "stock": 30, "is_available": True, "image": "products/flat_white.jpg"},
                     {"name": "Iced Caramel Latte", "description": "Café frío con salsa de caramelo casera y hielo.", "price": "3400.00", "stock": 25, "is_available": True, "image": "products/cafe_latte_doble.jpg"},
                     {"name": "Cookie Gigante de Chocolate y Sal Marina", "description": "Horneada al momento con corazón fundente.", "price": "2100.00", "stock": 30, "is_available": True, "image": "products/cookie_chocolate.jpg"},
                     {"name": "Avocado Toast con Huevo Poché", "description": "Pan de masa madre tostado, palta pisada y huevo poché.", "price": "4900.00", "stock": 15, "is_available": True, "image": "products/avocado_toast.jpg"},
@@ -293,7 +293,7 @@ class Command(BaseCommand):
                 "description": "Meriendas completas, café gourmet, tostados en pan de campo y jugos naturales exprimidos.",
                 "image": "stores/deli_palermo.jpg",
                 "products": [
-                    {"name": "Brunch Completo para Dos", "description": "2 cafés, 2 jugos, tostón de salmón, porción dulce y tostadas.", "price": "13500.00", "stock": 10, "is_available": True, "image": "products/avocado_toast.jpg"},
+                    {"name": "Brunch Completo para Dos", "description": "2 cafés, 2 jugos, tostón de salmón, porción dulce y tostadas.", "price": "13500.00", "stock": 10, "is_available": True, "image": "products/brunch_completo.jpg"},
                     {"name": "Tostón de Salmón Ahumado", "description": "Pan de centeno, queso crema con ciboulette y alcaparras.", "price": "5800.00", "stock": 12, "is_available": True, "image": "products/avocado_toast.jpg"},
                     {"name": "Jugo de Naranja Exprimido Natural", "description": "100% fruta recién exprimida sin azúcar agregada.", "price": "2200.00", "stock": 30, "is_available": True, "image": "products/jugo_naranja.jpg"},
                     {"name": "Waffle con Dulce de Leche y Frutillas", "description": "Waffle tibio con frutas de estación.", "price": "4100.00", "stock": 0, "is_available": False, "image": "products/waffle_frutas.jpg"},
@@ -405,8 +405,8 @@ class Command(BaseCommand):
                 "description": "Paletas artesanales rellenas con leche condensada y helados refrescantes de fruta natural.",
                 "image": "stores/paleteria_mexicana.jpg",
                 "products": [
-                    {"name": "Paleta de Maracuyá Rellena", "description": "Fruta tropical con corazón de leche condensada líquida.", "price": "3400.00", "stock": 25, "is_available": True, "image": "products/paleta_artesanal_frutilla.jpg"},
-                    {"name": "Paleta de Chocolate Belga", "description": "Chocolate con 70% cacao intenso.", "price": "3600.00", "stock": 20, "is_available": True, "image": "products/paleta_artesanal_frutilla.jpg"},
+                    {"name": "Paleta de Maracuyá Rellena", "description": "Fruta tropical con corazón de leche condensada líquida.", "price": "3400.00", "stock": 25, "is_available": True, "image": "products/paleta_maracuya.jpg"},
+                    {"name": "Paleta de Chocolate Belga", "description": "Chocolate con 70% cacao intenso.", "price": "3600.00", "stock": 20, "is_available": True, "image": "products/paleta_chocolate.jpg"},
                     {"name": "Paleta de Limón y Menta al Agua", "description": "Súper refrescante para días de calor.", "price": "2800.00", "stock": 30, "is_available": True, "image": "products/paleta_artesanal_frutilla.jpg"},
                 ],
             },
@@ -480,7 +480,7 @@ class Command(BaseCommand):
                 "image": "stores/farmacia_puente.jpg",
                 "products": [
                     {"name": "Botiquín de Primeros Auxilios Básico", "description": "Incluye gasas, vendas, alcohol, apósitos y cinta.", "price": "6800.00", "stock": 15, "is_available": True, "image": "products/botiquin_primeros_auxilios.jpg"},
-                    {"name": "Vendas Elásticas 10cm x 2m", "description": "Para soporte muscular y vendajes.", "price": "1400.00", "stock": 30, "is_available": True, "image": "products/botiquin_primeros_auxilios.jpg"},
+                    {"name": "Vendas Elásticas 10cm x 2m", "description": "Para soporte muscular y vendajes.", "price": "1400.00", "stock": 30, "is_available": True, "image": "products/vendas_elasticas.jpg"},
                     {"name": "Gasas Estériles (sobre x 10 un.)", "description": "Gasas no tejidas para curaciones.", "price": "1200.00", "stock": 50, "is_available": True, "image": "products/botiquin_primeros_auxilios.jpg"},
                     {"name": "Termómetro Digital Rápido", "description": "Lectura precisa en 60 segundos con alarma sonora.", "price": "4500.00", "stock": 20, "is_available": True, "image": "products/termometro_digital.jpg"},
                 ],
@@ -506,7 +506,7 @@ class Command(BaseCommand):
                 "image": "stores/farmacia_pasteur.jpg",
                 "products": [
                     {"name": "Pañales Talle G (x 36 un.)", "description": "Cintura elastizada y máxima absorción nocturna.", "price": "13500.00", "stock": 22, "is_available": True, "image": "products/panales_bebe.jpg"},
-                    {"name": "Toallitas Húmedas para Bebé (x 50)", "description": "Sin fragancia, hipoalergénicas con manzanilla.", "price": "2900.00", "stock": 40, "is_available": True, "image": "products/panales_bebe.jpg"},
+                    {"name": "Toallitas Húmedas para Bebé (x 50)", "description": "Sin fragancia, hipoalergénicas con manzanilla.", "price": "2900.00", "stock": 40, "is_available": True, "image": "products/toallitas_bebe.jpg"},
                     {"name": "Crema Protectora de Pasapaduras 100g", "description": "Con óxido de zinc y caléndula.", "price": "3800.00", "stock": 25, "is_available": True, "image": "products/panales_bebe.jpg"},
                     {"name": "Aspirina Protect 100mg (x 30)", "description": "Comprimidos recubiertos protectores.", "price": "2700.00", "stock": 30, "is_available": True, "image": "products/ibuprofeno_capsulas.jpg"},
                 ],
@@ -519,7 +519,7 @@ class Command(BaseCommand):
                 "image": "stores/farmacia_salud.jpg",
                 "products": [
                     {"name": "Multivitamínico Complejo A-Z (x 30)", "description": "Minerales y vitaminas para reforzar el sistema inmune.", "price": "7900.00", "stock": 25, "is_available": True, "image": "products/vitaminas_suplemento.jpg"},
-                    {"name": "Vitamina C 1000mg Efervescente (x 10)", "description": "Sabor naranja de rápida absorción.", "price": "3200.00", "stock": 30, "is_available": True, "image": "products/vitaminas_suplemento.jpg"},
+                    {"name": "Vitamina C 1000mg Efervescente (x 10)", "description": "Sabor naranja de rápida absorción.", "price": "3200.00", "stock": 30, "is_available": True, "image": "products/vitamina_c.jpg"},
                     {"name": "Colágeno Hidrolizado Polvo 250g", "description": "Para salud articular, piel y uñas.", "price": "9800.00", "stock": 15, "is_available": True, "image": "products/vitaminas_suplemento.jpg"},
                     {"name": "Barra Proteica de Chocolate", "description": "15g de proteína sin azúcar agregada.", "price": "2100.00", "stock": 40, "is_available": True, "image": "products/chocolate_barra.jpg"},
                 ],
