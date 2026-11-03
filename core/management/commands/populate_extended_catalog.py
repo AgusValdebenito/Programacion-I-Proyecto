@@ -576,6 +576,50 @@ class Command(BaseCommand):
             },
         ]
 
+        # Asegurar usuarios demo para cada uno de los 3 roles del sistema
+        demo_users = [
+            {
+                "username": "admin@foodrush.com",
+                "email": "admin@foodrush.com",
+                "name": "Administrador FoodRush",
+                "role": Usuario.RoleChoices.ADMIN,
+                "is_staff": True,
+                "is_superuser": True,
+            },
+            {
+                "username": "cliente@foodrush.com",
+                "email": "cliente@foodrush.com",
+                "name": "Cliente Demo",
+                "role": Usuario.RoleChoices.CLIENTE,
+                "is_staff": False,
+                "is_superuser": False,
+            },
+            {
+                "username": "vendedor@foodrush.com",
+                "email": "vendedor@foodrush.com",
+                "name": "Vendedor Demo",
+                "role": Usuario.RoleChoices.VENDEDOR,
+                "is_staff": False,
+                "is_superuser": False,
+            },
+        ]
+        for du in demo_users:
+            demo_user, _ = Usuario.objects.get_or_create(
+                email=du["email"],
+                defaults={
+                    "username": du["username"],
+                    "name": du["name"],
+                    "role": du["role"],
+                    "is_staff": du["is_staff"],
+                    "is_superuser": du["is_superuser"],
+                },
+            )
+            demo_user.role = du["role"]
+            demo_user.is_staff = du["is_staff"]
+            demo_user.is_superuser = du["is_superuser"]
+            demo_user.set_password("password123")
+            demo_user.save()
+
         stores_count = 0
         products_count = 0
 
