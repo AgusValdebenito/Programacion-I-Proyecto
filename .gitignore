@@ -11,3 +11,13 @@ umllmkey
 node_modules/
 dist/
 tps/
+
+# Office temporary lock files
+~$*.doc*
+~$*.xls*
+~$*.ppt*
+
+# OS artifacts
+Thumbs.db
+.DS_Store
+

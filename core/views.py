@@ -561,7 +561,11 @@ class MediaSyncView(APIView):
         from django.core.management import call_command
         out = StringIO()
         try:
-            call_command("upload_media_to_cloudinary", stdout=out)
+            force = request.query_params.get("force", "false").lower() in ("true", "1")
+            populate = request.query_params.get("populate", "false").lower() in ("true", "1")
+            call_command("upload_media_to_cloudinary", force=force, stdout=out)
+            if populate:
+                call_command("populate_extended_catalog", stdout=out)
             return Response({"status": "ok", "output": out.getvalue()}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(

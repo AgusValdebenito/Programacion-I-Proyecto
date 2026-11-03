@@ -7,7 +7,15 @@ from django.core.management.base import BaseCommand
 class Command(BaseCommand):
     help = "Sube automáticamente las imágenes locales de media/ a Cloudinary si está configurado."
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            help="Fuerza la subida y sobrescritura de archivos aunque ya existan en Cloudinary.",
+        )
+
     def handle(self, *args, **options):
+        force = options.get("force", False)
         cloudinary_url = getattr(settings, "CLOUDINARY_URL", None) or os.environ.get("CLOUDINARY_URL")
         if not cloudinary_url:
             self.stdout.write(self.style.WARNING("CLOUDINARY_URL no está configurado. Omitiendo subida a la nube."))
@@ -48,7 +56,7 @@ class Command(BaseCommand):
                 public_id = f"media/{base_name}"
 
                 # Comprobación HEAD rápida: si ya existe en Cloudinary, se omite para ahorrar ancho de banda
-                if cloud_name:
+                if not force and cloud_name:
                     check_url = f"https://res.cloudinary.com/{cloud_name}/image/upload/{public_id}{ext}"
                     try:
                         res = requests.head(check_url, timeout=3)

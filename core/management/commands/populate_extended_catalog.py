@@ -50,7 +50,7 @@ class Command(BaseCommand):
                 "image": "stores/sushi_koi.jpg",
                 "products": [
                     {"name": "Combo Koi 15 Piezas", "description": "Variedad de salmon rolls, nigiris y makis de la casa.", "price": "11500.00", "stock": 18, "is_available": True, "image": "products/sushi_combo.jpg"},
-                    {"name": "Salmón Roll Especial (8 un.)", "description": "Salmón rosado, palta y queso philadelphia con sésamo tostado.", "price": "6800.00", "stock": 22, "is_available": True, "image": "products/sushi_combo.jpg"},
+                    {"name": "Salmón Roll Especial (8 un.)", "description": "Salmón rosado, palta y queso philadelphia con sésamo tostado.", "price": "6800.00", "stock": 22, "is_available": True, "image": "products/salmon_roll.jpg"},
                     {"name": "Gyozas de Cerdo y Verdeo (5 un.)", "description": "Empanaditas al vapor y doradas con salsa agridulce.", "price": "4100.00", "stock": 16, "is_available": True, "image": "products/gyozas.jpg"},
                     {"name": "Roll Veggie Philadelphia", "description": "Zanahoria glaceada, pepino y queso.", "price": "5200.00", "stock": 0, "is_available": False, "image": "products/sushi_combo.jpg"},
                 ],
@@ -88,10 +88,10 @@ class Command(BaseCommand):
                 "description": "Empanadas salteñas y tucumanas horneadas al horno de barro con masa casera.",
                 "image": "stores/empanadas_lorenzo.jpg",
                 "products": [
-                    {"name": "Docena de Empanadas Variadas", "description": "Elegí 12 empanadas de carne, pollo, jamón o verdura.", "price": "12000.00", "stock": 35, "is_available": True, "image": "products/empanada_carne.jpg"},
+                    {"name": "Docena de Empanadas Variadas", "description": "Elegí 12 empanadas de carne, pollo, jamón o verdura.", "price": "12000.00", "stock": 35, "is_available": True, "image": "products/empanadas_variadas.jpg"},
                     {"name": "Empanada Criolla Picante", "description": "Carne suave con comino y ají picante salteño.", "price": "1100.00", "stock": 50, "is_available": True, "image": "products/empanada_carne.jpg"},
-                    {"name": "Empanada de Jamón y Muzzarella", "description": "Muzzarella fundida con jamón cocido seleccionado.", "price": "1100.00", "stock": 45, "is_available": True, "image": "products/empanada_carne.jpg"},
-                    {"name": "Empanada de Humita y Queso", "description": "Choclo cremoso, cebolla y queso derretido.", "price": "1100.00", "stock": 30, "is_available": True, "image": "products/empanada_carne.jpg"},
+                    {"name": "Empanada de Jamón y Muzzarella", "description": "Muzzarella fundida con jamón cocido seleccionado.", "price": "1100.00", "stock": 45, "is_available": True, "image": "products/empanada_jamon_queso.jpg"},
+                    {"name": "Empanada de Humita y Queso", "description": "Choclo cremoso, cebolla y queso derretido.", "price": "1100.00", "stock": 30, "is_available": True, "image": "products/empanada_humita.jpg"},
                 ],
             },
             {
@@ -103,7 +103,7 @@ class Command(BaseCommand):
                 "products": [
                     {"name": "Power Bowl de Pollo y Palta", "description": "Quinoa, pollo grillado, palta, tomates cherry y aderezo tahini.", "price": "6100.00", "stock": 15, "is_available": True, "image": "products/power_bowl.jpg"},
                     {"name": "Wrap Mediterráneo de Falafel", "description": "Falafel horneado, hummus, espinaca y pepino.", "price": "5200.00", "stock": 12, "is_available": True, "image": "products/wrap_vegetariano.jpg"},
-                    {"name": "Ensalada César Crunch", "description": "Mix de lechugas, croutons caseros, parmesano y aderezo césar.", "price": "5500.00", "stock": 20, "is_available": True, "image": "products/power_bowl.jpg"},
+                    {"name": "Ensalada César Crunch", "description": "Mix de lechugas, croutons caseros, parmesano y aderezo césar.", "price": "5500.00", "stock": 20, "is_available": True, "image": "products/ensalada_cesar.jpg"},
                 ],
             },
             {
@@ -357,7 +357,7 @@ class Command(BaseCommand):
                 "products": [
                     {"name": "1 Kilo de Helado (4 Sabores)", "description": "Elegí hasta 4 sabores de cremas y chocolates.", "price": "13500.00", "stock": 30, "is_available": True, "image": "products/pote_helado_1kg.jpg"},
                     {"name": "1/2 Kilo de Helado (3 Sabores)", "description": "Pote térmico ideal para dos personas.", "price": "7800.00", "stock": 35, "is_available": True, "image": "products/pote_helado_medio.jpg"},
-                    {"name": "1/4 Kilo de Helado (2 Sabores)", "description": "Porción individual generosa con cucurucho.", "price": "4500.00", "stock": 40, "is_available": True, "image": "products/cucurucho_especial.jpg"},
+                    {"name": "1/4 Kilo de Helado (2 Sabores)", "description": "Porción individual generosa con cucurucho.", "price": "4500.00", "stock": 40, "is_available": True, "image": "products/helado_cuarto.jpg"},
                     {"name": "Cucurucho Bañado en Chocolate", "description": "Waffle crocante bañado en chocolate cobertura.", "price": "3200.00", "stock": 25, "is_available": True, "image": "products/cucurucho_especial.jpg"},
                 ],
             },
