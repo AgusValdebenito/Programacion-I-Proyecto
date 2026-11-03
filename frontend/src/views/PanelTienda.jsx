@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../hooks/useAuth'
 
@@ -31,6 +32,8 @@ import RejectOrderModal from '../components/tienda/RejectOrderModal'
  */
 
 export default function PanelTienda() {
+
+  const navigate = useNavigate()
 
   const { user, getToken, updateUser } = useAuth()
 
@@ -738,6 +741,11 @@ export default function PanelTienda() {
 
 
 
+              <div className="alert alert-info py-2 px-3 small text-start border-0 bg-info-subtle text-info-emphasis rounded-3 mb-3">
+                <i className="bi bi-info-circle-fill me-2"></i>
+                Estás a un paso de abrir tu comercio. Tu cuenta seguirá siendo de <strong>cliente</strong> hasta que confirmes la creación de la tienda.
+              </div>
+
               <form onSubmit={handleCreateStore} className="text-start">
 
                 <div className="mb-3">
@@ -871,6 +879,17 @@ export default function PanelTienda() {
                   )}
 
                 </button>
+
+                <div className="text-center mt-3">
+                  <button
+                    type="button"
+                    className="btn btn-link text-secondary text-decoration-none small"
+                    onClick={() => navigate('/')}
+                  >
+                    <i className="bi bi-arrow-left me-1"></i>
+                    Cancelar y seguir comprando como cliente
+                  </button>
+                </div>
 
               </form>
 
