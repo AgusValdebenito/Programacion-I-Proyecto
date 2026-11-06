@@ -322,7 +322,7 @@ main {
 }
 
 .fr-store-logo-item {
-  width: 82px;
+  width: 88px;
   text-align: center;
 }
 
@@ -348,19 +348,20 @@ main {
 
 .fr-store-logo-name {
   font-size: 0.8rem;
-  line-height: 1.2;
+  line-height: 1.25;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  word-break: break-word;
-  max-height: 2.4em;
+  word-break: normal;
+  overflow-wrap: normal;
+  max-height: 2.5em;
 }
 
 @media (min-width: 768px) {
   .fr-store-logo-item {
-    width: 96px;
+    width: 100px;
   }
 
   .fr-store-logo {
