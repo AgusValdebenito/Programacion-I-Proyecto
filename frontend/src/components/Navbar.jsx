@@ -186,8 +186,9 @@ export default function Navbar() {
 
             {showLocationMenu && (
               <div
-                className="card border-0 shadow-lg rounded-4 p-3 position-absolute top-100 start-0 mt-2 z-3 bg-white text-dark"
-                style={{ width: '320px', maxWidth: '90vw' }}
+                className="card border-0 shadow-lg rounded-4 p-3 position-absolute top-100 start-0 mt-2 z-3 bg-white text-dark fr-location-menu"
+                role="region"
+                aria-label="Selección de dirección de entrega"
               >
                 <div className="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
                   <span className="small fw-bold text-secondary text-uppercase tracking-wide">

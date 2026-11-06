@@ -481,6 +481,49 @@ main {
   animation: fr-heartbeat 0.35s ease-in-out;
 }
 
+/* ---------- Boton favorito con texto (Pill) ---------- */
+.fr-favorite-btn.fr-favorite-btn--with-label {
+  width: auto;
+  min-height: 38px;
+  padding: 0.35rem 0.95rem;
+  border-radius: 50rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- Dropdowns responsivos en movil ---------- */
+.fr-notification-menu {
+  width: 330px;
+  max-width: 92vw;
+  z-index: 1050;
+}
+
+.fr-location-menu {
+  width: 320px;
+  max-width: 90vw;
+  z-index: 1050;
+}
+
+@media (max-width: 575.98px) {
+  .fr-notification-menu {
+    position: fixed !important;
+    top: 56px !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    transform: none !important;
+  }
+
+  .fr-location-menu {
+    position: fixed !important;
+    top: 92px !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+}
+
 /* ---------- Toast responsive flotante (DRY) ---------- */
 .fr-toast-responsive {
   max-width: min(360px, calc(100vw - 2rem));
@@ -491,4 +534,10 @@ main {
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.fr-horizontal-scroll::-webkit-scrollbar {
+  display: none;
 }

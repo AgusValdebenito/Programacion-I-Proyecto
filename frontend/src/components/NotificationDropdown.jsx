@@ -80,8 +80,7 @@ export default function NotificationDropdown({ customNotifications = null }) {
 
       {isOpen && (
         <div
-          className="dropdown-menu dropdown-menu-end show shadow-lg border-0 rounded-4 p-0 mt-2 position-absolute end-0"
-          style={{ width: '330px', maxWidth: '92vw', zIndex: 1050 }}
+          className="dropdown-menu dropdown-menu-end show shadow-lg border-0 rounded-4 p-0 mt-2 position-absolute end-0 fr-notification-menu"
           role="region"
           aria-label="Panel de notificaciones"
         >

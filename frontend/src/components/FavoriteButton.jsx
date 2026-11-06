@@ -43,7 +43,7 @@ export default function FavoriteButton({
   return (
     <button
       type="button"
-      className={`fr-favorite-btn ${favorited ? 'is-favorite' : ''} ${
+      className={`fr-favorite-btn ${showLabel ? 'fr-favorite-btn--with-label' : ''} ${favorited ? 'is-favorite' : ''} ${
         animating ? 'animate-heart' : ''
       } ${sizeClass} ${className}`}
       onClick={handleClick}
