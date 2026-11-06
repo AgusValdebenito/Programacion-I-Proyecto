@@ -2,12 +2,12 @@ export default function Hero({ userName }) {
   return (
     <div className="container py-2 py-md-3" id="inicio">
       <div className="fr-hero p-3 p-md-4">
-        <div className="row align-items-center g-2 g-md-3">
-          <div className="col-7 col-sm-8 col-md-7">
+        <div className="row align-items-center g-3">
+          <div className="col-12 col-sm-8 col-md-7 text-center text-sm-start">
             <span className="fr-promo-badge">
               {userName ? `¡Hola, ${userName}! Exclusivo FoodRush` : 'Exclusivo FoodRush'}
             </span>
-            <h1 className="mt-1 mb-1 mt-md-2 mb-md-2">
+            <h1 className="mt-2 mb-2">
               Nuestras mejores
               <br className="d-none d-sm-inline" /> promociones
             </h1>
@@ -19,18 +19,13 @@ export default function Hero({ userName }) {
               Explorar promociones <i className="bi bi-arrow-right ms-2" />
             </a>
           </div>
-          <div className="col-5 col-sm-4 col-md-5 d-flex justify-content-center">
+          <div className="col-12 col-sm-4 col-md-5 d-flex justify-content-center">
             <div className="fr-hero-img" role="img" aria-label="Promo de hamburguesa con papas y bebida">
               <span>🍔</span>
               <span>🍟</span>
-              <span className="d-none d-sm-inline">🥤</span>
+              <span>🥤</span>
             </div>
           </div>
-        </div>
-        <div className="fr-carousel-dots d-none d-md-flex" aria-hidden="true">
-          <span className="active" />
-          <span />
-          <span />
         </div>
       </div>
     </div>
