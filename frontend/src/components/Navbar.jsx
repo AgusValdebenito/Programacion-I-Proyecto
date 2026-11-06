@@ -52,13 +52,13 @@ export default function Navbar() {
 
   return (
     <header className="fr-navbar">
-      <div className="container">
+      <div className="container-fluid px-3 px-md-4 px-xl-5" style={{ maxWidth: '1440px' }}>
         <div className="d-flex align-items-center justify-content-between py-1 py-md-2">
-          <div className="d-flex align-items-center flex-grow-1 flex-md-grow-0 me-2 me-md-3 min-w-0">
+          <div className="d-flex align-items-center flex-shrink-0 me-2 me-md-3">
             <Logo />
             {!isExcludedPath && !isVendorOnly && (
               <form
-                className="d-none d-lg-flex position-relative ms-3"
+                className="d-none d-lg-flex position-relative ms-3 flex-shrink-0"
                 onSubmit={handleSearchSubmit}
                 role="search"
                 style={{ width: '240px' }}
@@ -90,7 +90,7 @@ export default function Navbar() {
                 </span>
               </nav>
             ) : (
-              <nav className="d-none d-md-flex align-items-center gap-4 me-4" aria-label="Navegación principal">
+              <nav className="d-none d-md-flex align-items-center gap-2 gap-lg-3 gap-xl-4 me-2 me-lg-3 me-xl-4 flex-shrink-0" aria-label="Navegación principal">
                 <Link className="fr-nav-link" to="/">
                   Inicio
                 </Link>
@@ -121,7 +121,7 @@ export default function Navbar() {
             )}
             {user ? (
               <div className="d-flex align-items-center gap-1 gap-sm-2 flex-shrink-0">
-                <span className="badge bg-light text-dark border d-none d-sm-inline-block">
+                <span className="badge bg-light text-dark border d-none d-sm-inline-flex align-items-center text-truncate" style={{ maxWidth: '180px' }}>
                   <i className={`bi ${isVendorOnly ? 'bi-shop text-primary' : 'bi-person-fill text-primary'} me-1`}></i>
                   {user.name || user.username || user.email}
                 </span>

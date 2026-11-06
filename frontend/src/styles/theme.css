@@ -26,19 +26,6 @@ body {
   overflow-x: clip;
 }
 
-/* Contención ergonómica de contenedores en escritorio respetando WCAG 1.4.4 */
-@media (min-width: 992px) {
-  .container {
-    max-width: 980px;
-  }
-}
-
-@media (min-width: 1200px) {
-  .container {
-    max-width: 1140px;
-  }
-}
-
 /* Utilidad requerida para permitir text-truncate dentro de contenedores Flexbox */
 .min-w-0 {
   min-width: 0 !important;
