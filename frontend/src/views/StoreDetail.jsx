@@ -146,7 +146,7 @@ export default function StoreDetail() {
   const initials = getInitials(store.name)
 
   return (
-    <div className="container py-4">
+    <div className="container py-3 py-md-4">
       {/* Toast de notificación temporal de éxito */}
       {addedItemMessage && (
         <div

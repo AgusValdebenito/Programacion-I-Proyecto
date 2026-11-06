@@ -17,6 +17,19 @@
 html {
   max-width: 100vw;
   overflow-x: hidden;
+  font-size: 14.5px; /* Proporcion equilibrada para tablets y moviles */
+}
+
+@media (min-width: 992px) {
+  html {
+    font-size: 13.5px; /* Simula naturalmente el zoom 80-85% en monitores de PC sin deformar */
+  }
+}
+
+@media (min-width: 1400px) {
+  html {
+    font-size: 14px;
+  }
 }
 
 body {
@@ -62,10 +75,15 @@ main {
 /* ---------- Navbar ---------- */
 .fr-navbar {
   background: linear-gradient(180deg, var(--dark-purple), var(--primary-purple));
-  padding: 1rem 0 1.5rem;
+  padding: 0.5rem 0 0.6rem;
   width: 100%;
   max-width: 100vw;
   overflow-x: clip;
+  position: sticky;
+  top: 0;
+  z-index: 1025;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(8px);
 }
 
 @supports not (overflow-x: clip) {
@@ -172,25 +190,25 @@ main {
 }
 
 .fr-hero h1 {
-  font-size: 1.7rem;
+  font-size: 1.15rem;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .fr-discount {
-  font-size: 3.2rem;
+  font-size: 1.9rem;
   font-weight: 800;
   color: var(--yellow);
   line-height: 1;
 }
 
 .fr-hero-img {
-  min-height: 200px;
+  min-height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  font-size: 3.5rem;
+  gap: 0.5rem;
+  font-size: 2.2rem;
 }
 
 .fr-carousel-dots {
@@ -217,15 +235,15 @@ main {
 
 @media (min-width: 768px) {
   .fr-hero h1 {
-    font-size: 2.3rem;
+    font-size: 1.65rem;
   }
 
   .fr-discount {
-    font-size: 4.5rem;
+    font-size: 2.75rem;
   }
 
   .fr-hero-img {
-    font-size: 5rem;
+    font-size: 3.2rem;
   }
 }
 
@@ -239,12 +257,19 @@ main {
 }
 
 .fr-card-img {
-  height: 130px;
+  height: 85px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3.2rem;
+  font-size: 2.2rem;
   color: var(--white);
+}
+
+@media (min-width: 768px) {
+  .fr-card-img {
+    height: 105px;
+    font-size: 2.6rem;
+  }
 }
 
 .fr-card-img-img {
@@ -314,15 +339,15 @@ main {
 }
 
 .fr-store-logo {
-  width: 90px;
-  height: 90px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--white);
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   box-shadow: var(--shadow-soft);
 }
 
@@ -335,8 +360,20 @@ main {
 
 @media (min-width: 768px) {
   .fr-store-logo {
-    width: 110px;
-    height: 110px;
+    width: 86px;
+    height: 86px;
+    font-size: 1.4rem;
+  }
+}
+
+/* ---------- Product card image ---------- */
+.fr-product-card-img {
+  height: 135px;
+}
+
+@media (min-width: 768px) {
+  .fr-product-card-img {
+    height: 160px;
   }
 }
 

@@ -34,8 +34,7 @@ export default function ProductCard({ product, onAddToCart }) {
   return (
     <article className="card h-100 shadow-sm border-0 rounded-4 overflow-hidden d-flex flex-column">
       <div
-        className="position-relative bg-light d-flex align-items-center justify-content-center overflow-hidden"
-        style={{ height: '180px' }}
+        className="position-relative bg-light d-flex align-items-center justify-content-center overflow-hidden fr-product-card-img"
       >
         <Link
           to={`/productos/${product.id}`}

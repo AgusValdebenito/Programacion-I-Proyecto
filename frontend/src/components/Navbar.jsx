@@ -53,7 +53,7 @@ export default function Navbar() {
   return (
     <header className="fr-navbar">
       <div className="container">
-        <div className="d-flex align-items-center justify-content-between py-2">
+        <div className="d-flex align-items-center justify-content-between py-1 py-md-2">
           <div className="d-flex align-items-center flex-grow-1 flex-md-grow-0 me-2 me-md-3 min-w-0">
             <Logo />
             {!isExcludedPath && !isVendorOnly && (
@@ -168,7 +168,7 @@ export default function Navbar() {
         </div>
 
         {showDeliveryLocation && (
-          <div className="pt-3 pb-1 d-flex justify-content-center justify-content-md-start position-relative" ref={locationMenuRef}>
+          <div className="pt-1 pb-1 d-flex justify-content-center justify-content-md-start position-relative" ref={locationMenuRef}>
             <button
               type="button"
               className="fr-location-pill border-0 text-start d-inline-flex align-items-center cursor-pointer"

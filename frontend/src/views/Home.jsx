@@ -90,24 +90,16 @@ export default function Home() {
     }
   }, [getValidToken, setUser])
 
-  const mainCategories = categories.filter((category) => category.featured)
-  const secondaryCategories = categories.filter((category) => !category.featured)
-
   const displayName = profile?.name || profile?.username || user?.name || user?.username || ''
 
   return (
     <>
       <Hero userName={displayName} />
 
-      <section id="categorias" className="container py-3">
-        <h2 className="h5 fw-bold mb-4">¿Qué pedimos hoy?</h2>
-        <div className="row g-3 g-md-4">
-          {mainCategories.map((category) => (
-            <div className="col-12 col-sm-6 col-md-4" key={category.id}>
-              <CategoryCard category={category} />
-            </div>
-          ))}
-          {secondaryCategories.map((category) => (
+      <section id="categorias" className="container py-2 py-md-3">
+        <h2 className="h5 fw-bold mb-3 mb-md-4">¿Qué pedimos hoy?</h2>
+        <div className="row g-2 g-md-3">
+          {categories.map((category) => (
             <div className="col-6 col-md-4" key={category.id}>
               <CategoryCard category={category} />
             </div>
@@ -115,7 +107,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="tiendas" className="container pt-5 pb-4 mb-5">
+      <section id="tiendas" className="container pt-3 pt-md-4 pb-3 mb-4">
         <SectionHeader title="Tiendas destacadas" />
 
         {loadingStores ? (

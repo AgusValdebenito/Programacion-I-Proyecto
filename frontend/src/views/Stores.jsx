@@ -168,7 +168,7 @@ export default function Stores() {
   const activeCategoryObj = activeCategoryId ? getCategoryById(activeCategoryId) : null
 
   return (
-    <div className="container py-4">
+    <div className="container py-3 py-md-4">
       {/* Header */}
       <div className="mb-4">
         <nav aria-label="breadcrumb">

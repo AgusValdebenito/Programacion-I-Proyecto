@@ -1,34 +1,33 @@
 export default function Hero({ userName }) {
   return (
-    <div className="container py-4" id="inicio">
-      <div className="fr-hero p-4 p-md-5">
-        <div className="row align-items-center g-0">
-          <div className="col-12 col-md-6">
+    <div className="container py-2 py-md-3" id="inicio">
+      <div className="fr-hero p-3 p-md-4">
+        <div className="row align-items-center g-2 g-md-3">
+          <div className="col-7 col-sm-8 col-md-7">
             <span className="fr-promo-badge">
               {userName ? `¡Hola, ${userName}! Exclusivo FoodRush` : 'Exclusivo FoodRush'}
             </span>
-            <h1 className="mt-3 mb-3">
+            <h1 className="mt-1 mb-1 mt-md-2 mb-md-2">
               Nuestras mejores
-              <br />
-              promociones
+              <br className="d-none d-sm-inline" /> promociones
             </h1>
             <p className="fr-discount mb-0">50% OFF</p>
             <a
               href="#categorias"
-              className="btn btn-warning fw-semibold rounded-pill px-4 py-2 mt-4 d-inline-flex align-items-center"
+              className="btn btn-warning btn-sm fw-semibold rounded-pill px-3 py-1 mt-2 mt-md-3 d-inline-flex align-items-center"
             >
               Explorar promociones <i className="bi bi-arrow-right ms-2" />
             </a>
           </div>
-          <div className="col-12 col-md-6 d-flex justify-content-center">
+          <div className="col-5 col-sm-4 col-md-5 d-flex justify-content-center">
             <div className="fr-hero-img" role="img" aria-label="Promo de hamburguesa con papas y bebida">
               <span>🍔</span>
               <span>🍟</span>
-              <span>🥤</span>
+              <span className="d-none d-sm-inline">🥤</span>
             </div>
           </div>
         </div>
-        <div className="fr-carousel-dots" aria-hidden="true">
+        <div className="fr-carousel-dots d-none d-md-flex" aria-hidden="true">
           <span className="active" />
           <span />
           <span />

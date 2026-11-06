@@ -167,7 +167,7 @@ export default function ProductDetail() {
   const resolvedImg = !imgError && product.image ? getImageUrl(product.image) : null
 
   return (
-    <div className="container py-4">
+    <div className="container py-3 py-md-4">
       {/* Toast de Éxito */}
       {addedMessage && (
         <div
