@@ -53,8 +53,8 @@ export default function Navbar() {
   return (
     <header className="fr-navbar">
       <div className="container">
-        <div className="d-flex align-items-center justify-content-between py-2">
-          <div className="d-flex align-items-center flex-grow-1 flex-md-grow-0 me-md-3">
+        <div className="d-flex align-items-center justify-content-between py-1 py-md-2">
+          <div className="d-flex align-items-center flex-grow-1 flex-md-grow-0 me-2 me-md-3 min-w-0">
             <Logo />
             {!isExcludedPath && !isVendorOnly && (
               <form
@@ -78,7 +78,7 @@ export default function Navbar() {
               </form>
             )}
           </div>
-          <div className="d-flex align-items-center">
+          <div className="d-flex align-items-center flex-shrink-0">
             {isVendorOnly ? (
               <nav className="d-none d-md-flex align-items-center gap-3 me-4" aria-label="Navegación de comercio">
                 <Link className="fr-nav-link text-primary fw-semibold" to="/panel-tienda">
@@ -120,7 +120,7 @@ export default function Navbar() {
               </nav>
             )}
             {user ? (
-              <div className="d-flex align-items-center gap-2">
+              <div className="d-flex align-items-center gap-1 gap-sm-2 flex-shrink-0">
                 <span className="badge bg-light text-dark border d-none d-sm-inline-block">
                   <i className={`bi ${isVendorOnly ? 'bi-shop text-primary' : 'bi-person-fill text-primary'} me-1`}></i>
                   {user.name || user.username || user.email}
@@ -155,11 +155,11 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <div className="d-flex align-items-center gap-2">
-                <Link to="/login" className="btn btn-sm btn-outline-primary">
+              <div className="d-flex align-items-center gap-1 gap-sm-2 flex-shrink-0">
+                <Link to="/login" className="btn btn-sm btn-outline-primary px-2 px-sm-3 text-nowrap">
                   Iniciar sesión
                 </Link>
-                <Link to="/register" className="btn btn-sm btn-primary">
+                <Link to="/register" className="btn btn-sm btn-primary px-2 px-sm-3 text-nowrap">
                   Registrarse
                 </Link>
               </div>
@@ -168,7 +168,7 @@ export default function Navbar() {
         </div>
 
         {showDeliveryLocation && (
-          <div className="pt-3 pb-1 d-flex justify-content-center justify-content-md-start position-relative" ref={locationMenuRef}>
+          <div className="pt-1 pb-1 d-flex justify-content-center justify-content-md-start position-relative" ref={locationMenuRef}>
             <button
               type="button"
               className="fr-location-pill border-0 text-start d-inline-flex align-items-center cursor-pointer"

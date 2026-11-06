@@ -46,7 +46,7 @@ export default function StoreLogo({ store }) {
     return (
       <Link
         to={`/tiendas/${store.id}`}
-        className="text-decoration-none d-block transition-hover"
+        className="text-decoration-none d-block transition-hover flex-shrink-0"
         aria-label={`Ver tienda ${store.name}`}
       >
         {content}

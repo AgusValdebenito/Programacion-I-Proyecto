@@ -66,4 +66,27 @@ describe('CategoryCard Component (TP6 & TP9)', () => {
     expect(link).toBeInTheDocument()
     expect(link).toHaveAttribute('href', '/tiendas?categoria=burgers')
   })
+  it('applies truncation classes and title tooltip for long text', () => {
+    const longCat = {
+      id: 'super-long',
+      title: 'Supermercados y Almacenes de Barrio Extensos',
+      subtitle: 'Variedad completa de productos frescos y empaquetados',
+      gradient: 'fr-grad-2',
+      featured: true,
+    }
+
+    render(
+      <MemoryRouter>
+        <CategoryCard category={longCat} />
+      </MemoryRouter>
+    )
+
+    const heading = screen.getByRole('heading', { level: 3 })
+    expect(heading).toHaveClass('text-truncate')
+    expect(heading).toHaveAttribute('title', longCat.title)
+
+    const subtitle = screen.getByText(longCat.subtitle)
+    expect(subtitle).toHaveClass('text-truncate')
+    expect(subtitle).toHaveAttribute('title', longCat.subtitle)
+  })
 })

@@ -167,12 +167,11 @@ export default function ProductDetail() {
   const resolvedImg = !imgError && product.image ? getImageUrl(product.image) : null
 
   return (
-    <div className="container py-4">
+    <div className="container py-3 py-md-4">
       {/* Toast de Éxito */}
       {addedMessage && (
         <div
-          className="alert alert-success position-fixed top-0 end-0 m-3 shadow-lg z-3"
-          style={{ maxWidth: '350px' }}
+          className="alert alert-success position-fixed top-0 end-0 m-3 shadow-lg z-3 fr-toast-responsive"
           role="status"
         >
           <i className="bi bi-check-circle-fill me-2" />
@@ -183,8 +182,7 @@ export default function ProductDetail() {
       {/* Toast de Error */}
       {actionError && (
         <div
-          className="alert alert-danger position-fixed top-0 end-0 m-3 shadow-lg z-3 d-flex align-items-center"
-          style={{ maxWidth: '360px' }}
+          className="alert alert-danger position-fixed top-0 end-0 m-3 shadow-lg z-3 d-flex align-items-center fr-toast-responsive"
           role="alert"
         >
           <i className="bi bi-exclamation-triangle-fill me-2 fs-5 flex-shrink-0" />

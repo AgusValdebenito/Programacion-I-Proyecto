@@ -19,12 +19,16 @@ export default function CategoryCard({ category }) {
             </span>
           )}
         </div>
-        <div className="p-3 d-flex align-items-center justify-content-between gap-2">
-          <div>
-            <h3 className="fr-card-title">{category.title}</h3>
-            <p className="fr-card-sub">{category.subtitle}</p>
+        <div className="p-2 p-sm-3 d-flex align-items-center justify-content-between gap-2 min-w-0">
+          <div className="min-w-0 flex-grow-1">
+            <h3 className="fr-card-title text-truncate" title={category.title}>
+              {category.title}
+            </h3>
+            <p className="fr-card-sub text-truncate" title={category.subtitle}>
+              {category.subtitle}
+            </p>
           </div>
-          <span className="fr-card-btn" aria-hidden="true">
+          <span className="fr-card-btn flex-shrink-0" aria-hidden="true">
             <i className="bi bi-arrow-right" />
           </span>
         </div>

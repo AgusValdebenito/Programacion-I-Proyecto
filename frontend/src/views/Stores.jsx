@@ -168,7 +168,7 @@ export default function Stores() {
   const activeCategoryObj = activeCategoryId ? getCategoryById(activeCategoryId) : null
 
   return (
-    <div className="container py-4">
+    <div className="container py-3 py-md-4">
       {/* Header */}
       <div className="mb-4">
         <nav aria-label="breadcrumb">
@@ -204,14 +204,14 @@ export default function Stores() {
           </div>
 
           {/* Search bar & Ordering */}
-          <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2">
-            <div className="position-relative" style={{ minWidth: '240px', maxWidth: '340px' }}>
+          <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 w-100 w-sm-auto">
+            <div className="position-relative flex-grow-1" style={{ maxWidth: '340px' }}>
               <span className="position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary">
                 <i className="bi bi-search" />
               </span>
               <input
                 type="text"
-                className="form-control rounded-pill ps-5 pe-4 py-2 border shadow-sm"
+                className="form-control rounded-pill ps-5 pe-4 py-2 border shadow-sm w-100"
                 placeholder="Buscar tiendas o productos..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -230,8 +230,7 @@ export default function Stores() {
             </div>
 
             <select
-              className="form-select rounded-pill py-2 px-3 border shadow-sm text-secondary small"
-              style={{ minWidth: '160px' }}
+              className="form-select rounded-pill py-2 px-3 border shadow-sm text-secondary small w-100 w-sm-auto"
               value={ordering}
               onChange={(e) => setOrdering(e.target.value)}
               aria-label="Ordenar tiendas"
@@ -247,7 +246,7 @@ export default function Stores() {
 
 
       {/* Category Filter Chips */}
-      <div className="mb-4 overflow-auto pb-2">
+      <div className="mb-4 fr-horizontal-scroll pb-2">
         <div className="d-flex align-items-center gap-2 flex-nowrap flex-md-wrap">
           <button
             type="button"

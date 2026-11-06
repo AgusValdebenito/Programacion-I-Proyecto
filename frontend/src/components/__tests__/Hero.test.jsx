@@ -23,4 +23,12 @@ describe('Hero Component (TP6)', () => {
     const cta = screen.getByRole('link', { name: /explorar promociones/i })
     expect(cta).toHaveAttribute('href', '#categorias')
   })
+  it('renders greeting cleanly with a long user name and call-to-action button', () => {
+    render(<Hero userName="Maximiliano de la Guarda" />)
+
+    expect(screen.getByText('¡Hola, Maximiliano de la Guarda! Exclusivo FoodRush')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/promociones/i)
+    expect(screen.getByRole('img', { name: /promo de hamburguesa/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /explorar promociones/i })).toBeInTheDocument()
+  })
 })

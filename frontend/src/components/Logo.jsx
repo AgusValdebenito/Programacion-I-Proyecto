@@ -22,7 +22,7 @@ export default function Logo({ variant }) {
   if (!imgError) {
     return (
       <Link
-        className="fr-logo d-flex align-items-center gap-2 text-decoration-none"
+        className="fr-logo d-flex align-items-center gap-1 gap-sm-2 text-decoration-none flex-shrink-0"
         to={to}
         aria-label={label}
       >

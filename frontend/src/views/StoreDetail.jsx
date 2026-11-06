@@ -146,12 +146,11 @@ export default function StoreDetail() {
   const initials = getInitials(store.name)
 
   return (
-    <div className="container py-4">
+    <div className="container py-3 py-md-4">
       {/* Toast de notificación temporal de éxito */}
       {addedItemMessage && (
         <div
-          className="alert alert-success position-fixed top-0 end-0 m-3 shadow-lg z-3"
-          style={{ maxWidth: '350px' }}
+          className="alert alert-success position-fixed top-0 end-0 m-3 shadow-lg z-3 fr-toast-responsive"
           role="status"
         >
           <i className="bi bi-check-circle-fill me-2" />
@@ -162,8 +161,7 @@ export default function StoreDetail() {
       {/* Toast de notificación temporal de error */}
       {actionErrorMessage && (
         <div
-          className="alert alert-danger position-fixed top-0 end-0 m-3 shadow-lg z-3 d-flex align-items-center"
-          style={{ maxWidth: '360px' }}
+          className="alert alert-danger position-fixed top-0 end-0 m-3 shadow-lg z-3 d-flex align-items-center fr-toast-responsive"
           role="alert"
         >
           <i className="bi bi-exclamation-triangle-fill me-2 fs-5 flex-shrink-0" />
