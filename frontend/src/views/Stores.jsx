@@ -205,7 +205,7 @@ export default function Stores() {
 
           {/* Search bar & Ordering */}
           <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2">
-            <div className="position-relative" style={{ minWidth: '240px', maxWidth: '340px' }}>
+            <div className="position-relative flex-grow-1" style={{ maxWidth: '340px' }}>
               <span className="position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary">
                 <i className="bi bi-search" />
               </span>
@@ -231,7 +231,7 @@ export default function Stores() {
 
             <select
               className="form-select rounded-pill py-2 px-3 border shadow-sm text-secondary small"
-              style={{ minWidth: '160px' }}
+              style={{ maxWidth: '220px' }}
               value={ordering}
               onChange={(e) => setOrdering(e.target.value)}
               aria-label="Ordenar tiendas"
@@ -247,7 +247,7 @@ export default function Stores() {
 
 
       {/* Category Filter Chips */}
-      <div className="mb-4 overflow-auto pb-2">
+      <div className="mb-4 overflow-auto pb-2" style={{ maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
         <div className="d-flex align-items-center gap-2 flex-nowrap flex-md-wrap">
           <button
             type="button"

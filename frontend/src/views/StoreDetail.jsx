@@ -151,7 +151,7 @@ export default function StoreDetail() {
       {addedItemMessage && (
         <div
           className="alert alert-success position-fixed top-0 end-0 m-3 shadow-lg z-3"
-          style={{ maxWidth: '350px' }}
+          style={{ maxWidth: 'min(350px, calc(100vw - 2rem))' }}
           role="status"
         >
           <i className="bi bi-check-circle-fill me-2" />
@@ -163,7 +163,7 @@ export default function StoreDetail() {
       {actionErrorMessage && (
         <div
           className="alert alert-danger position-fixed top-0 end-0 m-3 shadow-lg z-3 d-flex align-items-center"
-          style={{ maxWidth: '360px' }}
+          style={{ maxWidth: 'min(360px, calc(100vw - 2rem))' }}
           role="alert"
         >
           <i className="bi bi-exclamation-triangle-fill me-2 fs-5 flex-shrink-0" />

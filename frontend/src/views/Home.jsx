@@ -146,7 +146,7 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <div className="d-flex overflow-auto gap-4 pb-2 d-md-none">
+            <div className="d-flex overflow-x-auto gap-3 gap-sm-4 pb-2 d-md-none" style={{ maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
               {featuredStores.map((store) => (
                 <StoreLogo key={store.id || store.name} store={store} />
               ))}
