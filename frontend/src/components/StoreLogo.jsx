@@ -16,7 +16,7 @@ function getInitials(name) {
 
 const GRADIENTS = ['fr-grad-1', 'fr-grad-2', 'fr-grad-3', 'fr-grad-4', 'fr-grad-5']
 
-export default function StoreLogo({ store }) {
+export default function StoreLogo({ store, showTagline = false }) {
   const [imgError, setImgError] = useState(false)
   const gradientClass = store.gradient || GRADIENTS[(store.id || 0) % GRADIENTS.length] || 'fr-grad-1'
   const initials = store.initials || getInitials(store.name)
@@ -24,7 +24,7 @@ export default function StoreLogo({ store }) {
   const resolvedImg = !imgError && store.image ? getImageUrl(store.image) : null
 
   const content = (
-    <div className="text-center">
+    <div className="fr-store-logo-item text-center">
       <div className={`fr-store-logo mx-auto ${gradientClass} overflow-hidden shadow-sm`}>
         {resolvedImg ? (
           <img
@@ -37,8 +37,14 @@ export default function StoreLogo({ store }) {
           initials
         )}
       </div>
-      <p className="fw-semibold mb-0 mt-3 small text-dark">{store.name}</p>
-      {tagline && <p className="text-secondary small mb-0 text-truncate" style={{ maxWidth: '140px' }}>{tagline}</p>}
+      <p className="fr-store-logo-name fw-semibold mb-0 mt-2 text-dark" title={store.name}>
+        {store.name}
+      </p>
+      {showTagline && tagline && (
+        <p className="text-secondary small mb-0 text-truncate" style={{ maxWidth: '140px' }}>
+          {tagline}
+        </p>
+      )}
     </div>
   )
 
