@@ -112,10 +112,10 @@ export default function RatingModal({
       aria-modal="true"
       style={{ backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(3px)' }}
     >
-      <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '480px' }}>
+      <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable my-2 my-sm-auto" style={{ maxWidth: '460px', width: '95%' }}>
         <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
           {/* Header */}
-          <div className="modal-header border-0 bg-light p-4 pb-3">
+          <div className="modal-header border-0 bg-light p-3 p-sm-4 pb-2">
             <div>
               <h2 className="modal-title h5 fw-bold text-dark mb-1">
                 ¿Cómo estuvo tu pedido?
@@ -134,7 +134,7 @@ export default function RatingModal({
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="modal-body p-4 pt-3">
+            <div className="modal-body p-3 p-sm-4 pt-2">
               {error && (
                 <div className="alert alert-danger py-2 px-3 small rounded-3 mb-3 d-flex align-items-center" role="alert">
                   <i className="bi bi-exclamation-circle-fill me-2" />
@@ -143,14 +143,14 @@ export default function RatingModal({
               )}
 
               {/* Selector de Estrellas */}
-              <div className="text-center my-3">
-                <div className="d-flex justify-content-center align-items-center gap-2 mb-2">
+              <div className="text-center my-2 my-sm-3">
+                <div className="d-flex justify-content-center align-items-center gap-2 mb-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
                       type="button"
                       className="btn p-1 border-0 bg-transparent text-warning"
-                      style={{ fontSize: '2.2rem', transition: 'transform 0.15s ease' }}
+                      style={{ fontSize: '1.85rem', transition: 'transform 0.15s ease' }}
                       onMouseEnter={() => setHoverRating(star)}
                       onMouseLeave={() => setHoverRating(0)}
                       onClick={() => setRating(star)}
@@ -166,28 +166,29 @@ export default function RatingModal({
                     </button>
                   ))}
                 </div>
-                <span className="badge bg-light text-dark border px-3 py-2 fw-semibold fs-6">
+                <span className="badge bg-light text-dark border px-2.5 py-1 fw-semibold small">
                   {RATING_LABELS[activeRating] || 'Elegí una puntuación'}
                 </span>
               </div>
 
               {/* Chips de Motivos */}
-              <div className="mb-4">
-                <label className="form-label small fw-bold text-secondary text-uppercase tracking-wide mb-2 d-block">
+              <div className="mb-3 mb-sm-4">
+                <label className="form-label small fw-bold text-secondary text-uppercase tracking-wide mb-1.5 d-block">
                   ¿Qué destacarías de la experiencia?
                 </label>
-                <div className="d-flex flex-wrap gap-2">
+                <div className="d-flex flex-wrap gap-1.5 gap-sm-2">
                   {availableTags.map((tag) => {
                     const isSelected = selectedTags.includes(tag)
                     return (
                       <button
                         key={tag}
                         type="button"
-                        className={`btn rounded-pill btn-sm px-3 py-1 transition-all ${
+                        className={`btn rounded-pill btn-sm px-2.5 py-1 transition-all ${
                           isSelected
                             ? 'btn-primary shadow-sm'
                             : 'btn-outline-secondary'
                         }`}
+                        style={{ fontSize: '0.8rem' }}
                         onClick={() => handleTagToggle(tag)}
                       >
                         {isSelected && <i className="bi bi-check2 me-1" />}
@@ -199,7 +200,7 @@ export default function RatingModal({
               </div>
 
               {/* Textarea de Comentario Opcional */}
-              <div className="mb-2">
+              <div className="mb-1">
                 <div className="d-flex justify-content-between align-items-center mb-1">
                   <label htmlFor="rating-comment" className="form-label small fw-bold text-secondary mb-0">
                     Comentario adicional (opcional)
@@ -208,8 +209,8 @@ export default function RatingModal({
                 </div>
                 <textarea
                   id="rating-comment"
-                  className="form-control rounded-3"
-                  rows="3"
+                  className="form-control rounded-3 small"
+                  rows="2"
                   maxLength="300"
                   placeholder="Contanos más detalles sobre los platos o el servicio..."
                   value={comment}
@@ -220,10 +221,10 @@ export default function RatingModal({
             </div>
 
             {/* Footer */}
-            <div className="modal-footer border-0 bg-light p-3 px-4 d-flex justify-content-end gap-2">
+            <div className="modal-footer border-0 bg-light p-2.5 p-sm-3 px-3 px-sm-4 d-flex justify-content-end gap-2">
               <button
                 type="button"
-                className="btn btn-light rounded-pill px-4"
+                className="btn btn-sm btn-light rounded-pill px-3 px-sm-4 py-2"
                 onClick={onClose}
                 disabled={submitting}
               >
@@ -231,7 +232,7 @@ export default function RatingModal({
               </button>
               <button
                 type="submit"
-                className="btn btn-primary rounded-pill px-4 shadow-sm"
+                className="btn btn-sm btn-primary rounded-pill px-3 px-sm-4 py-2 shadow-sm fw-semibold"
                 disabled={submitting || rating === 0}
               >
                 {submitting ? (

@@ -1014,201 +1014,103 @@ export default function PanelTienda() {
 
 
       {/* Navegación por pestañas */}
-
-      <ul className="nav nav-pills gap-2 mb-4 p-1 bg-white rounded-pill shadow-sm border d-inline-flex" role="tablist">
-
-        <li className="nav-item" role="presentation">
-
+      <ul className="nav nav-pills gap-1 gap-md-2 mb-4 p-1 bg-white fr-nav-pills-container shadow-sm border d-flex flex-nowrap fr-horizontal-scroll align-items-center" role="tablist">
+        <li className="nav-item flex-shrink-0" role="presentation">
           <button
-
             type="button"
-
-            className={`nav-link rounded-pill px-4 fw-semibold ${activeTab === 'resumen' ? 'active' : ''}`}
-
+            className={`nav-link rounded-pill px-3 px-md-4 py-2 fw-semibold text-nowrap ${activeTab === 'resumen' ? 'active' : ''}`}
             onClick={() => setActiveTab('resumen')}
-
           >
-
-            <i className="bi bi-speedometer2 me-2"></i>
-
+            <i className="bi bi-speedometer2 me-1 me-md-2"></i>
             Resumen
-
           </button>
-
         </li>
-
-        <li className="nav-item" role="presentation">
-
+        <li className="nav-item flex-shrink-0" role="presentation">
           <button
-
             type="button"
-
-            className={`nav-link rounded-pill px-4 fw-semibold ${activeTab === 'menu' ? 'active' : ''}`}
-
+            className={`nav-link rounded-pill px-3 px-md-4 py-2 fw-semibold text-nowrap ${activeTab === 'menu' ? 'active' : ''}`}
             onClick={() => setActiveTab('menu')}
-
           >
-
-            <i className="bi bi-card-list me-2"></i>
-
+            <i className="bi bi-card-list me-1 me-md-2"></i>
             Menú y Productos
-
             {products.length > 0 && (
-
-              <span className="badge bg-secondary ms-2">{products.length}</span>
-
+              <span className="badge bg-secondary ms-1 ms-md-2">{products.length}</span>
             )}
-
           </button>
-
         </li>
-
-        <li className="nav-item" role="presentation">
-
+        <li className="nav-item flex-shrink-0" role="presentation">
           <button
-
             type="button"
-
-            className={`nav-link rounded-pill px-4 fw-semibold ${activeTab === 'pedidos' ? 'active' : ''}`}
-
+            className={`nav-link rounded-pill px-3 px-md-4 py-2 fw-semibold text-nowrap ${activeTab === 'pedidos' ? 'active' : ''}`}
             onClick={() => setActiveTab('pedidos')}
-
           >
-
-            <i className="bi bi-bell-fill me-2"></i>
-
+            <i className="bi bi-bell-fill me-1 me-md-2"></i>
             Monitor de Pedidos
-
             {stats.pendingOrders > 0 && (
-
-              <span className="badge bg-danger ms-2">{stats.pendingOrders}</span>
-
+              <span className="badge bg-danger ms-1 ms-md-2">{stats.pendingOrders}</span>
             )}
-
           </button>
-
         </li>
-
       </ul>
 
-
-
       {/* TAB 1: RESUMEN / KPIS */}
-
       {activeTab === 'resumen' && (
-
-        <div className="row g-3 mb-4">
-
-          <div className="col-12 col-sm-6 col-lg-3">
-
-            <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
-
+        <div className="row g-2 g-sm-3 mb-4">
+          <div className="col-6 col-lg-3">
+            <div className="card border-0 shadow-sm rounded-4 p-2.5 p-sm-3 bg-white h-100">
               <div className="d-flex align-items-center justify-content-between mb-2">
-
                 <span className="text-secondary small fw-semibold">Platos Publicados</span>
-
                 <div className="bg-primary-subtle text-primary p-2 rounded-3">
-
                   <i className="bi bi-basket2-fill"></i>
-
                 </div>
-
               </div>
-
-              <h2 className="fw-bold mb-1">{stats.totalProd}</h2>
-
+              <h2 className="h4 h-sm-2 fw-bold mb-1 text-truncate">{stats.totalProd}</h2>
               <span className="small text-success">
-
                 <i className="bi bi-check-circle-fill me-1"></i>
-
                 {stats.availableProd} disponibles
-
               </span>
-
             </div>
-
           </div>
 
-
-
-          <div className="col-12 col-sm-6 col-lg-3">
-
-            <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
-
+          <div className="col-6 col-lg-3">
+            <div className="card border-0 shadow-sm rounded-4 p-2.5 p-sm-3 bg-white h-100">
               <div className="d-flex align-items-center justify-content-between mb-2">
-
                 <span className="text-secondary small fw-semibold">Pedidos Pendientes</span>
-
                 <div className="bg-warning-subtle text-warning p-2 rounded-3">
-
                   <i className="bi bi-hourglass-split"></i>
-
                 </div>
-
               </div>
-
-              <h2 className="fw-bold mb-1">{stats.pendingOrders}</h2>
-
+              <h2 className="h4 h-sm-2 fw-bold mb-1 text-truncate">{stats.pendingOrders}</h2>
               <span className="small text-muted">Aguardando preparación</span>
-
             </div>
-
           </div>
 
-
-
-          <div className="col-12 col-sm-6 col-lg-3">
-
-            <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
-
+          <div className="col-6 col-lg-3">
+            <div className="card border-0 shadow-sm rounded-4 p-2.5 p-sm-3 bg-white h-100">
               <div className="d-flex align-items-center justify-content-between mb-2">
-
                 <span className="text-secondary small fw-semibold">Total de Pedidos</span>
-
                 <div className="bg-info-subtle text-info p-2 rounded-3">
-
                   <i className="bi bi-receipt"></i>
-
                 </div>
-
               </div>
-
-              <h2 className="fw-bold mb-1">{stats.totalOrders}</h2>
-
+              <h2 className="h4 h-sm-2 fw-bold mb-1 text-truncate">{stats.totalOrders}</h2>
               <span className="small text-muted">Historial completo</span>
-
             </div>
-
           </div>
 
-
-
-          <div className="col-12 col-sm-6 col-lg-3">
-
-            <div className="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
-
+          <div className="col-6 col-lg-3">
+            <div className="card border-0 shadow-sm rounded-4 p-2.5 p-sm-3 bg-white h-100">
               <div className="d-flex align-items-center justify-content-between mb-2">
-
                 <span className="text-secondary small fw-semibold">Ventas Entregadas</span>
-
                 <div className="bg-success-subtle text-success p-2 rounded-3">
-
                   <i className="bi bi-currency-dollar"></i>
-
                 </div>
-
               </div>
-
-              <h2 className="fw-bold mb-1">${stats.totalRevenue.toFixed(2)}</h2>
-
+              <h2 className="h4 h-sm-2 fw-bold mb-1 text-truncate">${stats.totalRevenue.toFixed(2)}</h2>
               <span className="small text-success">Órdenes completadas</span>
-
             </div>
-
           </div>
-
         </div>
-
       )}
 
 
@@ -1463,137 +1365,72 @@ export default function PanelTienda() {
 
           ) : (
 
-            <div className="table-responsive">
-
-              <table className="table table-hover align-middle mb-0">
-
+            <div className="table-responsive fr-horizontal-scroll">
+              <table className="table table-hover align-middle mb-0 fr-admin-table">
                 <thead className="table-light">
-
                   <tr>
-
-                    <th scope="col" style={{ width: '60px' }}>Foto</th>
-
+                    <th scope="col" style={{ width: '48px' }}>Foto</th>
                     <th scope="col">Nombre & Descripción</th>
-
-                    <th scope="col">Precio</th>
-
-                    <th scope="col">Stock</th>
-
-                    <th scope="col">Disponibilidad</th>
-
-                    <th scope="col" className="text-end">Acciones</th>
-
+                    <th scope="col" className="text-nowrap">Precio</th>
+                    <th scope="col" className="text-nowrap">Stock</th>
+                    <th scope="col" className="text-nowrap">Estado</th>
+                    <th scope="col" className="text-end text-nowrap">Acciones</th>
                   </tr>
-
                 </thead>
-
                 <tbody>
-
                   {filteredProducts.map((prod) => (
-
                     <tr key={prod.id}>
-
                       <td>
-
                         <img
-
                           src={getImageUrl(prod.image) || '/images/placeholder-product.svg'}
-
                           alt={prod.name}
-
                           className="rounded-3 object-fit-cover shadow-sm"
-
-                          style={{ width: '48px', height: '48px' }}
-
+                          style={{ width: '42px', height: '42px' }}
                           onError={(e) => {
-
                             e.target.src = '/images/placeholder-product.svg'
-
                           }}
-
                         />
-
                       </td>
-
                       <td>
-
-                        <div className="fw-bold text-dark">{prod.name}</div>
-
-                        <div className="small text-secondary text-truncate" style={{ maxWidth: '250px' }}>
-
+                        <div className="fw-bold text-dark text-truncate" style={{ maxWidth: '140px' }}>{prod.name}</div>
+                        <div className="small text-secondary text-truncate" style={{ maxWidth: '140px' }}>
                           {prod.description || 'Sin descripción'}
-
                         </div>
-
                       </td>
-
-                      <td className="fw-bold text-primary">${parseFloat(prod.price || 0).toFixed(2)}</td>
-
-                      <td>
-
+                      <td className="fw-bold text-primary text-nowrap">${parseFloat(prod.price || 0).toFixed(2)}</td>
+                      <td className="text-nowrap">
                         <span
-
                           className={`badge ${
-
                             prod.stock > 5 ? 'bg-success-subtle text-success' : prod.stock > 0 ? 'bg-warning-subtle text-warning' : 'bg-danger-subtle text-danger'
-
                           }`}
-
                         >
-
                           {prod.stock} u.
-
                         </span>
-
                       </td>
-
                       <td>
-
-                        <div className="form-check form-switch m-0">
-
+                        <div className="form-check form-switch m-0 d-inline-flex align-items-center">
                           <input
-
                             className="form-check-input cursor-pointer"
-
                             type="checkbox"
-
                             role="switch"
-
                             id={`switch-${prod.id}`}
-
                             checked={prod.is_available}
-
                             onChange={() => handleToggleAvailability(prod)}
-
                           />
-
                           <label
-
-                            className="form-check-label small cursor-pointer"
-
+                            className="form-check-label small cursor-pointer d-none d-lg-inline ms-1"
                             htmlFor={`switch-${prod.id}`}
-
                           >
-
                             {prod.is_available ? (
-
                               <span className="text-success fw-semibold">Disponible</span>
-
                             ) : (
-
                               <span className="text-secondary">Pausado</span>
-
                             )}
-
                           </label>
-
                         </div>
-
                       </td>
-
                       <td className="text-end">
-
-                        <div className="btn-group btn-group-sm">
+                        <div className="btn-group btn-group-sm text-nowrap">
 
                           <button
 
