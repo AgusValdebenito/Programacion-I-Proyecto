@@ -535,6 +535,30 @@ main {
   max-width: 180px;
 }
 
+/* ---------- Panel Tienda y tablas responsivas ---------- */
+.fr-nav-pills-container {
+  border-radius: 1rem;
+}
+
+@media (min-width: 768px) {
+  .fr-nav-pills-container {
+    border-radius: 50rem;
+  }
+}
+
+.fr-admin-table th,
+.fr-admin-table td {
+  padding: 0.65rem 0.6rem;
+}
+
+@media (max-width: 575.98px) {
+  .fr-admin-table th,
+  .fr-admin-table td {
+    padding: 0.5rem 0.35rem;
+    font-size: 0.82rem;
+  }
+}
+
 /* ---------- Dropdowns responsivos en movil ---------- */
 .fr-notification-menu {
   width: 330px;
