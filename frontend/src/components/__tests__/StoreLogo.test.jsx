@@ -95,4 +95,22 @@ describe('StoreLogo Component (TP6 & TP9)', () => {
     expect(link).toBeInTheDocument()
     expect(link).toHaveAttribute('href', '/tiendas/5')
   })
+
+  it('renders single-word long store name with proper container and class', () => {
+    const singleWordStore = {
+      id: 9,
+      name: 'Hamburguesería',
+      description: 'Hamburguesas',
+    }
+
+    render(
+      <MemoryRouter>
+        <StoreLogo store={singleWordStore} />
+      </MemoryRouter>
+    )
+
+    const nameElem = screen.getByText('Hamburguesería')
+    expect(nameElem).toBeInTheDocument()
+    expect(nameElem).toHaveClass('fr-store-logo-name')
+  })
 })

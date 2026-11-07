@@ -41,7 +41,7 @@ export default function StoreLogo({ store, showTagline = false }) {
         {store.name}
       </p>
       {showTagline && tagline && (
-        <p className="text-secondary small mb-0 text-truncate" style={{ maxWidth: '140px' }}>
+        <p className="text-secondary small mb-0 text-truncate fr-store-tagline">
           {tagline}
         </p>
       )}

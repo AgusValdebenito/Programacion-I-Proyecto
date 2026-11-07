@@ -52,16 +52,15 @@ export default function Navbar() {
 
   return (
     <header className="fr-navbar">
-      <div className="container-fluid px-3 px-md-4 px-xl-5" style={{ maxWidth: '1440px' }}>
+      <div className="container-fluid px-3 px-md-4 px-xl-5 fr-navbar-container">
         <div className="d-flex align-items-center justify-content-between py-1 py-md-2">
           <div className="d-flex align-items-center flex-shrink-0 me-2 me-md-3">
             <Logo />
             {!isExcludedPath && !isVendorOnly && (
               <form
-                className="d-none d-lg-flex position-relative ms-3 flex-shrink-0"
+                className="d-none d-xl-flex position-relative ms-3 flex-shrink-0 fr-search-form"
                 onSubmit={handleSearchSubmit}
                 role="search"
-                style={{ width: '240px' }}
               >
                 <i
                   className="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary"
@@ -90,7 +89,7 @@ export default function Navbar() {
                 </span>
               </nav>
             ) : (
-              <nav className="d-none d-md-flex align-items-center gap-2 gap-lg-3 gap-xl-4 me-2 me-lg-3 me-xl-4 flex-shrink-0" aria-label="Navegación principal">
+              <nav className="d-none d-md-flex align-items-center gap-2 gap-lg-3 gap-xl-4 me-2 me-lg-3 me-xl-4" aria-label="Navegación principal">
                 <Link className="fr-nav-link" to="/">
                   Inicio
                 </Link>
@@ -121,7 +120,7 @@ export default function Navbar() {
             )}
             {user ? (
               <div className="d-flex align-items-center gap-1 gap-sm-2 flex-shrink-0">
-                <span className="badge bg-light text-dark border d-none d-sm-inline-flex align-items-center text-truncate" style={{ maxWidth: '180px' }}>
+                <span className="badge bg-light text-dark border d-none d-sm-inline-flex align-items-center text-truncate fr-user-badge">
                   <i className={`bi ${isVendorOnly ? 'bi-shop text-primary' : 'bi-person-fill text-primary'} me-1`}></i>
                   {user.name || user.username || user.email}
                 </span>

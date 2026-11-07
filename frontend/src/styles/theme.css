@@ -354,9 +354,12 @@ main {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  word-break: normal;
-  overflow-wrap: normal;
+  overflow-wrap: break-word;
   max-height: 2.5em;
+}
+
+.fr-store-tagline {
+  max-width: 140px;
 }
 
 @media (min-width: 768px) {
@@ -512,10 +515,24 @@ main {
 /* ---------- Boton favorito con texto (Pill) ---------- */
 .fr-favorite-btn.fr-favorite-btn--with-label {
   width: auto;
+  height: auto;
   min-height: 38px;
   padding: 0.35rem 0.95rem;
   border-radius: 50rem;
   border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- Navbar y utilidades de cabecera (Clean Code) ---------- */
+.fr-navbar-container {
+  max-width: 1440px;
+}
+
+.fr-search-form {
+  width: 240px;
+}
+
+.fr-user-badge {
+  max-width: 180px;
 }
 
 /* ---------- Dropdowns responsivos en movil ---------- */
@@ -539,6 +556,8 @@ main {
     right: 12px !important;
     width: auto !important;
     max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 70px) !important;
+    overflow-y: auto !important;
     transform: none !important;
   }
 
@@ -549,6 +568,8 @@ main {
     right: 12px !important;
     width: auto !important;
     max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 105px) !important;
+    overflow-y: auto !important;
   }
 }
 
