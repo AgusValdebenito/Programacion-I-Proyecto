@@ -1,4 +1,5 @@
 import { getImageUrl } from '../../utils/imageUrl'
+import { formatPrice } from '../../utils/formatters'
 
 /**
  * Tabla y gestión del catálogo de productos para el panel de vendedor.
@@ -156,19 +157,21 @@ export default function StoreProductsTable({
                   <td>
                     <div
                       className="fw-bold text-dark text-truncate"
-                      style={{ maxWidth: '140px' }}
+                      style={{ maxWidth: 'clamp(140px, 22vw, 320px)' }}
+                      title={prod.name}
                     >
                       {prod.name}
                     </div>
                     <div
                       className="small text-secondary text-truncate"
-                      style={{ maxWidth: '140px' }}
+                      style={{ maxWidth: 'clamp(140px, 25vw, 360px)' }}
+                      title={prod.description}
                     >
                       {prod.description || 'Sin descripción'}
                     </div>
                   </td>
                   <td className="fw-bold text-primary text-nowrap">
-                    ${parseFloat(prod.price || 0).toFixed(2)}
+                    {formatPrice(prod.price)}
                   </td>
                   <td className="text-nowrap">
                     <span

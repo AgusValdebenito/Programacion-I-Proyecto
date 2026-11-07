@@ -1,3 +1,5 @@
+import { formatPrice } from '../../utils/formatters'
+
 const STATUS_FILTERS = [
   { id: 'todos', label: 'Todos' },
   { id: 'pending', label: 'Pendientes', badge: 'bg-warning' },
@@ -161,7 +163,7 @@ export default function StoreOrderMonitor({
                               {it.product_name || `Producto #${it.product}`}
                             </span>
                             <span className="text-secondary">
-                              ${parseFloat(it.unit_price || 0).toFixed(2)}
+                              {formatPrice(it.unit_price)}
                             </span>
                           </li>
                         ))}
@@ -174,7 +176,7 @@ export default function StoreOrderMonitor({
                   <div className="d-flex align-items-center justify-content-between pt-2 border-top mt-auto">
                     <span className="fw-bold">Total a cobrar:</span>
                     <span className="fw-bold fs-5 text-primary">
-                      ${parseFloat(ord.total || 0).toFixed(2)}
+                      {formatPrice(ord.total)}
                     </span>
                   </div>
 
