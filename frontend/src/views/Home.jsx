@@ -146,7 +146,7 @@ export default function Home() {
 
             <div className="row g-4 d-none d-md-flex row-cols-2 row-cols-sm-3 row-cols-md-6 justify-content-center">
               {featuredStores.map((store) => (
-                <div className="col" key={store.id || store.name}>
+                <div className="col d-flex justify-content-center" key={store.id || store.name}>
                   <StoreLogo store={store} />
                 </div>
               ))}

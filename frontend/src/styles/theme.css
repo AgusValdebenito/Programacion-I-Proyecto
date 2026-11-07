@@ -26,19 +26,6 @@ body {
   overflow-x: clip;
 }
 
-/* Contención ergonómica de contenedores en escritorio respetando WCAG 1.4.4 */
-@media (min-width: 992px) {
-  .container {
-    max-width: 980px;
-  }
-}
-
-@media (min-width: 1200px) {
-  .container {
-    max-width: 1140px;
-  }
-}
-
 /* Utilidad requerida para permitir text-truncate dentro de contenedores Flexbox */
 .min-w-0 {
   min-width: 0 !important;
@@ -334,6 +321,11 @@ main {
   text-decoration: none;
 }
 
+.fr-store-logo-item {
+  width: 88px;
+  text-align: center;
+}
+
 .fr-store-logo {
   width: 72px;
   height: 72px;
@@ -354,11 +346,37 @@ main {
   object-fit: cover;
 }
 
+.fr-store-logo-name {
+  font-size: 0.8rem;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  max-height: 2.5em;
+}
+
+.fr-store-tagline {
+  max-width: 140px;
+}
+
 @media (min-width: 768px) {
+  .fr-store-logo-item {
+    width: 100px;
+  }
+
   .fr-store-logo {
     width: 86px;
     height: 86px;
     font-size: 1.4rem;
+  }
+
+  .fr-store-logo-name {
+    font-size: 0.85rem;
+    line-height: 1.25;
+    max-height: 2.5em;
   }
 }
 
@@ -494,6 +512,67 @@ main {
   animation: fr-heartbeat 0.35s ease-in-out;
 }
 
+/* ---------- Boton favorito con texto (Pill) ---------- */
+.fr-favorite-btn.fr-favorite-btn--with-label {
+  width: auto;
+  height: auto;
+  min-height: 38px;
+  padding: 0.35rem 0.95rem;
+  border-radius: 50rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- Navbar y utilidades de cabecera (Clean Code) ---------- */
+.fr-navbar-container {
+  max-width: 1440px;
+}
+
+.fr-search-form {
+  width: 240px;
+}
+
+.fr-user-badge {
+  max-width: 180px;
+}
+
+/* ---------- Dropdowns responsivos en movil ---------- */
+.fr-notification-menu {
+  width: 330px;
+  max-width: 92vw;
+  z-index: 1050;
+}
+
+.fr-location-menu {
+  width: 320px;
+  max-width: 90vw;
+  z-index: 1050;
+}
+
+@media (max-width: 575.98px) {
+  .fr-notification-menu {
+    position: fixed !important;
+    top: 56px !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 70px) !important;
+    overflow-y: auto !important;
+    transform: none !important;
+  }
+
+  .fr-location-menu {
+    position: fixed !important;
+    top: 92px !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 105px) !important;
+    overflow-y: auto !important;
+  }
+}
+
 /* ---------- Toast responsive flotante (DRY) ---------- */
 .fr-toast-responsive {
   max-width: min(360px, calc(100vw - 2rem));
@@ -504,4 +583,10 @@ main {
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.fr-horizontal-scroll::-webkit-scrollbar {
+  display: none;
 }

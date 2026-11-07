@@ -58,8 +58,9 @@ describe('FavoriteButton Component (Milestone 6 - Issue #42)', () => {
   })
 
   it('renders text label when showLabel is true', () => {
-    render(<FavoriteButton store={mockStore} showLabel />)
+    const { container } = render(<FavoriteButton store={mockStore} showLabel />)
     expect(screen.getByText('Guardar')).toBeInTheDocument()
+    expect(container.querySelector('button')).toHaveClass('fr-favorite-btn--with-label')
 
     const favoritedStore = { id: 2, name: 'Pizza Planet' }
     render(<FavoriteButton store={favoritedStore} showLabel />)

@@ -228,4 +228,25 @@ describe('Navbar Component - Delivery Location Visibility & Roles', () => {
     expect(screen.getByRole('link', { name: /mi tienda/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /moderación/i })).toBeInTheDocument()
   })
+
+  it('renders user badge with truncation classes and maintains accessible search bar for authenticated users', () => {
+    vi.spyOn(AuthHook, 'useAuth').mockReturnValue({
+      user: { id: 1, role: 'cliente', name: 'Usuario Con Un Nombre Sumamente Largo y Extenso Para Probar Truncamiento' },
+      logout: vi.fn(),
+    })
+
+    const { container } = render(
+      <MemoryRouter initialEntries={['/']}>
+        <Navbar />
+      </MemoryRouter>
+    )
+
+    const searchInput = screen.getByRole('searchbox', { name: /buscar en foodrush/i })
+    expect(searchInput).toBeInTheDocument()
+
+    const badge = container.querySelector('.fr-user-badge')
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveClass('text-truncate')
+    expect(badge).toHaveTextContent('Usuario Con Un Nombre Sumamente Largo y Extenso Para Probar Truncamiento')
+  })
 })

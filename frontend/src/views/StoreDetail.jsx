@@ -251,7 +251,7 @@ export default function StoreDetail() {
           </div>
 
           <div className="text-center text-sm-start flex-grow-1">
-            <div className="d-flex align-items-center justify-content-between mb-1 gap-2 flex-wrap">
+            <div className="d-flex align-items-center justify-content-center justify-content-sm-between mb-1 gap-2 flex-wrap">
               <h1 className="h3 fw-bold mb-0 text-dark">{store.name}</h1>
               <FavoriteButton store={store} size="md" showLabel />
             </div>

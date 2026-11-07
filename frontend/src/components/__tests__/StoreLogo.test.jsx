@@ -27,10 +27,23 @@ describe('StoreLogo Component (TP6 & TP9)', () => {
     image: null,
   }
 
-  it('renders store name and tagline', () => {
+  it('renders store name with compact 2-line layout and omits tagline by default', () => {
     render(
       <MemoryRouter>
         <StoreLogo store={storeWithImage} />
+      </MemoryRouter>
+    )
+
+    const nameElem = screen.getByText('Burger King')
+    expect(nameElem).toBeInTheDocument()
+    expect(nameElem).toHaveClass('fr-store-logo-name')
+    expect(screen.queryByText('A la parrilla')).not.toBeInTheDocument()
+  })
+
+  it('renders tagline when showTagline prop is explicitly enabled', () => {
+    render(
+      <MemoryRouter>
+        <StoreLogo store={storeWithImage} showTagline />
       </MemoryRouter>
     )
 
@@ -69,7 +82,6 @@ describe('StoreLogo Component (TP6 & TP9)', () => {
 
     expect(screen.getByText('CB')).toBeInTheDocument()
     expect(screen.getByText('Crazy Burgers')).toBeInTheDocument()
-    expect(screen.getByText('Hamburguesas artesanales premium')).toBeInTheDocument()
   })
 
   it('renders accessible link pointing to /tiendas/:id', () => {
@@ -82,5 +94,23 @@ describe('StoreLogo Component (TP6 & TP9)', () => {
     const link = screen.getByRole('link', { name: /crazy burgers/i })
     expect(link).toBeInTheDocument()
     expect(link).toHaveAttribute('href', '/tiendas/5')
+  })
+
+  it('renders single-word long store name with proper container and class', () => {
+    const singleWordStore = {
+      id: 9,
+      name: 'Hamburguesería',
+      description: 'Hamburguesas',
+    }
+
+    render(
+      <MemoryRouter>
+        <StoreLogo store={singleWordStore} />
+      </MemoryRouter>
+    )
+
+    const nameElem = screen.getByText('Hamburguesería')
+    expect(nameElem).toBeInTheDocument()
+    expect(nameElem).toHaveClass('fr-store-logo-name')
   })
 })
