@@ -614,3 +614,9 @@ main {
 .fr-horizontal-scroll::-webkit-scrollbar {
   display: none;
 }
+
+
+/* ---------- Borde inferior punteado sutil para listas y desglose de pedidos ---------- */
+.border-bottom-dashed {
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.12);
+}
